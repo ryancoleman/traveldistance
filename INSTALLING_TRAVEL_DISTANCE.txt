@@ -1,0 +1,116 @@
+This is a guide to installing Travel Depth, CHUNNEL, Burial Depth, and CLIPPERS
+ and the various dependencies it has. Please remember to cite the 
+following if you use this work in your research:
+
+Travel Depth:
+
+Coleman, RG, Sharp, KA. Travel Depth, A New Shape Descriptior for 
+Macromolecules: Application to Ligand Binding. Journal of Molecular 
+Biology 362(3), pp. 441-458, 22 September 2006. 
+http://dx.doi.org/10.1016/j.jmb.2006.07.022
+
+CHUNNEL:
+
+Coleman, RG, Sharp, KA. Finding and characterizing tunnels in 
+macromolecules with application to ion channels and pores. Biophysical 
+Journal. 96(2). pp 632-645. January 2009. 
+http://dx.doi.org/10.1529/biophysj.108.135970
+
+Burial Depth:
+
+Coleman, RG, Sharp, KA. Shape and evolution of thermostable protein 
+structure. Proteins: Structure, Function, and Bioinformatics. 78(2). pp 
+420-433. 1 February 2010. 
+http://dx.doi.org/10.1002/prot.22558
+
+CLIPPERS:
+
+Coleman, RG, Sharp, KA. Protein Pockets: Inventory, Shape, and Comparison. 
+J Chem Inf Model. 50(4). pp 589-603. 26 April 2010.
+http://dx.doi.org/10.1021/ci900397t
+
+For additional information, or the original source of these files:
+
+http://crystal.med.upenn.edu
+http://ryancoleman.name
+
+0. Systems
+
+All code is developed and tested on GNU/Linux systems, and has been tested 
+on recent Mac OS X systems. It may work under cygwin on Windows systems.
+
+1. External Downloads/Installs
+
+The Travel Depth Code relies on Python 2.5 (it may work with 2.6 but is 
+untested, a port to the 3 branch is planned). Also, visualization support is 
+provided by a python script for PyMOL. CLIPPERS requires numpy or Numeric, 
+it is optional for Travel Depth, Burial Depth and CHUNNEL. 
+
+These 3 software packages may be installed on your system already, or if
+necessary, download and install them here:
+
+http://www.python.org/download/releases/2.5.2/
+
+http://sourceforge.net/project/showfiles.php?group_id=1369&package_id=1351
+
+http://pymol.sourceforge.net/
+
+You must set the $TDHOME environmental variable to this directory (the 
+directory with bin/ and src/ among others.
+
+The included python scripts run using the python2.5 command. You must have 
+this set and in your path unless you want to call each script by saying 
+
+`/path/to/python2.5 $TDHOME/src/tstTravelDepth.py file.pdb`
+
+for instance. Again, if you've set python2.5 to call the correct 
+interpreter, you can just run the scripts like this:
+
+`$TDHOME/src/tstTravelDepth.py file.pdb`
+
+Before running these scripts, you must also install the required software.
+
+2. Quickhull
+
+Quickhull or qhull is redistributed here, available at
+http://www.qhull.org as well, and it is required for the Travel Depth
+code to run. If using the supplied version, install as follows:
+
+`cd $TDHOME/qhull/src`
+`make install`
+
+$TDHOME/bin/qhull is the qhull executable, other qhull executables are also
+placed there. 
+
+An alternative code khull is under development and included since qhull 
+does not work on some 64 bit linux installations. khull is compiled in the 
+next step, after completing the compilation you can rename khull to qhull 
+in the $TDHOME/bin directory. Alternatively, you can change the flag in 
+tstConvexHull.py on line 12 to runKHull=True.
+
+3. Surface Generation code (TST)
+
+Travel Depth can work with any triangulated surface, but currently
+support only for surfaces generated with the included code and the 'tst'
+file format. Install as follows:
+
+`cd $TDHOME/tst`
+`make all`
+
+Which compiles and puts the executables into ./bin 
+
+4. If you want to analyze CLIPPERS data, you will most likely need to 
+install aiSee. aiSee is free for academic use and can be downloaded from:
+
+http://www.aisee.com/download/
+
+For almost any operating system. aiSee imports .gdl files, which are 
+created by CLIPPERS as described in the RUNNING_TRAVEL_DISTANCE.txt file.
+
+5. All python scripts are are in pymol/ or src/, and need no
+installation, unless you want to add the directories to your path or run
+the tstdisp.py script everytime PyMOL starts.
+
+There are several scripts to run, described in the 
+RUNNING_TRAVEL_DISTANCE.txt file
+

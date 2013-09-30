@@ -1,0 +1,3 @@
+All changes were to Makefile, to integrate into travel depth code
+distribution, source untouched, obtain original from
+http://www.qhull.org
