@@ -1,7 +1,8 @@
 traveldistance
 ==============
 
-Github version of Travel Distance code by me (Ryan Coleman) and my advisor (Kim Sharp). See http://crystal.med.upenn.edu/travel_distance.html for official download, academic paper references, license, etc.
+Github version of Travel Distance code by me (Ryan Coleman) and my advisor (Kim Sharp). 
+See http://crystal.med.upenn.edu/travel_distance.html for official download, academic paper references, license, etc.
 
 INSTALLING
 ==========
