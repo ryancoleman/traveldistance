@@ -49,7 +49,7 @@ def tstTravelDepthNoPhi(tstFileName, gridSize=1.0):
   #grid encoding -1 = outside ch, 0 = between ch, ms, -2 = inside ms
   mins, maxs = [],[] #so values computed are saved
   mins = [math.floor(x)-gridSize for x in minsSave]
-  mins = [math.ceil(x)+gridSize for x in maxsSave]
+  maxs = [math.ceil(x)+gridSize for x in maxsSave]
   gridD = grid.makeNewEmptyGrid(mins,maxs,gridSize,-1)  #all set to outside ch
   #tstdebug.debugGridCountVals(gridD)
   #first step, check and set outside ch
