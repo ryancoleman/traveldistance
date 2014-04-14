@@ -1,7 +1,8 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 #ryan g coleman ryangc@mail.med.upenn.edu ryan.g.coleman@gmail.com
 
-import string,sys
+import string
+import sys
 
 def readRadiiTxtFile(filename):
   '''reads a file that is a pair of floats separated by a comma, returns list'''
@@ -12,35 +13,35 @@ def readRadiiTxtFile(filename):
       tokens = string.split(string.strip(line), ',')
       distRadPairs.append((float(tokens[0]), float(tokens[1])))
   except StopIteration:
-    pass #it is okay
+    pass  # it is okay
   return distRadPairs
 
 def combinePairs(allDistRadPairs, names):
   '''combines dist, rad pairs into one master list'''
   allFirst = set()
   for distRadPairs in allDistRadPairs:
-    for dist,rad in distRadPairs:
+    for dist, rad in distRadPairs:
       allFirst.add(dist)
   distances = list(allFirst)
-  distances.sort() #now have all the unique distances in sorted order
+  distances.sort()  # now have all the unique distances in sorted order
   radii = []
-  for index,distRadPairs in enumerate(allDistRadPairs):
+  for index, distRadPairs in enumerate(allDistRadPairs):
     name = names[index]
     theseRadii = []
-    for dist,rad in distRadPairs:
+    for dist, rad in distRadPairs:
       found = distances.index(dist)
-      while found > len(theseRadii): #must interpolate to produce new data
+      while found > len(theseRadii):  # must interpolate to produce new data
         lastRadius = theseRadii[-1]
         lastDistIndex = len(theseRadii)-1
         lastDist = distances[lastDistIndex]
-        thisDist = distances[lastDistIndex+1] #next one
-        difference = (thisDist-lastDist)/(dist-lastDist) #between 0 and 1
+        thisDist = distances[lastDistIndex+1]  # next one
+        difference = (thisDist-lastDist)/(dist-lastDist)  # between 0 and 1
         curRad = lastRadius + ((rad-lastRadius)*difference)
         theseRadii.append(curRad)
-      theseRadii.append(rad) #add the current one
+      theseRadii.append(rad)  # add the current one
     while len(theseRadii) < len(distances):
       theseRadii.append("-")
-    theseRadii.insert(0, name) #easier to do now due to indexing
+    theseRadii.insert(0, name)  # easier to do now due to indexing
     radii.append(theseRadii)
   distances.insert(0, 'distances')
   radii.insert(0, distances)

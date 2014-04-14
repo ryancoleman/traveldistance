@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #reports pockets with highest overlap with the set of residues
 
@@ -30,7 +30,7 @@ if -1 != string.find(sys.argv[0], "tm3rescomp.py"):
           resCols=["Atom Name List"], sizeColName = "Volume", \
           sizeMin=-1.,sizeMax=10000000000, \
           doSelfScore=False, justNodes=dotData.treeToBestNode, \
-          mst=True, lineMst=True, lineMstEnds=False) 
+          mst=True, lineMst=True, lineMstEnds=False)
   #linemstends doesn't work that well so disabled for now
   names,matrix = [],{}
   for match in matchList:

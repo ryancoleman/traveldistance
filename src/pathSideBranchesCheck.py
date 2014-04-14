@@ -1,7 +1,7 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
-#idea is to find paths that exit into the membrane barrier, and figure out 
-#what residues line them and what their radius is. 
+#idea is to find paths that exit into the membrane barrier, and figure out
+#what residues line them and what their radius is.
 #this version only does the branch from a 'proper' path to the membrane interior
 #and removes other points along the path and other residues.
 
@@ -23,7 +23,7 @@ def countCrossingsZ(path, barrier):
 
 def checkPathBarriers(prefix):
   tstName = prefix + ".nocav.tst"
-  findHolesName = tstName + ".findholes.log" 
+  findHolesName = tstName + ".findholes.log"
   findHolesFile = open(findHolesName, 'r')
   findHolesLines = findHolesFile.readlines()
   findHolesFile.close()
@@ -52,21 +52,21 @@ def checkPathBarriers(prefix):
   goodLogFile = open(goodHolesName, 'w')
   sideLogFile = open(sideHolesName, 'w')
   badLogFile = open(badHolesName, 'w')
-  #the following 5 things are calculated and written for each path, headers 
+  #the following 5 things are calculated and written for each path, headers
   #the 6th, barrier separation, is really the same for each structure
-  logFile.write("endsBeyond1count barrier1count endsBetweenCount ") 
+  logFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   logFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   goodLogFile.write("prefix ")
-  goodLogFile.write(string.strip(findHolesLines[0]) + " ") 
-  goodLogFile.write("endsBeyond1count barrier1count endsBetweenCount ") 
+  goodLogFile.write(string.strip(findHolesLines[0]) + " ")
+  goodLogFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   goodLogFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   sideLogFile.write("prefix ")
-  sideLogFile.write(string.strip(findHolesLines[0]) + " ") 
-  sideLogFile.write("endsBeyond1count barrier1count endsBetweenCount ") 
+  sideLogFile.write(string.strip(findHolesLines[0]) + " ")
+  sideLogFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   sideLogFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   badLogFile.write("prefix ")
-  badLogFile.write(string.strip(findHolesLines[0]) + " ") 
-  badLogFile.write("endsBeyond1count barrier1count endsBetweenCount ") 
+  badLogFile.write(string.strip(findHolesLines[0]) + " ")
+  badLogFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   badLogFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   holeNumber = 1
   poreFile =  tstName + "." + str(holeNumber) + poreSuffix
@@ -76,8 +76,8 @@ def checkPathBarriers(prefix):
   endsToPaths = {}
   pathsToEnds = {}
   while os.path.exists(poreFile):
-    path = comparePaths.readCGOPath(poreFile)    
-    pathRad = comparePaths.readCGOPathWithRadius(poreFile)    
+    path = comparePaths.readCGOPath(poreFile)
+    pathRad = comparePaths.readCGOPathWithRadius(poreFile)
     paths.append(pathRad)
     pathNum = len(paths) - 1
     for end in string.split(findHolesLines[holeNumber])[1:3]:
@@ -139,7 +139,7 @@ def checkPathBarriers(prefix):
   branchSuffix = ".branch.py"
   branchFile =   tstName + "." + str(branches) + branchSuffix
   branchLog = open(tstName + ".branchholes.log", 'w')
-  branchLog.write(string.strip(findHolesLines[0]) + "\n") 
+  branchLog.write(string.strip(findHolesLines[0]) + "\n")
   for side in sides:
     foundGoods = []
     for sideEnd in pathsToEnds[side]:
@@ -166,15 +166,10 @@ def checkPathBarriers(prefix):
           logExt=".branchholes.log", poreSuffix = ".branch.py", \
           nearbyName=".branch")
 
-if -1 != string.find(sys.argv[0], "pathSideBranchesCheck"): 
+if -1 != string.find(sys.argv[0], "pathSideBranchesCheck"):
   if len(sys.argv) >= 2:
     prefix = sys.argv[1]
     prefix = prefix.replace(".nocav.tst.findholes.log", "")#just in case
     checkPathBarriers(prefix)
   else:
     print "pathSidesCheck.py prefix[.nocav.tst.findholes.log]"
-
-
-
-
-

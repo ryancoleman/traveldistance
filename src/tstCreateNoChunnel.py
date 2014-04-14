@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 #ryan g. coleman ryangc@mail.med.upenn.edu
 
 import sys,string,os

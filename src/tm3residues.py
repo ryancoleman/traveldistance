@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #reports pockets with highest overlap with the set of residues
 

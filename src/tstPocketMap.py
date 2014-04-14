@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #copyright 2005-2009 Ryan G. Coleman, Kim A. Sharp, University of Pennsylvania
 #cite the following papers if you use this code:

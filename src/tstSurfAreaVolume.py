@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 #ryan g. coleman ryangc@mail.med.upenn.edu
 #geometry is great
 
@@ -89,16 +89,15 @@ def tstSurfVolAnalysis(tstFileName):
   #print allVol, cavVol, allcavVol #again another check not necessary anymore
   return allArea, allVol, allArea + cavArea, allVol - cavVol, chArea, chVol
 
-#this is where main is... 
+#this is where main is...
 if -1 != string.find(sys.argv[0], "tstSurfAreaVolume.py"):
   if 1 < len(sys.argv):
     print "tst\tsurfaceArea\tvolume\tcavSurfArea\tcavVolume\tspher\tcavSpher\tchArea\tchVol"
     for tstfile in sys.argv[1:]:
-      surfArea, volume, cavA, cavV, chA, chV = tstSurfVolAnalysis(tstfile)     
+      surfArea, volume, cavA, cavV, chA, chV = tstSurfVolAnalysis(tstfile)
       spher1 = geometry.calculateSphericity(surfArea, volume)
       spher2 = geometry.calculateSphericity(cavA, cavV)
-      print tstfile, "\t", surfArea, "\t", volume, "\t", cavA, "\t", 
+      print tstfile, "\t", surfArea, "\t", volume, "\t", cavA, "\t",
       print cavV, "\t", spher1, "\t", spher2, "\t", chA, "\t", chV
   else:
     print "Usage: tstSurfAreaVolume.py tstfile [list of more tstfiles]"
-

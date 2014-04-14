@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 import string, sys, comparePaths, os, pdb, geometry
 
@@ -30,14 +30,9 @@ def getJustMembranePdb(inputFileName, outputFileName):
   newPdb = pdbBarriers.getListResiduesChains(goodResChain)
   newPdb.write(outputFileName)
 
-if -1 != string.find(sys.argv[0], "getMembranePdb"): 
+if -1 != string.find(sys.argv[0], "getMembranePdb"):
   if len(sys.argv) >= 2:
     for prefix in sys.argv[1:]:
-      getJustMembranePdb(prefix, "just_membrane_" + prefix)    
+      getJustMembranePdb(prefix, "just_membrane_" + prefix)
   else:
     print "getMembranePdb.py file_planes.pdb [more pdbs]"
-
-
-
-
-

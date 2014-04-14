@@ -1,20 +1,22 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
-import math,  string
-import sys, os #for running commandline instead of through pymol
+import math
+import string
+import sys
+import os #for running commandline instead of through pymol
 from os.path import isfile
 import cPickle
 #following custom module must be in same directory or in usual path
-import tstdata 
-from phi import phi #phi map reader/writer
+import tstdata
+from sharp_phi import phi #phi map reader/writer
 import tstdebug #debugging functions, moved out of codebase
-import tstTopology #gets strip surrounding handles
-from comparePaths import comparePathsManyMetrics #does pRMSD etc
+import tstTopology  # gets strip surrounding handles
+from comparePaths import comparePathsManyMetrics  # does pRMSD etc
 import mesh
-import geometry  #geometric primitives
-from pdb import pdbData 
-import grid  #moved primitive grid functions
-import paths #moved primitive path functions
+import geometry  # geometric primitives
+from pdb import pdbData
+import grid  # moved primitive grid functions
+import paths  # moved primitive path functions
 import orstHelper
 import cavity
 import charge
@@ -45,7 +47,7 @@ def meshConstruct(tstD, phiData, tstFileName="temp.tst", borderSize=2, \
   del phiData #no longer needed in this function, so delete this reference
   #needs border = 2 so all surface points have a grid point on either side...
   #tstdebug.debugGridCountVals(gridD)
-  #tstdebug.debugGridNoBlue(gridD, "debug.phigrid.py") 
+  #tstdebug.debugGridNoBlue(gridD, "debug.phigrid.py")
   #do the biggest disjoint set of tris/points stuff
   if not cavities:
     allPoints, allTris, cavPoints, cavTris = cavity.assumeNoCavities( \
@@ -65,9 +67,9 @@ def meshConstruct(tstD, phiData, tstFileName="temp.tst", borderSize=2, \
                  tstD.dict['POINT_XYZ'], \
                  tstD.dict['CONVEX_HULL_TRI_POINT_LIST'], \
                  0, -1, 2) #0 inside convex hull,
-                           # -1 outside (only valid to change), 2 = max tris 
+                           # -1 outside (only valid to change), 2 = max tris
   #grid encoding -1 = outside ch, 0 = between ch, ms, -2 = inside ms
-  #tstdebug.debugGridNoBlue(gridD, "debug.phigrid.py") 
+  #tstdebug.debugGridNoBlue(gridD, "debug.phigrid.py")
   meshData = mesh.mesh(gridD, tstD.dict['POINT_XYZ'], \
                        tstD.dict['POINT_NEIGHBOR'], \
                        gridSize, -1, -2, 0, allPoints, cavPointLists)
@@ -137,7 +139,7 @@ def tstTravelDepthMesh(tstFileName,phiFileName, ligandFileName=None, \
   #tstdebug.debugGridCountVals(phiTravelDepthGrid)
   #transform grid to actual travel distance
   phiTravelDepth.write(tstFileName+".travel.phi")
-  #write data to file    
+  #write data to file
   tstFile = open(tstFileName, 'a')
   tstFile.write("DEPTH_TRAVEL_DIST\n")
   for line in tstD.dict['DEPTH_TRAVEL_DIST']:
@@ -148,7 +150,7 @@ def tstTravelDepthMesh(tstFileName,phiFileName, ligandFileName=None, \
     tstFile.write(noPlusLine)
     tstFile.write("\n")
   tstFile.write("END DEPTH_TRAVEL_DIST\n")
-  tstFile.close()  
+  tstFile.close()
 
 def tstCountHoles(tstFileName):
   tstD = tstdata.tstData(tstFileName) #read the file into the data structure
@@ -188,7 +190,7 @@ def tstTravelFindHoles(tstFileName,phiFileName,debugOut=False,borderSize=2,\
   del tstD #rest of tstD isn't needed, so free memory
   #output the possible places where HOLE could start... centers of regular plugs
   print "writing output files"
-  paths.outputNodesText(possHoleStarts, tstFileName+".HOLE.start.txt") 
+  paths.outputNodesText(possHoleStarts, tstFileName+".HOLE.start.txt")
   pathsList = meshData.getPaths("surfout", pointNeighbors, outsidePoints, \
                             possHoleStarts)
   del meshData #deletes everything that has no other refs (from paths)
@@ -198,7 +200,7 @@ def tstTravelFindHoles(tstFileName,phiFileName,debugOut=False,borderSize=2,\
     allPoints.append(point.pathXyz)
   for point in outsidePointsNodes:
     outsidePts.append(point.pathXyz)
-  tstdebug.pointDebug(allPoints, filename=tstFileName+".tree.py") 
+  tstdebug.pointDebug(allPoints, filename=tstFileName+".tree.py")
   tstdebug.pointDebug(outsidePts, filename=tstFileName+".outside.py", mainColor=(.9,.1,.1), radius=0.55)
   #tstdebug.debugSetGridSpheres(pointNeighbors.keys(),gridSize,tstFileName+".tree.radius.py",radius=True,mainColor=(0.01,0.9,0.05)) #testing new output of tree with radius
   foundPaths = 0
@@ -293,7 +295,7 @@ def tstTravelFindHoles(tstFileName,phiFileName,debugOut=False,borderSize=2,\
         except (IOError, TypeError): #if there is no known path  file, this should be the error
           pass
       #now output data
-      logFile.write(str(foundPaths) + " ") 
+      logFile.write(str(foundPaths) + " ")
       logFile.write(str(outsideOne) + " ")
       logFile.write(str(outsideTwo) + " ")
       logFile.write(str(plugs) + " ")
@@ -314,7 +316,7 @@ def tstTravelFindHoles(tstFileName,phiFileName,debugOut=False,borderSize=2,\
         logFile.write(str(wrmsd) + " ")
         logFile.write(str(less1) + " ")
         logFile.write(str(lessrad) + " ")
-        logFile.write(str(radiicomp) + " ") 
+        logFile.write(str(radiicomp) + " ")
       logFile.write("\n") #that's all
   logFile.close()
   if knownPathExists: #output bestStats and bestStatsPaths
@@ -323,9 +325,9 @@ def tstTravelFindHoles(tstFileName,phiFileName,debugOut=False,borderSize=2,\
     bestFile.write("pRMSD coverage span wrmsd less1 lessrad radiicomp ")
     bestFile.write("pRMSD# coverage# span# wrmsd# less1# lessrad# radiicomp#\n")
     for stat in bestStats:
-      bestFile.write(str(stat) + " ")    
+      bestFile.write(str(stat) + " ")
     for stat in bestStatsPaths:
-      bestFile.write(str(stat) + " ")    
+      bestFile.write(str(stat) + " ")
     bestFile.write("\n")
     bestFile.close()
   print "done with chunnel"
@@ -448,13 +450,13 @@ def tstTravelSurfInsideMesh(tstFileName,phiFileName,threshold="auto"):
     tstFile.write(noPlusLine)
     tstFile.write("\n")
   tstFile.write("END ATOM_TRAVEL_IN\n")
-  tstFile.close()  
+  tstFile.close()
   print "burial depth done"
 
 def repairPointPdbRecord(tstD=None, tstFileName=False):
   '''checks and repairs pointpdbrecord if it has no data in it'''
   same = True
-  if tstD is None: #hasn't been read in already   
+  if tstD is None: #hasn't been read in already
     tstD = tstdata.tstData(tstFileName, \
               necessaryKeys=tstdata.tstData.necessaryKeysForPocket)
   lastPdbNum = tstD.dict['POINT_PDB_RECORD'][0][1]-1
@@ -533,7 +535,7 @@ def tstAssignCharges(tstFileName, chargeD, appendTstFile=False):
       tstFile.write(noPlusLine)
       tstFile.write("\n")
     tstFile.write("END HYDROPHOBIC_XYZ\n")
-    tstFile.close()  
+    tstFile.close()
   return tstD, chargeXyz, hydroXyz #in case caller just wanted that
 
 def repairNearby(tstFileName):
@@ -545,7 +547,8 @@ def repairNearby(tstFileName):
   #that's it
 
 def tstPocketMap(tstFileName, phiFileName, tstD=None, \
-                     ligandFileName=None, nearbyDistance=0., appendTst=True):
+                 ligandFileName=None, nearbyDistance=0., appendTst=True, \
+                 doPCA=True):
   '''pocket mapping algorithm, finds all pockets on entire surface, puts in
   tree and graph data structure, various outputs'''
   print "read tst file"
@@ -575,7 +578,7 @@ def tstPocketMap(tstFileName, phiFileName, tstD=None, \
   meshData.setSurfaceArea(tstD.dict['TRIANGLE_POINT'])
   del tstD,phiData,gridData #not needed, reclaim memory
   pdbD = pdbData()
-  pdbD.processLines(tstPdbRecord)  
+  pdbD.processLines(tstPdbRecord)
   pointAtomList = meshData.calculateNearbyAtoms(pdbD, nearbyDistance)
   meshData.setVolume(gridSize)
   print "calculating travel depth"
@@ -596,25 +599,25 @@ def tstPocketMap(tstFileName, phiFileName, tstD=None, \
            'traveldepth',  \
            [2,3,5], pointAtomList, pdbD, \
            outName=outFileName+".", groupName='group', \
-           ligandNodes=nodeWithinSet)
+           ligandNodes=nodeWithinSet, doPCA=doPCA)
   else:
     outFileName = tstFileName
     localMaxima, borders, tm3tree, surfNodeToLeaf = meshData.pocketMapping( \
            'traveldepth',  \
            [2,3,5], pointAtomList, pdbD, \
-           outName=outFileName+".", groupName='group')
+           outName=outFileName+".", groupName='group', doPCA=doPCA)
   #print len(localMaxima), len(borders), tm3tree, len(surfNodeToLeaf)
   #tstdebug.nodeDebug(localMaxima, \
-  #              filename=tstFileName+".localmaxima.pocketmap.py")  
+  #              filename=tstFileName+".localmaxima.pocketmap.py")
   #tstdebug.nodeDebug(borders, \
-  #              filename=tstFileName+".borders.pocketmap.py")  
+  #              filename=tstFileName+".borders.pocketmap.py")
   #tstdebug.nodeDebug(meshData.getSurfaceNodes(), \
-  #              filename=tstFileName+".groups.pocketmap.py", name='group')  
+  #              filename=tstFileName+".groups.pocketmap.py", name='group')
   tm3tree.write(outFileName+".tree.tm3")
   #tm3tree.writeTNV(tstFileName+".tree.tnv") #doesn't seem to import into treemap correctly
   if appendTst: #turn off sometimes since appends to tst file
     print "appending data to tst file"
-    surfNodes = meshData.getSurfaceNodes()    
+    surfNodes = meshData.getSurfaceNodes()
     pointLeafList = []
     for aNode in surfNodes:
       if aNode not in surfNodeToLeaf:
@@ -649,7 +652,7 @@ def tstPocketMap(tstFileName, phiFileName, tstD=None, \
                             "END CHARGE_XYZ", tstFile)
     tstdata.writeEntrySingleFloat(hydroXyz, "HYDROPHOBIC_XYZ", \
                             "END HYDROPHOBIC_XYZ", tstFile)
-    #write data to file    
+    #write data to file
     tstFile.write("DEPTH_TRAVEL_DIST\n")
     for line in pointTravelDepth:
       lineOut = "%8d" % line[0]
@@ -659,7 +662,7 @@ def tstPocketMap(tstFileName, phiFileName, tstD=None, \
       tstFile.write(noPlusLine)
       tstFile.write("\n")
     tstFile.write("END DEPTH_TRAVEL_DIST\n")
-    tstFile.close()  
+    tstFile.close()
   print "pocket mapping complete"
 
 def printHelpMessage():
@@ -677,64 +680,64 @@ def printHelpMessage():
   print "Usage: tstTravelDist.py pocketmap tstFile phiFile [ligandFile]"
 
 #this is where main is... maybe add some other arguments like gridSize?
-if -1 != string.find(sys.argv[0], "tstTravelDist.py"): 
+if -1 != string.find(sys.argv[0], "tstTravelDist.py"):
   if 1 < len(sys.argv):
     if sys.argv[1] == "meshdepth" and  len(sys.argv) > 4:
-      tstFile, phiFile, ligandPdbFile = sys.argv[2:5] 
+      tstFile, phiFile, ligandPdbFile = sys.argv[2:5]
       print "tstname phiname ligandname ",
-      print "within-min max mean traceback-min max mean ", 
+      print "within-min max mean traceback-min max mean ",
       print "between-min max mean surface-min max mean",
-      print "within-volume trace-volume" #actually want newline 
+      print "within-volume trace-volume" #actually want newline
       print tstFile, phiFile, ligandPdbFile, #wait for more output
-      tstTravelDepthMesh(tstFile, phiFile, ligandPdbFile) 
+      tstTravelDepthMesh(tstFile, phiFile, ligandPdbFile)
     elif sys.argv[1] == "meshdepth" and  len(sys.argv) > 3:
       tstFile, phiFile = sys.argv[2:4]
       print tstFile, phiFile
-      tstTravelDepthMesh(tstFile, phiFile) 
+      tstTravelDepthMesh(tstFile, phiFile)
     elif sys.argv[1] == "repairnearby" and  len(sys.argv) > 2:
       for tstFile in sys.argv[2:]:
         print tstFile
-        tstTravelRepairNearby(tstFile) 
+        tstTravelRepairNearby(tstFile)
     elif sys.argv[1] == "meshdepthcav" and len(sys.argv) > 4:
-      tstFile, phiFile, ligandPdbFile = sys.argv[2:5] 
+      tstFile, phiFile, ligandPdbFile = sys.argv[2:5]
       print "tstname phiname ligandname ",
-      print "within-min max mean traceback-min max mean ", 
+      print "within-min max mean traceback-min max mean ",
       print "between-min max mean surface-min max mean",
-      print "within-volume trace-volume" #actually want newline 
+      print "within-volume trace-volume" #actually want newline
       print tstFile, phiFile, ligandPdbFile, #wait for more output
       tstTravelDepthMesh(tstFile, phiFile, ligandPdbFile, \
-                         cavities=True, threshold="auto") 
+                         cavities=True, threshold="auto")
     elif sys.argv[1] == "meshdepthcav" and  len(sys.argv) > 3:
       tstFile, phiFile = sys.argv[2:4]
       print tstFile, phiFile
-      tstTravelDepthMesh(tstFile, phiFile, cavities=True, threshold="auto") 
+      tstTravelDepthMesh(tstFile, phiFile, cavities=True, threshold="auto")
     elif sys.argv[1] == "meshsurfout" and  len(sys.argv) > 3:
       tstFile, phiFile = sys.argv[2:4]
       print tstFile, phiFile
-      tstTravelSurfOutsideMesh(tstFile, phiFile) 
+      tstTravelSurfOutsideMesh(tstFile, phiFile)
     elif sys.argv[1] == "findholes" and  len(sys.argv) > 3:
       tstFile, phiFile = sys.argv[2:4]
       print tstFile, phiFile
-      tstTravelFindHoles(tstFile, phiFile, debugOut=False) 
+      tstTravelFindHoles(tstFile, phiFile, debugOut=False)
     elif sys.argv[1] == "findholesdebug" and  len(sys.argv) > 3:
       tstFile, phiFile = sys.argv[2:4]
       print tstFile, phiFile
-      tstTravelFindHoles(tstFile, phiFile, debugOut=True) 
+      tstTravelFindHoles(tstFile, phiFile, debugOut=True)
     elif sys.argv[1] == "meshsurfin" and  len(sys.argv) > 3:
       tstFile, phiFile = sys.argv[2:4]
       print tstFile, phiFile
-      tstTravelSurfInsideMesh(tstFile, phiFile) 
+      tstTravelSurfInsideMesh(tstFile, phiFile)
     elif sys.argv[1] == "cavityremove" and  len(sys.argv) > 3:
       tstFile, tstOut, phiFile, phiOut = sys.argv[2:6]
       print tstFile, tstOut, phiFile, phiOut
-      cavity.tstCavityRemoval(tstFile, tstOut, phiFile, phiOut) 
+      cavity.tstCavityRemoval(tstFile, tstOut, phiFile, phiOut)
     elif sys.argv[1] == "countholes" and  len(sys.argv) > 2:
       tstFileIn = sys.argv[2]
       print tstFileIn,
       print tstCountHoles(tstFileIn)
     elif sys.argv[1] == "assigncharge" and len(sys.argv)> 2:
       tstFile = sys.argv[2]
-      print tstFile, 
+      print tstFile,
       if len(sys.argv) > 3:
         chargeFile = sys.argv[3]
         print chargeFile
@@ -745,15 +748,13 @@ if -1 != string.find(sys.argv[0], "tstTravelDist.py"):
     elif sys.argv[1] == "pocketmap" and len(sys.argv)> 3:
       tstFile, phiFile = sys.argv[2:4]
       if len(sys.argv) > 4:
-        ligandPdbFile = sys.argv[4] 
-        print tstFile, phiFile, ligandPdbFile 
+        ligandPdbFile = sys.argv[4]
+        print tstFile, phiFile, ligandPdbFile
         tstPocketMap(tstFile, phiFile, ligandFileName=ligandPdbFile)
       else:
-        print tstFile, phiFile 
+        print tstFile, phiFile
         tstPocketMap(tstFile, phiFile)
     else:
       printHelpMessage()
   else:
     printHelpMessage()
-
-

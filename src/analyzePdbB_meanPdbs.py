@@ -1,9 +1,9 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 #ryan g. coleman ryangc@mail.med.upenn.edu
 
 #analyzes the b-factor column of pdb file... for travel-in analysis
 
-import analyzePdbB 
+import analyzePdbB
 import string, sys
 import pdb
 
@@ -46,8 +46,7 @@ def analyzePdbBCompareFiles(firstFilename):
   analyzePdbB.makeMeanPerProteinReport(pdbs, outName = listFilename + ".meansbypdb.txt")
 
 #this is main
-if -1 != string.find(sys.argv[0], "analyzePdbB_meanPdbs.py"): 
+if -1 != string.find(sys.argv[0], "analyzePdbB_meanPdbs.py"):
   if len(sys.argv) > 1:
     for filename1 in sys.argv[1:]:
       analyzePdbBCompareFiles(filename1)
-

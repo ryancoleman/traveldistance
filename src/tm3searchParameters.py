@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #reads in tm3 files, ignores tree structure, just looks for nodes/pockets
 #that are similar
@@ -8,14 +8,14 @@ import tm3, string, sys
 if -1 != string.find(sys.argv[0], "tm3searchParameters.py"):
   tmDataList = []
   try:
-    alpha = float(sys.argv[1]) #the second parameter should be a float, 
+    alpha = float(sys.argv[1]) #the second parameter should be a float,
                       #which is multiplied by the redudancy scores
     minVolume = float(sys.argv[2])
     maxVolume = float(sys.argv[3])
     startConn = float(sys.argv[4])
     endConn = float(sys.argv[5])
     stepConn = float(sys.argv[6])
-    useNormalMeans = bool(sys.argv[7]) 
+    useNormalMeans = bool(sys.argv[7])
     calculateNormalMeans = not useNormalMeans #actually want to invert
   except (IndexError, ValueError):
     print "error with parameters, all are required..."

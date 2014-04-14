@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 import tm3, string, sys, statistics
 
@@ -24,7 +24,7 @@ def summarizeOneFeature(tmDataList, columnName, intervals=50, outName="a.txt"):
   outFile.write("\n")
   for tm3tree in tmDataList:
     tm3data = treeData[tm3tree]
-    avgData = statistics.computeAverage(tm3data)
+    avgData = statistics.computeMean(tm3data)
     stddevData = statistics.computeStdDev(tm3data, avgData)
     histo, outMax = statistics.computeHistogram(tm3data, interval, overallMax)
     outFile.write(tm3tree.inputFileName +"\t")
@@ -41,7 +41,6 @@ if -1 != string.find(sys.argv[0], "tm3summarize.py"):
   for filename in sys.argv[1:]:
     tmData = tm3.tmTreeFromFile(filename)
     tmDataList.append(tmData)
-  summarizeOneFeature(tmDataList, "Volume", outName="volume.txt")  
-  summarizeOneFeature(tmDataList, "Surface Area", outName="surfarea.txt")  
+  summarizeOneFeature(tmDataList, "Volume", outName="volume.txt")
+  summarizeOneFeature(tmDataList, "Surface Area", outName="surfarea.txt")
   summarizeOneFeature(tmDataList, "mouths", outName="mouths.txt", intervals="max")
-

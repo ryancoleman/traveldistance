@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #compares the roots of the trees passed in
 
@@ -25,7 +25,7 @@ if -1 != string.find(sys.argv[0], "tm3rootcomp.py"):
           resCols=["Atom Name List"], sizeColName = "Volume", \
           sizeMin=-1.,sizeMax=1000000000000, \
           doSelfScore=False, justNodes=dotData.treeToBestNode, \
-          mst=True, lineMst=False, lineMstEnds=False) 
+          mst=True, lineMst=False, lineMstEnds=False)
   #linemstends doesn't work that well so disabled for now
   names,matrix = [],{}
   for match in matchList:

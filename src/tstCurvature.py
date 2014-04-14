@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 import sys,string
 import tstdata
@@ -41,7 +41,7 @@ def tstEdgeCurvature(trianglePoint, pointXyz, pointTriangle, pointNeighbor):
         normalB = geometry.getTriNormalList(triXyz[tris[1]])
         unsignedAngle = geometry.getAngle(normalA, normalB) #unsigned
         centerTriA = geometry.getAverage(triXyz[tris[0]])
-        planeA = geometry.calculatePlaneD(normalA, centerTriA) 
+        planeA = geometry.calculatePlaneD(normalA, centerTriA)
         ptsB = set(trianglePoint[tris[1]-1][1:])
         edgePts = set(ptList)
         otherB = pointXyz[list(ptsB.difference(edgePts))[0]-1][1:]
@@ -53,9 +53,9 @@ def tstEdgeCurvature(trianglePoint, pointXyz, pointTriangle, pointNeighbor):
         edgeAngle[ptTuple] = angle
         angles.append(angle)
         weightedAngles.append(angle*edgeLength)
-    pointMeanAngle.append([mainPt, statistics.computeAverage(angles)])
+    pointMeanAngle.append([mainPt, statistics.computeMean(angles)])
     pointWeightedMeanAngle.append([mainPt, \
-                                  statistics.computeAverage(weightedAngles)])
+                                  statistics.computeMean(weightedAngles)])
   return edgeAngle, pointMeanAngle, pointWeightedMeanAngle
 
 #this is main
@@ -77,12 +77,12 @@ if -1 != string.find(sys.argv[0], "tstCurvature.py"):
     for pointWeightCurv in pWA:
       curves.append(pointWeightCurv[1])
       absCurves.append(abs(pointWeightCurv[1]))
-    meanCurv = statistics.computeAverage(curves)
-    meanAbsCurv = statistics.computeAverage(absCurves)
+    meanCurv = statistics.computeMean(curves)
+    meanAbsCurv = statistics.computeMean(absCurves)
     curves,absCurves = [],[]
     for pointWeightCurv in eA.values():
       curves.append(pointWeightCurv)
       absCurves.append(abs(pointWeightCurv))
-    meanCurvE = statistics.computeAverage(curves)
-    meanAbsCurvE = statistics.computeAverage(absCurves)
+    meanCurvE = statistics.computeMean(curves)
+    meanAbsCurvE = statistics.computeMean(absCurves)
     print tstFileName, meanCurv, meanAbsCurv, meanCurvE, meanAbsCurvE

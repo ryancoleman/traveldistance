@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #reads in tm3 files, ignores tree structure, just looks for nodes/pockets
 #that are similar

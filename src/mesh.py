@@ -2,67 +2,76 @@
 #copyright Ryan Coleman, Kim Sharp 2007
 #contains explicit mesh data structures and code
 
-import phi
-import math, string
-from unionfind2 import unionFind, unionFindAttach
-from priodict import priorityDictionary
-import geometry  #lots of geometric primitives
-from tstdebug import pointDebug #debugging obviously
-import tm3 #tree/graph structure...
-import statistics #average and such
+import math
+import string
+import unionfind2
+import priodict
+import geometry  # lots of geometric primitives
+import tstdebug
+import tm3  # tree/graph structure...
+import statistics  # average and such
 import pdb
 import pca
-useNumeric = True #use numeric, if available
+useNumeric = True  # use numeric, if available
 try:
-  try: #use numeric (older faster code)
+  try:  # use numeric (older faster code)
     import Numeric
-  except ImportError: #fallback to numpy (newer slower code)
+  except ImportError:  # fallback to numpy (newer slower code)
     import numpy.oldnumeric as Numeric
-except ImportError: #otherwise fallback
-  useNumeric = False #have to do worse linear dimesion estimate
+except ImportError:  # otherwise fallback
+  useNumeric = False  # have to do worse linear dimesion estimate
 
 def returnBoxStructure(curBox):
-  '''returns a dict of indexes connected in orthogonal directions only, 
+  '''returns a dict of indexes connected in orthogonal directions only,
   upper corner given as input, used only for mesh helping, so in this module.
-  code is hard coded nastiness for speed, basically'''
+  code is hard coded nastiness for speed, basically (bad excuse, code with loops
+  would likely not be slower, but might be uglier. easier to debug perhaps).'''
   boxStruct = {}
-  thisBox = (curBox[0],curBox[1],curBox[2])
-  boxStruct[thisBox] = [(thisBox[0]+1,thisBox[1],thisBox[2]), \
-                        (thisBox[0],thisBox[1]+1,thisBox[2]), \
-                        (thisBox[0],thisBox[1],thisBox[2]+1)]
-  thisBox = (curBox[0]+1,curBox[1],curBox[2])
-  boxStruct[thisBox] = [(thisBox[0]-1,thisBox[1],thisBox[2]), \
-                        (thisBox[0],thisBox[1]+1,thisBox[2]), \
-                        (thisBox[0],thisBox[1],thisBox[2]+1)]
-  thisBox = (curBox[0],curBox[1]+1,curBox[2])
-  boxStruct[thisBox] = [(thisBox[0]+1,thisBox[1],thisBox[2]), \
-                        (thisBox[0],thisBox[1]-1,thisBox[2]), \
-                        (thisBox[0],thisBox[1],thisBox[2]+1)]
-  thisBox = (curBox[0],curBox[1],curBox[2]+1)
-  boxStruct[thisBox] = [(thisBox[0]+1,thisBox[1],thisBox[2]), \
-                        (thisBox[0],thisBox[1]+1,thisBox[2]), \
-                        (thisBox[0],thisBox[1],thisBox[2]-1)]
-  thisBox = (curBox[0]+1,curBox[1]+1,curBox[2])
-  boxStruct[thisBox] = [(thisBox[0]-1,thisBox[1],thisBox[2]), \
-                        (thisBox[0],thisBox[1]-1,thisBox[2]), \
-                        (thisBox[0],thisBox[1],thisBox[2]+1)]
-  thisBox = (curBox[0]+1,curBox[1],curBox[2]+1)
-  boxStruct[thisBox] = [(thisBox[0]-1,thisBox[1],thisBox[2]), \
-                        (thisBox[0],thisBox[1]+1,thisBox[2]), \
-                        (thisBox[0],thisBox[1],thisBox[2]-1)]
-  thisBox = (curBox[0],curBox[1]+1,curBox[2]+1)
-  boxStruct[thisBox] = [(thisBox[0]+1,thisBox[1],thisBox[2]), \
-                        (thisBox[0],thisBox[1]-1,thisBox[2]), \
-                        (thisBox[0],thisBox[1],thisBox[2]-1)]
-  thisBox = (curBox[0]+1,curBox[1]+1,curBox[2]+1)
-  boxStruct[thisBox] = [(thisBox[0]-1,thisBox[1],thisBox[2]), \
-                        (thisBox[0],thisBox[1]-1,thisBox[2]), \
-                        (thisBox[0],thisBox[1],thisBox[2]-1)]
+  thisBox = (curBox[0], curBox[1], curBox[2])
+  boxStruct[thisBox] = [
+      (thisBox[0] + 1, thisBox[1], thisBox[2]),
+      (thisBox[0], thisBox[1] + 1, thisBox[2]),
+      (thisBox[0], thisBox[1], thisBox[2] + 1)]
+  thisBox = (curBox[0] + 1, curBox[1], curBox[2])
+  boxStruct[thisBox] = [
+      (thisBox[0] - 1, thisBox[1], thisBox[2]),
+      (thisBox[0], thisBox[1] + 1, thisBox[2]),
+      (thisBox[0], thisBox[1], thisBox[2] + 1)]
+  thisBox = (curBox[0], curBox[1] + 1, curBox[2])
+  boxStruct[thisBox] = [
+      (thisBox[0] + 1, thisBox[1], thisBox[2]),
+      (thisBox[0], thisBox[1] - 1, thisBox[2]),
+      (thisBox[0], thisBox[1], thisBox[2] + 1)]
+  thisBox = (curBox[0], curBox[1], curBox[2] + 1)
+  boxStruct[thisBox] = [
+      (thisBox[0] + 1, thisBox[1], thisBox[2]),
+      (thisBox[0], thisBox[1] + 1, thisBox[2]),
+      (thisBox[0], thisBox[1], thisBox[2] - 1)]
+  thisBox = (curBox[0] + 1, curBox[1] + 1, curBox[2])
+  boxStruct[thisBox] = [
+      (thisBox[0] - 1, thisBox[1], thisBox[2]),
+      (thisBox[0], thisBox[1] - 1, thisBox[2]),
+      (thisBox[0], thisBox[1], thisBox[2] + 1)]
+  thisBox = (curBox[0] + 1, curBox[1], curBox[2] + 1)
+  boxStruct[thisBox] = [
+      (thisBox[0] - 1, thisBox[1], thisBox[2]),
+      (thisBox[0], thisBox[1] + 1, thisBox[2]),
+      (thisBox[0], thisBox[1], thisBox[2] - 1)]
+  thisBox = (curBox[0], curBox[1] + 1, curBox[2] + 1)
+  boxStruct[thisBox] = [
+      (thisBox[0] + 1, thisBox[1], thisBox[2]),
+      (thisBox[0], thisBox[1] - 1, thisBox[2]),
+      (thisBox[0], thisBox[1], thisBox[2] - 1)]
+  thisBox = (curBox[0] + 1, curBox[1] + 1, curBox[2] + 1)
+  boxStruct[thisBox] = [
+      (thisBox[0] - 1, thisBox[1], thisBox[2]),
+      (thisBox[0], thisBox[1] - 1, thisBox[2]),
+      (thisBox[0], thisBox[1], thisBox[2] - 1)]
   return boxStruct
 
 def createValidFunctionSurfaceZero(listSurfRef):
-  '''creates a validator function that returns true only if the lookup on the 
-  listSurfRef of the surfaceReferencePoint of the surfaceNode is 0. used to 
+  '''creates a validator function that returns true only if the lookup on the
+  listSurfRef of the surfaceReferencePoint of the surfaceNode is 0. used to
   expand patch only as long as it is hydrophobic'''
   lookupDict = {}
   for items in listSurfRef:
@@ -74,9 +83,9 @@ def createValidFunctionSurfaceZero(listSurfRef):
 
 class node(object):
   '''only made when you want to give a list of nodes to an outside class/func'''
-  classification = False #outside(CH)=0, inside(MS)=1, between(CH+MS)=2, surf=3
-                         #cavity surface = 5
-  
+  classification = False
+  #outside(CH)=0, inside(MS)=1, between(CH+MS)=2, surf=3, cavity surface = 5
+
   def __init__(self, referenceIn, xyzIn, pathXyzIn, distIn):
     self.reference = referenceIn
     self.xyz = xyzIn
@@ -87,57 +96,61 @@ class mesh(object):
   '''mesh for travel distance, unified data structure makes computing any
   travel distance easy'''
 
-  def __init__(self, grid, pointXYZ, pointNeighbor, gridSize, \
-               outside, inside, between, allPoints=False, cavPoints=False):
+  def __init__(
+      self, grid, pointXYZ, pointNeighbor, gridSize,
+      outside, inside, between, allPoints=False, cavPoints=False):
     '''creates a mesh from a grid data structure and a tst data structure.
     if cavPoints then create 1 edge per cavpointlist which is the shortest edge
     possible that connects the cavity to the surface.
-    pointsHydro is a point->-1,0,+1 charge mapping, for calculating % apolar 
+    pointsHydro is a point->-1, 0,+1 charge mapping, for calculating % apolar
     surface area of pockets'''
-    self.gridNodes = []    #lists of nodes, all other dicts keyed off these
-    self.surfaceNodes = [] 
-    self.nodeDist = {} #moving data storage out of node class into dicts
+    self.gridNodes = []   # lists of nodes, all other dicts keyed off these
+    self.surfaceNodes = []
+    self.nodeDist = {}  # moving data storage out of node class into dicts
     self.nodeNeighbors = {}
     self.nodeClass = {}
     self.nodeXyz = {}
     self.nodeOffGridXyz = {}
     self.nodeNode = {}
     #want somewhere to store tracebacks information
-    self.tracebacks = {} #dictionary keyed on the name just like distances
+    self.tracebacks = {}  # dictionary keyed on the name just like distances
     self.gridNodeInitialize(grid, outside, inside, between)
     self.surfNodeInitialize(grid, pointXYZ, gridSize, cavPoints)
-    gridErrors, listBadPairs, badNodesSet = \
-                           self.surfNodeConnect(pointXYZ, pointNeighbor)
+    gridErrors, listBadPairs, badNodesSet = self.surfNodeConnect(
+        pointXYZ, pointNeighbor)
     if gridErrors:
       print "warning, grid errors, try changing threshold:",
       print gridErrors, len(listBadPairs), len(badNodesSet)
       exit(1)
     self.gridNodeConnect(grid)
-    if cavPoints: #want to add edges into cavities
+    if cavPoints:  # want to add edges into cavities
       #print "cavpoints", cavPoints
       self.addCavityEdges(cavPoints)
     #now all nodes have been added and neighbors calculated
 
   def setPtHydro(self, pointsHydro):
-    '''should be a tst formatted record of the surface point to -1,0,1 hydro'''
+    '''should be a tst formatted record of the surface point to -1, 0, 1 hydro'''
     self.nodeHydro = {}
     if pointsHydro:
-      for point,charge in pointsHydro:
+      for point, charge in pointsHydro:
         self.nodeHydro[point] = charge
 
   def setPtCurvature(self, pointsCurv):
     '''should be a tst formatted record of the surface point to curvature'''
     self.nodeCurv = {}
     if pointsCurv:
-      for point,curv in pointsCurv:
+      for point, curv in pointsCurv:
         self.nodeCurv[point] = curv
 
-  def gridNodeInitialize(self, grid, outside, inside, between): 
-    '''initialize the gridNodes,grid should be outside/inside/between already'''
-    for indexX,rowX in enumerate(grid): 
-      for indexY,rowY in enumerate(rowX):
-        for indexZ,entryZ in enumerate(rowY):
-          indices = (indexX,indexY,indexZ) #this is the reference back into grid
+  def gridNodeInitialize(self, grid, outside, inside, between):
+    '''
+    initialize the gridNodes, grid should be outside/inside/between already
+    '''
+    for indexX, rowX in enumerate(grid):
+      for indexY, rowY in enumerate(rowX):
+        for indexZ, entryZ in enumerate(rowY):
+          indices = (indexX, indexY, indexZ)
+          #indices is the reference back into grid
           value = entryZ[0]
           self.gridNodes.append(indices)
           self.nodeXyz[indices] = entryZ[1:]
@@ -158,12 +171,12 @@ class mesh(object):
     and connect back from said gridnodes.  if cavpoints then label each one as 5
     more to do later in another step'''
     if cavPoints:
-      allCavPoints = set() 
+      allCavPoints = set()
       for cavPointList in cavPoints:
         allCavPoints.update(cavPointList)
     realMins = grid[0][0][0][1:4]
-    for point in pointXYZ: #assuming no cavities
-      ptIndex,ptXYZ = int(point[0]), point[1:4] 
+    for point in pointXYZ:  # assuming no cavities
+      ptIndex, ptXYZ = int(point[0]), point[1:4]
       self.surfaceNodes.append(ptIndex)
       self.nodeXyz[ptIndex] = ptXYZ
       self.nodeOffGridXyz[ptIndex] = ptXYZ
@@ -172,35 +185,36 @@ class mesh(object):
       self.nodeNeighbors[ptIndex] = []
       if cavPoints and ptIndex in allCavPoints:
         self.nodeClass[ptIndex] = 5
-      maxDir,maxDist = -1, -1.
-      for direction in range(3):#find axis it is on
-        distance = (ptXYZ[direction]-realMins[direction]) 
-        distance = distance % gridSize #now between 0 and gridsize
-        distance = distance / gridSize #now between 0 and 1
+      maxDir, maxDist = -1, -1.
+      for direction in xrange(3):  # find axis it is on
+        distance = (ptXYZ[direction] - realMins[direction])
+        distance = distance % gridSize  # now between 0 and gridsize
+        distance = distance / gridSize  # now between 0 and 1
         if distance > 0.5:
-          distance = 1. - distance 
+          distance = 1. - distance
         if distance > maxDist:
-          maxDir, maxDist = direction,distance
-      gridIndices = [],[]
+          maxDir, maxDist = direction, distance
+      gridIndices = [], []
       for direction in range(3):
         if direction == maxDir:
-          gridIndices[0].append(int(math.floor( \
-                    (ptXYZ[direction]-realMins[direction]) / gridSize)))
-          gridIndices[1].append(int(math.ceil( \
-                    (ptXYZ[direction]-realMins[direction]) / gridSize)))
+          gridIndices[0].append(int(math.floor(
+              (ptXYZ[direction] - realMins[direction]) / gridSize)))
+          gridIndices[1].append(int(math.ceil(
+              (ptXYZ[direction] - realMins[direction]) / gridSize)))
         else:
           for gridIndex in range(2):
-            gridIndices[gridIndex].append(int(round( \
-                    (ptXYZ[direction]-realMins[direction]) / gridSize)))
+            gridIndices[gridIndex].append(int(round(
+                (ptXYZ[direction] - realMins[direction]) / gridSize)))
       newGridIndices = []
-      for gridIndex in range(2): #convert to tuple not list
+      for gridIndex in range(2):  # convert to tuple not list
         newGridIndices.append(tuple(gridIndices[gridIndex]))
       for gridIndex in newGridIndices:
-        gridPoint = grid[gridIndex[0]][gridIndex[1]][gridIndex[2]][1:4]      
+        gridPoint = grid[gridIndex[0]][gridIndex[1]][gridIndex[2]][1:4]
         distanceBetween = geometry.distL2(gridPoint, ptXYZ)
         #connect the surface nodes to the grid nodes and back
         self.connectNeighbors(ptIndex, gridIndex, distanceBetween)
-        if self.nodeClass[gridIndex] == 0 or self.nodeClass[gridIndex] == 2: #outside or between
+        if self.nodeClass[gridIndex] == 0 or self.nodeClass[gridIndex] == 2:
+          #outside or between
           dirVector = list(self.nodeXyz[gridIndex])
           offGridXYZ = []
           for coord in range(len(dirVector)):
@@ -208,27 +222,27 @@ class mesh(object):
             dirVector[coord] *= .1
             offGridXYZ.append(self.nodeXyz[ptIndex][coord] + dirVector[coord])
           #print self.gridNodes[gridIndex].xyz, curSurfNode.xyz, offGridXYZ
-          self.nodeOffGridXyz[ptIndex] = tuple(offGridXYZ) #gets set here
+          self.nodeOffGridXyz[ptIndex] = tuple(offGridXYZ)  # gets set here
 
   def connectNeighbors(self, node1, node2, distanceBetween):
     '''helper method to connect 2 nodes'''
     self.connectNeighbor(node1, node2, distanceBetween)
-    self.connectNeighbor(node2, node1, distanceBetween) #reverse
-  
+    self.connectNeighbor(node2, node1, distanceBetween)  # reverse
+
   def connectNeighbor(self, node1, node2, distanceBetween):
     '''only does 1 way connection from 1 to 2'''
     if node1 not in self.nodeNeighbors:
-      self.nodeNeighbors[node1] = [] #init list
+      self.nodeNeighbors[node1] = []  # init list
     if (node2, distanceBetween) not in self.nodeNeighbors[node1]:
       self.nodeNeighbors[node1].append((node2, distanceBetween))
 
   def surfNodeConnect(self, pointXYZ, pointNeighbor):
     '''now connect up all the surface nodes, check for errors'''
-    gridErrors,listBadPairs,badNodesSet = False,[],set()
-    for point in pointXYZ: #assuming no cavities
-      ptIndex,ptXYZ = int(point[0]), tuple(point[1:4])
+    gridErrors, listBadPairs, badNodesSet = False, [], set()
+    for point in pointXYZ:  # assuming no cavities
+      ptIndex, ptXYZ = int(point[0]), tuple(point[1:4])
       neighbors = []
-      for neighbor,neighDist in self.nodeNeighbors[ptIndex]:
+      for neighbor, neighDist in self.nodeNeighbors[ptIndex]:
         neighbors.append(neighbor)
       if self.nodeClass[neighbors[0]] == self.nodeClass[neighbors[1]]:
         gridErrors = True
@@ -238,46 +252,48 @@ class mesh(object):
       #now connect surface nodes to each other
       for otherPoint in pointNeighbor[ptIndex-1][2:]:
         otherXYZ = pointXYZ[otherPoint-1][1:4]
-        self.connectNeighbor(otherPoint, ptIndex, \
-                              geometry.distL2(ptXYZ, otherXYZ))
-    return gridErrors, listBadPairs, badNodesSet 
+        self.connectNeighbor(
+            otherPoint, ptIndex, geometry.distL2(ptXYZ, otherXYZ))
+    return gridErrors, listBadPairs, badNodesSet
 
   def gridNodeConnect(self, grid):
     '''now connect the gridNodes, go through each box..'''
-    lenX,lenY,lenZ = len(grid),len(grid[0]),len(grid[0][0]) 
-    for indexX in xrange(lenX-1): #don't do last one
-      for indexY in xrange(lenY-1):
-        for indexZ  in xrange(lenZ-1):
-          indices = (indexX,indexY,indexZ) #this is the reference back into grid
+    lenX, lenY, lenZ = len(grid), len(grid[0]), len(grid[0][0])
+    for indexX in xrange(lenX - 1):  # don't do last one
+      for indexY in xrange(lenY - 1):
+        for indexZ in xrange(lenZ - 1):
+          indices = (indexX, indexY, indexZ)
+          #indices is the reference back into grid
           boxStruct = returnBoxStructure(indices)
-          unionCenters = unionFind() #initialize
+          unionCenters = unionfind2.unionFind()  # initialize
           for oneCenter in boxStruct.keys():
             for otherCenter in boxStruct[oneCenter]:
-              if self.nodeClass[oneCenter] == 1: #oneNode.isInside():
-                if self.nodeClass[otherCenter] == 1: #otherNode.isInside():
+              if self.nodeClass[oneCenter] == 1:  # oneNode.isInside():
+                if self.nodeClass[otherCenter] == 1:  # otherNode.isInside():
                   unionCenters.union(oneCenter, otherCenter)
-              elif self.nodeClass[oneCenter] in [0,2]: #isOutsideOrBetween()
-                if self.nodeClass[otherCenter] in [0,2]: #isOutsideOrBetween
+              elif self.nodeClass[oneCenter] in [0, 2]:  # isOutsideOrBetween()
+                if self.nodeClass[otherCenter] in [0, 2]:  # isOutsideOrBetween
                   unionCenters.union(oneCenter, otherCenter)
           unionCenterLists = unionCenters.toLists()
-          for oneSet in unionCenterLists: #connect all within each set
+          for oneSet in unionCenterLists:  # connect all within each set
             for indexOne, nodeOne in enumerate(oneSet):
-              gridPtOne = grid[nodeOne[0]][nodeOne[1]][nodeOne[2]][1:4] 
+              gridPtOne = grid[nodeOne[0]][nodeOne[1]][nodeOne[2]][1:4]
               for indexTwo, nodeTwo in enumerate(oneSet):
                 if indexOne < indexTwo:
-                  gridPtTwo = grid[nodeTwo[0]][nodeTwo[1]][nodeTwo[2]][1:4] 
+                  gridPtTwo = grid[nodeTwo[0]][nodeTwo[1]][nodeTwo[2]][1:4]
                   #have to add grid neighbors
-                  distBetween = geometry.distL2(gridPtOne,gridPtTwo)
+                  distBetween = geometry.distL2(gridPtOne, gridPtTwo)
                   self.connectNeighbors(nodeOne, nodeTwo, distBetween)
 
   def addCavityEdges(self, cavPtLists):
     '''adds cavity edges which are the shortest travel in distance from one pt
     in each cavity to the surface.'''
     travelInName = "travelinforcavities"
-    self.calculateTravelDistance(travelInName, [3], [1,2,5]) #necessary for cavs
+    self.calculateTravelDistance(travelInName, [3], [1, 2, 5])
+    #necessary for cavities
     for cavPtList in cavPtLists:
-      minEnd,minStart,minDist = False,False,100.**100. #huge number 
-      for aPt in cavPtList: #now go through whole set, find min
+      minEnd, minStart, minDist = False, False, 100.**100.  # huge number
+      for aPt in cavPtList:  # now go through whole set, find min
         traceSurfNodes = self.getFinalTracebackSet(set([aPt]), travelInName)
         for traceSurfNode in traceSurfNodes:
           travDist = self.nodeDist[aPt][travelInName]
@@ -285,11 +301,11 @@ class mesh(object):
             minDist = travDist
             minStart = traceSurfNode
             minEnd = aPt
-      #print "new cavity edge",minEnd,minStart,minDist #debugging
+      #print "new cavity edge", minEnd, minStart, minDist  # debugging
       #add edges between the 2 surface nodes minEnd and minStart
       self.connectNeighbors(minEnd, minStart, minDist)
     #should delete travelInName stuff now, save memory
-    del self.tracebacks[travelInName] 
+    del self.tracebacks[travelInName]
     for aNode in self.gridNodes + self.surfaceNodes:
       if travelInName in self.nodeDist[aNode]:
         del self.nodeDist[aNode][travelInName]
@@ -307,62 +323,66 @@ class mesh(object):
       outputList.append(tempList)
     return outputList
 
-  def calcTravelDistPair(self, validCodes, initialNode, endingNode, \
-                         startDist=0, endMaxDist=False, limitSet=False):
-    '''calculates the distance between 2 nodes, honoring validCodes, limitSet, 
+  def calcTravelDistPair(
+      self, validCodes, initialNode, endingNode,
+      startDist=0, endMaxDist=False, limitSet=False):
+    '''calculates the distance between 2 nodes, honoring validCodes, limitSet,
     endMaxDist and startDist, but no other options. Deletes distance dict after
     finding the distance, also doesn't compute the tracebacks at all'''
-    name = str(validCodes) + str(initialNode) #temporary name
-    self.calculateTravelDistance(name, validCodes, validCodes, \
-               startDist=startDist, endMaxDist=endMaxDist, \
-               limitSet=limitSet, initialNodes=[initialNode], \
-               endingNodes=[endingNode], doTracebacks=False)
+    name = str(validCodes) + str(initialNode)  # temporary name
+    self.calculateTravelDistance(
+        name, validCodes, validCodes, startDist=startDist,
+        endMaxDist=endMaxDist, limitSet=limitSet, initialNodes=[initialNode],
+        endingNodes=[endingNode], doTracebacks=False)
     returnDist = self.nodeDist[endingNode][name]
     if name in self.tracebacks:
-      del self.tracebacks[name] #don't delete if doesn't exist
+      del self.tracebacks[name]  # don't delete if doesn't exist
     for aNode in self.gridNodes + self.surfaceNodes:
       if name in self.nodeDist[aNode]:
         del self.nodeDist[aNode][name]
     return returnDist
 
-  def calcTravelDistPairLists(self, validCodes, initialNodes, endingNodes, \
-                         startDist=0, endMaxDist=False, limitSet=False):
+  def calcTravelDistPairLists(
+      self, validCodes, initialNodes, endingNodes,
+      startDist=0, endMaxDist=False, limitSet=False):
     '''calculates the distance between 2 lists of nodes, honoring validCodes,
-    limitSet, endMaxDist and startDist, but no other options. 
+    limitSet, endMaxDist and startDist, but no other options.
     Deletes distance dict after
     finding the distance, also doesn't compute the tracebacks at all'''
-    name = str(validCodes) + str(initialNodes) + str(endingNodes)#temporary name
-    returnDist = self.calculateTravelDistance(name, validCodes, validCodes, \
-                 startDist=startDist, endMaxDist=endMaxDist, \
-                 limitSet=limitSet, initialNodes=initialNodes, \
-                 endingNodes=endingNodes, doTracebacks=False)
+    name = str(validCodes) + str(initialNodes) + str(endingNodes)
+    #temporary name
+    returnDist = self.calculateTravelDistance(
+        name, validCodes, validCodes, startDist=startDist,
+        endMaxDist=endMaxDist, limitSet=limitSet, initialNodes=initialNodes,
+        endingNodes=endingNodes, doTracebacks=False)
     if name in self.tracebacks:
-      del self.tracebacks[name] #don't delete if doesn't exist
+      del self.tracebacks[name]  # don't delete if doesn't exist
     for aNode in self.gridNodes + self.surfaceNodes:
       if name in self.nodeDist[aNode]:
         del self.nodeDist[aNode][name]
     return returnDist
 
-  def calcTravelDistOneToMany(self, validCodes, initialNodes, endingNodesList, \
-                         startDist=0, endMaxDist=False, limitSet=False):
+  def calcTravelDistOneToMany(
+      self, validCodes, initialNodes, endingNodesList,
+      startDist=0, endMaxDist=False, limitSet=False):
     '''calculates the distance between from a list of nodes to many other lists
     of nodes, honoring validCodes,
-    limitSet, endMaxDist and startDist, but no other options. 
+    limitSet, endMaxDist and startDist, but no other options.
     Deletes distance dict after
     finding the distance, also doesn't compute the tracebacks at all'''
-    name = str(validCodes) + str(initialNodes) #temporary name
-    self.calculateTravelDistance(name, validCodes, validCodes, \
-                 startDist=startDist, endMaxDist=endMaxDist, \
-                 limitSet=limitSet, initialNodes=initialNodes, \
-                 doTracebacks=False)
+    name = str(validCodes) + str(initialNodes)  # temporary name
+    self.calculateTravelDistance(
+        name, validCodes, validCodes, startDist=startDist,
+        endMaxDist=endMaxDist, limitSet=limitSet, initialNodes=initialNodes,
+        doTracebacks=False)
     if name in self.tracebacks:
-      del self.tracebacks[name] #don't delete if doesn't exist
+      del self.tracebacks[name]  # don't delete if doesn't exist
     nodesListDist = {}
     for endingNodes in endingNodesList:
       shortestDist = 10000000000.
       for aNode in endingNodes:
-        if name in self.nodeDist[aNode] and  \
-                          self.nodeDist[aNode][name] < shortestDist:
+        if name in self.nodeDist[aNode] and \
+            self.nodeDist[aNode][name] < shortestDist:
           shortestDist = self.nodeDist[aNode][name]
       nodesListDist[endingNodes] = shortestDist
     for aNode in self.gridNodes + self.surfaceNodes:
@@ -370,187 +390,192 @@ class mesh(object):
         del self.nodeDist[aNode][name]
     return nodesListDist
 
-  def calculateCircularPatch(self, validCodes, initialNode, startDist=0, \
-                             endMaxArea=False, limitSet=False):
-    '''calculates the distance from a node, honoring validCodes, limitSet, 
-    endMaxDist and startDist, but no other options. returns the circular 
+  def calculateCircularPatch(
+      self, validCodes, initialNode, startDist=0,
+      endMaxArea=False, limitSet=False):
+    '''calculates the distance from a node, honoring validCodes, limitSet,
+    endMaxDist and startDist, but no other options. returns the circular
     or spherical patch constructed. doesn't do tracebacks.'''
-    name = str(validCodes) + str(initialNode) #temp name
-    self.calculateTravelDistance(name, validCodes, validCodes, \
-               startDist=startDist, endMaxArea=endMaxArea, \
-               limitSet=limitSet, initialNodes=[initialNode], \
-               doTracebacks=False)
+    name = str(validCodes) + str(initialNode)  # temp name
+    self.calculateTravelDistance(
+        name, validCodes, validCodes, startDist=startDist,
+        endMaxArea=endMaxArea, limitSet=limitSet, initialNodes=[initialNode],
+        doTracebacks=False)
     patch = self.getOrder(name)
     surfAreaList = self.getSurfaceAreaCumulative(patch)
     return patch, surfAreaList
 
-  def growCircularPatch(self, validCodes, initialNode, validFunc, \
-                        startDist=0, endMaxArea=False, limitSet=False):
+  def growCircularPatch(
+      self, validCodes, initialNode, validFunc,
+      startDist=0, endMaxArea=False, limitSet=False):
     '''grows a circular patch that meets the requirements of the valid function,
     returns the patch and the area'''
-    name = str(validCodes) + str(initialNode) #temporary name
-    self.calculateTravelDistance(name, validCodes, validCodes, \
-               startDist=startDist, endMaxArea=endMaxArea, \
-               limitSet=limitSet, initialNodes=[initialNode], \
-               doTracebacks=False, \
-               newNodeTest=validFunc)
+    name = str(validCodes) + str(initialNode)  # temporary name
+    self.calculateTravelDistance(
+        name, validCodes, validCodes, startDist=startDist,
+        endMaxArea=endMaxArea, limitSet=limitSet, initialNodes=[initialNode],
+        doTracebacks=False, newNodeTest=validFunc)
     patch = self.getOrder(name)
     surfArea = self.getSurfaceArea(patch)
     return patch, surfArea
 
-  def growSphericalVolume(self, validCodes, initialNode,  \
-                        startDist=0, endMaxVol=False, limitSet=False):
+  def growSphericalVolume(
+      self, validCodes, initialNode, startDist=0, endMaxVol=False,
+      limitSet=False):
     '''grows a spherical volume where each node
-    can be inside or outside or between based on the valid 
+    can be inside or outside or between based on the valid
     codes parameter and the limitSet if desired. endmaxvol is when to quit'''
-    name = str(validCodes) + str(initialNode) #temporary name
-    self.calculateTravelDistance(name, validCodes, validCodes, \
-               startDist=startDist, endMaxVol=endMaxVol, \
-               limitSet=limitSet, initialNodes=[initialNode], \
-               doTracebacks=False)
+    name = str(validCodes) + str(initialNode)  # temporary name
+    self.calculateTravelDistance(
+        name, validCodes, validCodes, startDist=startDist, endMaxVol=endMaxVol,
+        limitSet=limitSet, initialNodes=[initialNode], doTracebacks=False)
     patch = self.getOrder(name)
     vol = self.getVolume(patch)
     return patch, vol
-  
-  def groupByTracebacks(self, validCodes, initialNodes, \
-                        startDist=0, limitSet=False):
+
+  def groupByTracebacks(
+      self, validCodes, initialNodes, startDist=0, limitSet=False):
     '''method to grow from a set of initial nodes, then group all points into
     groups based on which initial node they trace back to'''
-    name = str(initialNodes) #any name will do
-    #does travel out from just the initialNodes, not all surface nodes. 
-    self.calculateTravelDistance(name, validCodes, validCodes, \
-          initialNodes=initialNodes, startDist=startDist, limitSet=limitSet, \
-          doTracebacks=True)
+    name = str(initialNodes)   # any name will do
+    #does travel out from just the initialNodes, not all surface nodes.
+    self.calculateTravelDistance(
+        name, validCodes, validCodes, initialNodes=initialNodes,
+        startDist=startDist, limitSet=limitSet, doTracebacks=True)
     #now calculation done, for each node, find the init node it traces back to
     groupDict = {}
     for startNode in initialNodes:
       groupDict[startNode] = []
     for aNode in self.gridNodes + self.surfaceNodes:
       if (self.nodeClass[aNode] in validCodes) and \
-                    (not limitSet or aNode in limitSet): #takes care of limitset
+          (not limitSet or aNode in limitSet):  # takes care of limitset
         #now check to see what it traces back to
         startingNodes = self.getFinalTracebackSet(set([aNode]), name)
-        for startNode in startingNodes: #shouldn't be many duplicates
+        for startNode in startingNodes:  # shouldn't be many duplicates
           groupDict[startNode].append(aNode)
     for startNode in initialNodes:
-      groupDict[startNode] = tuple(groupDict[startNode]) #tuples are hashable
+      groupDict[startNode] = tuple(groupDict[startNode])  # tuples are hashable
     return groupDict
 
-  def calculateTravelDistance(self, name, initializationCodes, validCodes, \
-                              startDist=0, endMaxDist=False, limitSet=False, \
-                              initialNodes=None, endingNodes=None, \
-                              doTracebacks=True, endMaxArea=False, \
-                              endMaxVol=False, \
-                              newNodeTest=lambda node: True):
+  def calculateTravelDistance(
+      self, name, initializationCodes, validCodes, startDist=0,
+      endMaxDist=False, limitSet=False, initialNodes=None, endingNodes=None,
+      doTracebacks=True, endMaxArea=False, endMaxVol=False,
+      newNodeTest=lambda node: True):
     '''does all the work of travel distance calculations for any algorithm
     codes are outside(CH)=0, inside(MS)=1, between(CH+MS)=2, surf=3, cavsurf=5
     returns (and saves) traceback, other data left in nodes,
     restricts computation to nodes in the limitSet if it exists.
-    if intialNodes and endingNodes are present, they are used, 
+    if intialNodes and endingNodes are present, they are used,
     and initCodes ignored. endingnodes just waits to find 1, not all.
     doTracebacks is boolean, either keep track of them or don't (save time).
-    newNodeTest is a function that should take a node, and return true if 
+    newNodeTest is a function that should take a node, and return true if
     it is okay to continue or false if the travel distance calculation should
     stop, and if it is false then it does stop. default is always true.
     '''
-    currentNodes = priorityDictionary() #holds data on nodes left to process
+    currentNodes = priodict.priorityDictionary()
+    #currentNodes holds data on nodes left to process
     if doTracebacks:
-      history = {} #keyed on (node,dist) pairs, goes to prevBox
-      self.tracebacks[name] = {} #assembled during run, keys on ending grid point, points back to list of direct ancestors
-    if initialNodes is not None: #i want to type if initialNodes are not None...
+      history = {}  # keyed on (node, dist) pairs, goes to prevBox
+      self.tracebacks[name] = {}
+      #tracebacks assembled during run, keys on ending grid point,
+      # points back to list of direct ancestors
+    if initialNodes is not None:  # i want to type if initialNodes are not None
       for initialNode in initialNodes:
         if newNodeTest(initialNode):
           self.nodeDist[initialNode][name] = startDist
           currentNodes[initialNode] = startDist
-    else: #initialize distance dictionary for this name for each node
+    else:  # initialize distance dictionary for this name for each node
       for aNode in self.gridNodes + self.surfaceNodes:
         if (self.nodeClass[aNode] in initializationCodes) and \
-                    (not limitSet or aNode in limitSet): #takes care of limitset
+            (not limitSet or aNode in limitSet):  # takes care of limitset
             if newNodeTest(aNode):
               self.nodeDist[aNode][name] = startDist
               actuallyInit = False
-              for neighNode,neighDist in self.nodeNeighbors[aNode]:
+              for neighNode, neighDist in self.nodeNeighbors[aNode]:
                 if self.nodeClass[neighNode] in validCodes:
                   actuallyInit = True
                   break
-              if actuallyInit: #this way heap is not overloaded...
+              if actuallyInit:  # this way heap is not overloaded...
                 currentNodes[aNode] = startDist
     lastTravelDistance = startDist
-    lastTravelArea = 0. #initialize but isn't updated unless needed
-    lastTravelVol = 0. #same as area, init now, not updated unless needed
+    lastTravelArea = 0.  # initialize but isn't updated unless needed
+    lastTravelVol = 0.  # same as area, init now, not updated unless needed
     #initialization steps over
     while (not endMaxDist or endMaxDist >= lastTravelDistance) and \
-          (not endMaxArea or endMaxArea >= lastTravelArea) and \
-          (not endMaxVol or endMaxVol >= lastTravelVol) and \
-          len(currentNodes) > 0: #this is the main loop
+        (not endMaxArea or endMaxArea >= lastTravelArea) and \
+        (not endMaxVol or endMaxVol >= lastTravelVol) and \
+        len(currentNodes) > 0:  # this is the main loop
       currentNode = currentNodes.smallest()
       if not newNodeTest(currentNode):
-        break #stop calculation now, this node is bad (for some reason)
+        break  # stop calculation now, this node is bad (for some reason)
       lastTravelDistance = currentNodes.pop(currentNodes.smallest())
-      if endMaxArea: #keeping track of the area as a stopping criterion
+      if endMaxArea:  # keeping track of the area as a stopping criterion
         lastTravelArea += self.nodeSurfArea[currentNode]
-      if endMaxVol: #keeping track of the area as a stopping criterion
+      if endMaxVol:  # keeping track of the area as a stopping criterion
         lastTravelVol += self.nodeVol[currentNode]
       if name not in self.nodeDist[currentNode] or \
-             self.nodeDist[currentNode][name] >= lastTravelDistance:
+          self.nodeDist[currentNode][name] >= lastTravelDistance:
         #update the dist, add neighbors to heap
         self.nodeDist[currentNode][name] = lastTravelDistance
         if doTracebacks:
-          prevNodeList = history.pop((currentNode, lastTravelDistance), False) 
+          prevNodeList = history.pop((currentNode, lastTravelDistance), False)
           if prevNodeList and len(prevNodeList) > 0:
-            self.tracebacks[name][currentNode] = \
-                                   [prevNodeList,currentNode,lastTravelDistance]
+            self.tracebacks[name][currentNode] = [
+                prevNodeList, currentNode, lastTravelDistance]
         if endingNodes is not None and currentNode in endingNodes:
-          break #stop calculation now, found one of the ending nodes
-        for neighborNode,nbDist in self.nodeNeighbors[currentNode]:
+          break  # stop calculation now, found one of the ending nodes
+        for neighborNode, nbDist in self.nodeNeighbors[currentNode]:
           if self.nodeClass[neighborNode] in validCodes and \
-                              name not in self.nodeDist[neighborNode]:
+              name not in self.nodeDist[neighborNode]:
             if not limitSet or neighborNode in limitSet:
               newDist = lastTravelDistance + nbDist
               if neighborNode not in currentNodes or \
-                     newDist <= currentNodes[neighborNode]:
-                  currentNodes[neighborNode] = newDist #updates prio dict
-                  if doTracebacks:
-                    prevNodeList = history.get((neighborNode, newDist), []) #old
-                    prevNodeList.append(currentNode)  #now add to it
-                    history[(neighborNode, newDist)] = prevNodeList #now update 
+                  newDist <= currentNodes[neighborNode]:
+                currentNodes[neighborNode] = newDist  # updates prio dict
+                if doTracebacks:
+                  prevNodeList = history.get((neighborNode, newDist), [])  # old
+                  prevNodeList.append(currentNode)  # now add to it
+                  history[(neighborNode, newDist)] = prevNodeList  # now update
     #print lastTravelDistance
     return lastTravelDistance
 
-  def clusterNodesByFunction(self,  validCodes, limitSet=False, 
-                              nodeTest=lambda node: True):
+  def clusterNodesByFunction(
+      self,  validCodes, limitSet=False, nodeTest=lambda node: True):
     '''clusters all validnodes together based on the nodeTest function
     codes are outside(CH)=0, inside(MS)=1, between(CH+MS)=2, surf=3
     restricts computation to nodes in the limitSet if it exists.
-    if 2 nodes pass the nodeTest function and are neighbors then they are 
+    if 2 nodes pass the nodeTest function and are neighbors then they are
     joined together. the clusters are returned. this is for growphobic2'''
-    currentNodes = set() #holds data on nodes left to process
-    nodeClusters  = unionFind() #initialize structure
+    currentNodes = set()  # holds data on nodes left to process
+    nodeClusters = unionfind2.unionFind()  # initialize structure
     for aNode in self.gridNodes + self.surfaceNodes:
       if (self.nodeClass[aNode] in validCodes) and \
-                  (not limitSet or aNode in limitSet): #takes care of limitset
-          if nodeTest(aNode):
-            currentNodes.add(aNode) #list to process later
-            nodeClusters.find(aNode) #make each its own set for now
+          (not limitSet or aNode in limitSet):  # takes care of limitset
+        if nodeTest(aNode):
+          currentNodes.add(aNode)  # list to process later
+          nodeClusters.find(aNode)  # make each its own set for now
     #initialization steps over
-    while len(currentNodes) > 0: #this is the main loop
-      currentNode = currentNodes.pop() #already been checked by nodeTest
-      for neighborNode,nbDist in self.nodeNeighbors[currentNode]:
-        if self.nodeClass[neighborNode] in validCodes: #complicated logic 
+    while len(currentNodes) > 0:  # this is the main loop
+      currentNode = currentNodes.pop()  # already been checked by nodeTest
+      for neighborNode, nbDist in self.nodeNeighbors[currentNode]:
+        if self.nodeClass[neighborNode] in validCodes:  # complicated logic
           if not limitSet or neighborNode in limitSet:
             if nodeTest(neighborNode):
-              nodeClusters.union(currentNode, neighborNode) #join
+              nodeClusters.union(currentNode, neighborNode)  # join
     #it is really that simple
-    return nodeClusters 
+    return nodeClusters
 
   def getOrder(self, name):
     '''gets the order in which nodes were found according to the distance'''
     unorderedList = []
     for aNode in self.gridNodes + self.surfaceNodes:
-      if name in self.nodeDist[aNode] and self.nodeDist[aNode][name]: #exists and notfalse
+      if name in self.nodeDist[aNode] and self.nodeDist[aNode][name]:
+        #exists and notfalse
         unorderedList.append(aNode)
-    unorderedList.sort(lambda x,y: cmp(self.nodeDist[x][name], self.nodeDist[y][name]))
-    return unorderedList #now actually ordered
+    unorderedList.sort(
+        lambda x, y: cmp(self.nodeDist[x][name], self.nodeDist[y][name]))
+    return unorderedList  # now actually ordered
 
   def getMaxName(self, name, iterableNodes):
     '''gets the max distance metric defined by name on iterablenodes'''
@@ -579,25 +604,25 @@ class mesh(object):
         if self.nodeTag[aNode] > 0:
           mouths.add(aNode)
     #return mouths #debug finding code
-    mouthSets = unionFind() #initialize
+    mouthSets = unionfind2.unionFind()  # initialize
     for aNode in mouths:
-      for neighborNode,neighDist in self.nodeNeighbors[aNode]:
+      for neighborNode, neighDist in self.nodeNeighbors[aNode]:
         if neighborNode in mouths:
           mouthSets.union(aNode, neighborNode)
     mouthLists = mouthSets.toLists()
     #want to sort by length so biggest is first
-    mouthLists.sort(lambda x,y: cmp(len(x), len(y)))   
+    mouthLists.sort(lambda x, y: cmp(len(x), len(y)))
     mouthLists.reverse()
     return mouthLists
 
   def getMaxDimension(self, iterableNodes, notJustSurface=False):
     '''finds the max difference in each orthogonal dimension. returns max.
     this is linear not quadratic, and always a under-approximation'''
-    mins = [100000.,100000.,100000.]
-    maxs = [-100000.,-100000.,-100000.]
+    mins = [100000., 100000., 100000.]
+    maxs = [-100000., -100000., -100000.]
     for aNode in iterableNodes:
-      if 3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode] \
-                                    or notJustSurface: #is surface
+      if 3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode] or \
+          notJustSurface:  # is surface
         xyz = self.nodeXyz[aNode]
         for direction in xrange(3):
           if xyz[direction] < mins[direction]:
@@ -605,44 +630,44 @@ class mesh(object):
           if xyz[direction] > maxs[direction]:
             maxs[direction] = xyz[direction]
     bestDist = 0.
-    for direction in xrange(3): 
+    for direction in xrange(3):
       if maxs[direction]-mins[direction] > bestDist:
         bestDist = maxs[direction]-mins[direction]
     return bestDist
 
   def getFarthestDistance(self, iterableNodes, notJustSurface=False):
-    '''looks at all pairs, finds the largest distance, using brute force, 
+    '''looks at all pairs, finds the largest distance, using brute force,
     which appears to be faster than hard to implement sub-quadratic solutions.
     also made it only consider surface nodes since it was too slow.
     falls back to max dimension if points > 100'''
-    if useNumeric: #can do good estimate using PCA
+    if useNumeric:  # can do good estimate using PCA
       pointList = []
       for aNode in iterableNodes:
-        if 3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode] \
-                                      or notJustSurface: #is surface/don't care
+        if 3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode] or \
+            notJustSurface:  # is surface/don't care
           pointList.append(self.nodeXyz[aNode])
       if len(pointList) > 0:
-        pcaLong = pca.findLongestDimension(pointList) #must be list
+        pcaLong = pca.findLongestDimension(pointList)  # must be list
         return pcaLong
       else:
         return 0.
     else:
-      if len(iterableNodes) > 20: #do linear estimate
+      if len(iterableNodes) > 20:  # do linear estimate
         return self.getMaxDimension(iterableNodes, notJustSurface)
       bestDist = 0.
-      for aCount,aNode in enumerate(iterableNodes):
-        if 3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode] \
-                                      or notJustSurface: #is surface
-          for bCount,bNode in enumerate(iterableNodes):
+      for aCount, aNode in enumerate(iterableNodes):
+        if 3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode] or \
+            notJustSurface:  # is surface
+          for bCount, bNode in enumerate(iterableNodes):
             if aCount > bCount:
-              if 3 == self.nodeClass[bNode] or 5 == self.nodeClass[bNode] \
-                                            or notJustSurface: #is inside
-                newDistSq = geometry.distL2Squared( \
-                                        self.nodeXyz[aNode],self.nodeXyz[bNode])
+              if 3 == self.nodeClass[bNode] or 5 == self.nodeClass[bNode] or \
+                  notJustSurface:  # is inside
+                newDistSq = geometry.distL2Squared(
+                    self.nodeXyz[aNode], self.nodeXyz[bNode])
                 if newDistSq > bestDist:
                   bestDist = newDistSq
             elif aCount <= bCount:
-              break #no need to compare every pair twice
+              break  # no need to compare every pair twice
       return math.sqrt(bestDist)
 
   def getVolume(self, iterableNodes):
@@ -660,25 +685,25 @@ class mesh(object):
         if self.nodeHydro[aNode] == 0:
           surfArea += self.nodeSurfArea[aNode]
       except KeyError:
-        pass #this is if you pass in non-surface nodes, which could happen
+        pass  # this is if you pass in non-surface nodes, which could happen
     return surfArea
 
   def getCurvatures(self, iterableSurfaceNodes):
     '''gets the mean curvature and the absolute mean curvature (roughness)'''
-    curvs, absCurvs = [],[]
+    curvs, absCurvs = [], []
     for aNode in iterableSurfaceNodes:
       if aNode in self.nodeCurv:
-        curv =  self.nodeCurv[aNode]
+        curv = self.nodeCurv[aNode]
         curvs.append(curv)
         absCurvs.append(abs(curv))
-    return statistics.computeAverage(curvs), statistics.computeAverage(absCurvs)
+    return statistics.computeMean(curvs), statistics.computeMean(absCurvs)
 
   def getHydroSurfaceAreas(self, iterableSurfaceNodes):
     '''gets the surface area of each kind of surface point (neg, apolar, pos)'''
-    surfAreas = [0.,0.,0.] #-1, 0, +1
+    surfAreas = [0., 0., 0.]  # -1, 0, +1 charge
     for aNode in iterableSurfaceNodes:
       if aNode in self.nodeHydro:
-        for index, type in enumerate([-1,0,1]):
+        for index, type in enumerate([-1, 0, 1]):
           if self.nodeHydro[aNode] == type:
             surfAreas[index] += self.nodeSurfArea[aNode]
     return surfAreas
@@ -693,7 +718,7 @@ class mesh(object):
 
   def getSurfaceAreaCumulative(self, iterableSurfaceNodes):
     '''gets the surface area of a set of surface nodes, returns cumulat list'''
-    surfArea,surfList = 0.,[]
+    surfArea, surfList = 0., []
     for aNode in iterableSurfaceNodes:
       surfArea += self.nodeSurfArea[aNode]
       surfList.append(surfArea)
@@ -701,8 +726,8 @@ class mesh(object):
 
   def setSurfaceArea(self, triPointList):
     self.nodeSurfArea = {}
-    for aNode in self.surfaceNodes: #initialize to 0
-      self.nodeSurfArea[aNode] = 0. 
+    for aNode in self.surfaceNodes:  # initialize to 0
+      self.nodeSurfArea[aNode] = 0.
     for triangle in triPointList:
       points = triangle[1:]
       xyzs = []
@@ -710,16 +735,16 @@ class mesh(object):
         xyzs.append(self.nodeXyz[point])
       triArea = geometry.calcTriAreaList(xyzs)
       for point in points:
-        self.nodeSurfArea[point] += (triArea/3.) #increment by 1/3rd of tri
+        self.nodeSurfArea[point] += (triArea/3.)  # increment by 1/3rd of tri
 
   def setVolume(self, gridSize):
-    '''sets the volume by simple method where any mesh vertex gets the volume 
+    '''sets the volume by simple method where any mesh vertex gets the volume
     of the cube and any surface node gets 0 volume. not perfect but good enough
     for a first pass'''
     self.nodeVol = {}
-    for aNode in self.surfaceNodes: #set all these to 0
-      self.nodeVol[aNode] = 0. 
-    for aNode in self.gridNodes: #set all these to the volume of a cube
+    for aNode in self.surfaceNodes:  # set all these to 0
+      self.nodeVol[aNode] = 0.
+    for aNode in self.gridNodes:  # set all these to the volume of a cube
       self.nodeVol[aNode] = gridSize**3.0
 
   def getSurfaceTravelDistance(self, name):
@@ -736,15 +761,16 @@ class mesh(object):
     '''copies the travel distance into new grid, doesn't modify passed grid,
     sets grids from False to defaultValue'''
     newGrid = []
-    for indexX,rowX in enumerate(grid):
+    for indexX, rowX in enumerate(grid):
       newX = []
-      for indexY,rowY in enumerate(rowX):
+      for indexY, rowY in enumerate(rowX):
         newY = []
-        for indexZ,entryZ in enumerate(rowY):
-          indices = (indexX,indexY,indexZ) #this is the reference back into grid
+        for indexZ, entryZ in enumerate(rowY):
+          indices = (indexX, indexY, indexZ)
+          #indicies is the reference back into grid
           if name in self.nodeDist[indices]:
             newZ = self.nodeDist[indices][name]
-            if not newZ: #means there is no distance in the dictionary
+            if not newZ:  # means there is no distance in the dictionary
               newZ = defaultValue
           else:
             newZ = defaultValue
@@ -754,14 +780,15 @@ class mesh(object):
     return newGrid
 
   def getAtomNumbers(self, nodes, pointAtomList):
-    '''for each node, if it is surface, find the atoms nearby, 
+    '''for each node, if it is surface, find the atoms nearby,
     return line numss'''
     numbers = []
     for aNode in nodes:
-      if 3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode]: #surface
-        #print aNode.surfacePointReference, len(pointAtomList), pointAtomList[aNode.surfacePointReference-1][0]
+      if 3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode]:  # surface
+        #print aNode.surfacePointReference, len(pointAtomList),
+        #print  pointAtomList[aNode.surfacePointReference-1][0]  # debug
         for number in pointAtomList[aNode-1][1:]:
-          if number not in numbers: #uniqueness
+          if number not in numbers:  # uniqueness
             numbers.append(number)
     return numbers
 
@@ -783,42 +810,45 @@ class mesh(object):
     resChainList = pdbData.getAtomsFromNums(numbers)
     return pdb.turnListIntoString(resChainList)
 
-  def calculatePocketProperties(self, nodes, name, pdbData, pointAtomList, \
-                                ligandNodes):
+  def calculatePocketProperties(
+      self, nodes, name, pdbData, pointAtomList, ligandNodes, doPCA=True):
     '''wrapper for all these functions since it is called multiple times'''
     surfArea = self.getSurfaceArea(nodes)
     negSA, apolarSA, posSA = self.getHydroSurfaceAreas(nodes)
     meanCurv, meanAbsCurv = self.getCurvatures(nodes)
     volume = self.getVolume(nodes)
-    meanTD = self.getSumName(name, nodes)/float(len(nodes))
+    meanTD = self.getSumName(name, nodes) / float(len(nodes))
     maxTD = self.getMaxName(name, nodes)
     mouthLists = self.findCountMouths(nodes)
     numbers = self.getAtomNumbers(nodes, pointAtomList)
     nearbyRes = self.getResChainsNodes(numbers, pdbData)
     nearbyResNames = self.getResNamesChainsNodes(numbers, pdbData)
     nearbyAtoms = self.getAtomNamesChainsNodes(numbers, pdbData)
-    pts = []
-    for node in nodes:
-      pts.append(self.nodeXyz[node])
-    dimensions = pca.findDimensions(pts)
-    biggestMouths = [0.,0.] #was going to use second size as well at some point
-    mouthResNames = "+" #empty is default
+    if doPCA:  # normal case, turned off for speed if features unused
+      pts = []
+      for node in nodes:
+        pts.append(self.nodeXyz[node])
+      dimensions = pca.findDimensions(pts)
+    else:  # fake dimensions data
+      dimensions = [-1., -1., -1.]  # obviously faked
+    biggestMouths = [0., 0.]  # going to use second size as well at some point
+    mouthResNames = "+"  # empty is default
     if len(mouthLists) > 0:
       biggestMouths[0] = self.getVolume(mouthLists[0])
-      if 0. == biggestMouths[0]: #means the mouth is all surface
+      if 0. == biggestMouths[0]:  # means the mouth is all surface
         biggestMouths[0] = self.getSurfaceArea(mouthLists[0])
       farthestPointMouth = self.getFarthestDistance(mouthLists[0])
       if 0. == farthestPointMouth:
-        farthestPointMouth = self.getFarthestDistance(mouthLists[0], \
-                                         notJustSurface=True)
+        farthestPointMouth = self.getFarthestDistance(
+            mouthLists[0], notJustSurface=True)
       numbers = self.getAtomNumbers(mouthLists[0], pointAtomList)
       mouthResNames = self.getResNamesChainsNodes(numbers, pdbData)
     else:
-      farthestPointMouth = 0. #no mouths
+      farthestPointMouth = 0.  # no mouths
       mouthResNames = "+"
     #now want to find the pocket type, i.e. bottleneck, groove, tunnel, cleft
-    pocketType = "n/a" #default
-    sizeInt, sizeUnion, jaccard, fraclig = 0.,0.,0.,0.
+    pocketType = "n/a"  # default
+    sizeInt, sizeUnion, jaccard, fraclig = 0., 0., 0., 0.
     if ligandNodes is not None:
       nodeSet = set(nodes)
       unionSet = nodeSet.union(ligandNodes)
@@ -826,59 +856,59 @@ class mesh(object):
       if sizeUnion > 0:
         intSet = nodeSet.intersection(ligandNodes)
         sizeInt = len(intSet)
-        fraclig = float(len(intSet))/float(len(ligandNodes))
-        jaccard = float(sizeInt)/float(sizeUnion)
+        fraclig = float(len(intSet)) / float(len(ligandNodes))
+        jaccard = float(sizeInt) / float(sizeUnion)
     #return a LOT of things
     return volume, surfArea, meanTD, mouthLists, nearbyRes, nearbyResNames, \
-                   nearbyAtoms, biggestMouths[0], farthestPointMouth, \
-                   pocketType, mouthResNames, maxTD, negSA, apolarSA, posSA, \
-                   meanCurv, meanAbsCurv, dimensions, \
-                   sizeInt,sizeUnion,jaccard,fraclig
+        nearbyAtoms, biggestMouths[0], farthestPointMouth, pocketType, \
+        mouthResNames, maxTD, negSA, apolarSA, posSA, meanCurv, meanAbsCurv, \
+        dimensions, sizeInt, sizeUnion, jaccard, Fraclig
 
-  def pocketMapping(self, name, validCodes, pointAtomList, pdbData, \
-                    groupName='group', \
-                    outName="test", ligandNodes=None):
+  def pocketMapping(
+      self, name, validCodes, pointAtomList, pdbData, groupName='group',
+      outName="test", ligandNodes=None, doPCA=True):
     '''actual implementation of pocket mapping algorithm.
     1. sorts all between and surface points
     2. goes through all points, if neighbor in cluster add, if not, new cluster
-    3. builds tree and connected leaf data structure. 
+    3. builds tree and connected leaf data structure.
     4. calculates pocket properties
-    5. optional pocket property is the intersection/overlap of the ligand vol'''
+    5. optional pocket property is the intersection/overlap of the ligand vol.
+    (6. doPCA optionally turns on/off the pocket PCA feature computation)'''
     sortedNodes = []
-    self.nodeTag = {} #tag to number of 'valid' neighbors
-                      #decrement all neighbors when a node is processed
-                      #if tag is 0, not a mouth, if >0, is a mouth
+    self.nodeTag = {}  # tag to number of 'valid' neighbors
+                       # decrement all neighbors when a node is processed
+                       # if tag is 0, not a mouth, if >0, is a mouth
     for aNode in self.gridNodes + self.surfaceNodes:
       if self.nodeClass[aNode] in validCodes and name in self.nodeDist[aNode]:
         sortedNodes.append(aNode)
         goodNeighborCount = 0
-        for neighborNode,neighDist in self.nodeNeighbors[aNode]:
+        for neighborNode, neighDist in self.nodeNeighbors[aNode]:
           if name in self.nodeDist[neighborNode]:
-          #if self.nodeClass[neighborNode] != 1: #not inside
+          #if self.nodeClass[neighborNode] != 1:  # not inside
             goodNeighborCount += 1
         self.nodeTag[aNode] = goodNeighborCount
-    sortedNodes.sort(self.__distCompare(name)) #sorts based on distance
-    sortedNodes.reverse() #want largest=biggest travel depth first
-    groups = unionFindAttach()
-    clusters = unionFindAttach() #actually clusters, eventually gets to 1 @ ch
+    sortedNodes.sort(self.__distCompare(name))  # sorts based on distance
+    sortedNodes.reverse()  # want largest=biggest travel depth first
+    groups = unionfind2.unionFindAttach()
+    clusters = unionfind2.unionFindAttach()
+    #actually clusters, eventually gets to 1 @ ch
     localMaxima = []
     borders = []
     groupCount = 0
-    tm3treeNames = ["NAME","Surface Area","Volume","threshold","meanTD", \
-                     "maxTD","height","mean height",\
-                     "mouths","Area of Biggest Mouth", \
-                     "Diameter of Biggest Mouth", \
-                     "Negative Surface Area", "Fraction Negative Surface Area",\
-                     "Apolar Surface Area", "Fraction Apolar Surface Area", \
-                     "Positive Surface Area", "Fraction Positive Surface Area",\
-                     "mean Curvature", "mean absolute Curvature", \
-                     "longest dimension","middle dimension","short dimension", \
-                     "Type of Pocket", \
-                     "Residue Number List","Residue Name List", \
-                     "Atom Name List", "Mouth Residue Name List"]
+    tm3treeNames = [
+        "NAME", "Surface Area", "Volume", "threshold", "meanTD", "maxTD",
+        "height", "mean height", "mouths", "Area of Biggest Mouth",
+        "Diameter of Biggest Mouth", "Negative Surface Area",
+        "Fraction Negative Surface Area", "Apolar Surface Area",
+        "Fraction Apolar Surface Area", "Positive Surface Area",
+        "Fraction Positive Surface Area", "mean Curvature",
+        "mean absolute Curvature", "longest dimension", "middle dimension",
+        "short dimension", "Type of Pocket", "Residue Number List",
+        "Residue Name List", "Atom Name List", "Mouth Residue Name List"]
     if ligandNodes is not None:
-      tm3treeNames.extend(["Ligand Intersection", "Ligand Overlap", \
-                           "Ligand Jaccard", "Fraction Ligand Volume"]) 
+      tm3treeNames.extend([
+          "Ligand Intersection", "Ligand Overlap", "Ligand Jaccard",
+          "Fraction Ligand Volume"])
     tree = tm3.tmTree(tm3treeNames)
     lastNode = None
     surfNodeToLeaf = {}
@@ -887,12 +917,12 @@ class mesh(object):
       thisThresh = self.nodeDist[thisNode][name]
       #print thisNode, thisThresh
       lastNode = thisNode
-      #groups.find(thisNode) #insert always, since new
+      #groups.find(thisNode)  # insert always, since new
       #clusters.find(thisNode)
       alreadySeenNeighbors = []
-      for neighborNode,neighDist in self.nodeNeighbors[thisNode]:
-        if groups.check(neighborNode): #means neighbor was seen and is valid
-          addIt = True #want only unique groups
+      for neighborNode, neighDist in self.nodeNeighbors[thisNode]:
+        if groups.check(neighborNode):  # means neighbor was seen and is valid
+          addIt = True  # want only unique groups
           for alreadySeenNeighbor in alreadySeenNeighbors:
             if not clusters.different(alreadySeenNeighbor, neighborNode):
               addIt = False
@@ -901,17 +931,17 @@ class mesh(object):
             alreadySeenNeighbors.append(neighborNode)
       if len(alreadySeenNeighbors) == 0:
         localMaxima.append(thisNode)
-        groupCount += 1 #still getting lost somewhere, not all groups accounted
-        groups.find(thisNode, set([str(groupCount)])) #attach name
-        clusters.find(thisNode, set([(str(groupCount), ())])) #attach name
+        groupCount += 1  # getting lost somewhere, not all groups accounted
+        groups.find(thisNode, set([str(groupCount)]))  # attach name
+        clusters.find(thisNode, set([(str(groupCount), ())]))  # attach name
         #print clusters.getAttached(thisNode)
-      elif len(alreadySeenNeighbors) == 1: #new part of old group
-        groups.find(thisNode) 
+      elif len(alreadySeenNeighbors) == 1:  # new part of old group
+        groups.find(thisNode)
         groups.union(thisNode, alreadySeenNeighbors[0])
         clusters.union(thisNode, alreadySeenNeighbors[0])
       elif len(alreadySeenNeighbors) > 1:
-        groups.find(thisNode) #insert always, since new
-        groups.union(thisNode, alreadySeenNeighbors[0]) #arbitrary choice
+        groups.find(thisNode)  # insert always, since new
+        groups.union(thisNode, alreadySeenNeighbors[0])  # arbitrary choice
         childrenNames, childrenNodes, chMeshNodes = [], [], []
         for alreadySeenNeighbor in alreadySeenNeighbors:
           chMeshNodes.append(clusters.getList(alreadySeenNeighbor))
@@ -924,38 +954,37 @@ class mesh(object):
         #for each child, we have to get all the data and make the new node
         newChildNodes = []
         for count, aChild in enumerate(childrenNames):
-          for aNode in chMeshNodes[count]: #add to surfnodetoleaf now
-            if (3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode]) \
-                        and aNode not in surfNodeToLeaf: #no overwrite, surface
+          for aNode in chMeshNodes[count]:  # add to surfnodetoleaf now
+            if (3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode]) and \
+                aNode not in surfNodeToLeaf:  # no overwrite, surface
               surfNodeToLeaf[aNode] = aChild
           volume, surfArea, meanTD, mouthLists, nearbyRes, nearbyResNames, \
-                nearbyAtoms, biggestMouth, farthestPointMouth, pocketType, \
-                mouthResNames, maxTD, negSA, apolarSA, posSA, \
-                meanCurv, meanAbsCurv, dimensions, \
-                sizeInt, sizeUnion, jaccard, fraclig  = \
-                self.calculatePocketProperties(chMeshNodes[count], name, \
-                pdbData, pointAtomList, ligandNodes)
+              nearbyAtoms, biggestMouth, farthestPointMouth, pocketType, \
+              mouthResNames, maxTD, negSA, apolarSA, posSA, \
+              meanCurv, meanAbsCurv, dimensions, \
+              sizeInt, sizeUnion, jaccard, fraclig = \
+              self.calculatePocketProperties(
+                  chMeshNodes[count], name, pdbData, pointAtomList,
+                  ligandNodes, doPCA=doPCA)
           try:
             fractionNeg = negSA/surfArea
             fractionApolar = apolarSA/surfArea
             fractionPos = posSA/surfArea
-          except ZeroDivisionError: #surfarea is 0
+          except ZeroDivisionError:  # surfarea is 0
             fractionNeg = 0.
             fractionApolar = 0.
             fractionPos = 0.
-          tm3nodeProps = [aChild, surfArea, volume, \
-                       thisThresh, meanTD, maxTD, maxTD-thisThresh, \
-                       meanTD-thisThresh, len(mouthLists), \
-                       float(biggestMouth), farthestPointMouth, \
-                       negSA, fractionNeg, \
-                       apolarSA, fractionApolar, posSA, fractionPos, \
-                       meanCurv, meanAbsCurv, \
-                       dimensions[0], dimensions[1], dimensions[2], pocketType,\
-                       nearbyRes, nearbyResNames, nearbyAtoms, mouthResNames]
+          tm3nodeProps = [
+              aChild, surfArea, volume, thisThresh, meanTD, maxTD,
+              maxTD - thisThresh, meanTD-thisThresh, len(mouthLists),
+              float(biggestMouth), farthestPointMouth, negSA, fractionNeg,
+              apolarSA, fractionApolar, posSA, fractionPos, meanCurv,
+              meanAbsCurv, dimensions[0], dimensions[1], dimensions[2],
+              pocketType, nearbyRes, nearbyResNames, nearbyAtoms, mouthResNames]
           if ligandNodes is not None:
-            tm3nodeProps.extend([sizeInt, sizeUnion, jaccard, fraclig])   
-          newChildNodes.append(tree.addNode(tm3nodeProps, \
-                            childrenNodes[count]).getId())
+            tm3nodeProps.extend([sizeInt, sizeUnion, jaccard, fraclig])
+          newChildNodes.append(tree.addNode(
+              tm3nodeProps, childrenNodes[count]).getId())
         for alreadySeenNeighbor in alreadySeenNeighbors:
           clusters.union(thisNode, alreadySeenNeighbor)
         groupCount += 1
@@ -965,11 +994,11 @@ class mesh(object):
         if 3 == self.nodeClass[thisNode] or 5 == self.nodeClass[thisNode]:
           borders.append(thisNode)
       #do neighbor groups leaf attachment now
-      thisId = list(groups.getAttached(thisNode))[0] #only one
+      thisId = list(groups.getAttached(thisNode))[0]  # only one
       for neighbor, neighDist in self.nodeNeighbors[thisNode]:
         if neighbor in self.nodeTag:
           self.nodeTag[neighbor] -= 1
-    #print len(clusters.toLists()) #debugging
+    #print len(clusters.toLists())   # debugging
     #set the root and all that needs to be done to finalize the tree
     attachedData = clusters.getAttached(lastNode)
     childrenNodes = []
@@ -981,43 +1010,40 @@ class mesh(object):
     #are working correctly.... next 4 lines
     #clustersLeft = [] #want to process cavities and insert them into the tree
     #for clusterList in clusters.toLists():
-    #  if allNodes[0] not in clusterList: #as good as doing equality checking
+    #  if allNodes[0] not in clusterList:  # as good as doing equality checking
     #    clustersLeft.append(clusterList)
     #print len(clustersLeft) #cavity debugging
     volume, surfArea, meanTD, mouthLists, nearbyRes, nearbyResNames, \
-                nearbyAtoms, biggestMouth, farthestPointMouth, pocketType, \
-                mouthResNames, maxTD, negSA, apolarSA, posSA, \
-                meanCurv, meanAbsCurv, dimensions, \
-                sizeInt, sizeUnion, jaccard, fraclig  = \
-                self.calculatePocketProperties(allNodes, name, \
-                pdbData, pointAtomList, ligandNodes)
+        nearbyAtoms, biggestMouth, farthestPointMouth, pocketType, \
+        mouthResNames, maxTD, negSA, apolarSA, posSA, \
+        meanCurv, meanAbsCurv, dimensions, sizeInt, sizeUnion, jaccard, \
+        fraclig = self.calculatePocketProperties(
+            allNodes, name, pdbData, pointAtomList, ligandNodes, doPCA=doPCA)
     thisThresh = self.nodeDist[lastNode][name]
     try:
       fractionNeg = negSA/surfArea
       fractionApolar = apolarSA/surfArea
       fractionPos = posSA/surfArea
-    except ZeroDivisionError: #surfarea is 0
+    except ZeroDivisionError:  # surfarea is 0
       fractionNeg = 0.
       fractionApolar = 0.
       fractionPos = 0.
-    tm3nodeProps = [newName, surfArea, volume, \
-                       thisThresh, meanTD, maxTD, maxTD-thisThresh, \
-                       meanTD-thisThresh, len(mouthLists), \
-                       float(biggestMouth), farthestPointMouth, \
-                       negSA, fractionNeg, \
-                       apolarSA, fractionApolar, posSA, fractionPos, \
-                       meanCurv, meanAbsCurv, \
-                       dimensions[0], dimensions[1], dimensions[2], pocketType,\
-                       nearbyRes, nearbyResNames, nearbyAtoms, mouthResNames]
+    tm3nodeProps = [
+        newName, surfArea, volume, thisThresh, meanTD, maxTD,
+        maxTD - thisThresh, meanTD-thisThresh, len(mouthLists),
+        float(biggestMouth), farthestPointMouth, negSA, fractionNeg,
+        apolarSA, fractionApolar, posSA, fractionPos, meanCurv, meanAbsCurv,
+        dimensions[0], dimensions[1], dimensions[2], pocketType,
+        nearbyRes, nearbyResNames, nearbyAtoms, mouthResNames]
     if ligandNodes is not None:
-      tm3nodeProps.extend([sizeInt, sizeUnion, jaccard, fraclig])   
+      tm3nodeProps.extend([sizeInt, sizeUnion, jaccard, fraclig])
     rootNode = tree.addNode(tm3nodeProps, childrenNodes)
     for aNode in allNodes:
-      if (3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode]) \
-               and aNode not in surfNodeToLeaf: #surface
+      if (3 == self.nodeClass[aNode] or 5 == self.nodeClass[aNode]) and \
+          aNode not in surfNodeToLeaf:  # surface
         surfNodeToLeaf[aNode] = newName
     tree.setRoot(rootNode)
-    for listCount, nodeList in enumerate(groups.toLists()):    
+    for listCount, nodeList in enumerate(groups.toLists()):
       listColor = listCount
       if listCount % 2 == 1:
         listColor += 1000
@@ -1026,7 +1052,7 @@ class mesh(object):
           self.nodeDist[aNode][groupName] = listColor
         else:
           self.nodeDist[aNode][groupName] = -1000
-    return localMaxima, borders, tree, surfNodeToLeaf     
+    return localMaxima, borders, tree, surfNodeToLeaf
 
   def getMinMaxMeanNodes(self, iterableNodes, distanceName):
     '''gets the min, max, and average of a certain distance over the nodes'''
@@ -1036,7 +1062,7 @@ class mesh(object):
       if distanceName in self.nodeDist[node]:
         distance = self.nodeDist[node][distanceName]
       else:
-        distance = 0. #means it was far outside convex hull 
+        distance = 0. #means it was far outside convex hull
       if minD is None or distance < minD:
         minD = distance
       if maxD is None or distance > maxD:
@@ -1056,7 +1082,7 @@ class mesh(object):
       aNode = self.nodeXyz[aNodeKey]
       if self.nodeClass[aNodeKey] != 1: #is not inside
         for coordRad in xyzRadiusList:
-          distanceTo = geometry.distL2(coordRad[:3],aNode)
+          distanceTo = geometry.distL2(coordRad[:3], aNode)
           if distanceTo < coordRad[3]:
             returnSet.add(aNodeKey)
             break #don't need to check any more vdw radii
@@ -1069,7 +1095,7 @@ class mesh(object):
     while len(listToProcess) > 0:
       currentNode = listToProcess.pop()
       if currentNode in self.tracebacks[name]:
-        listBack,curNode,dist = self.tracebacks[name][currentNode]
+        listBack, curNode, dist = self.tracebacks[name][currentNode]
         for nextNode in listBack:
           if nextNode not in listToProcess and nextNode not in returnSet:
             listToProcess.add(nextNode)
@@ -1083,14 +1109,14 @@ class mesh(object):
     while len(listToProcess) > 0:
       currentNode = listToProcess.pop()
       if currentNode in self.tracebacks[name]:
-        listBack,curNode,dist = self.tracebacks[name][currentNode]
+        listBack, curNode, dist = self.tracebacks[name][currentNode]
         for nextNode in listBack:
           if nextNode not in listToProcess and nextNode not in returnSet:
             listToProcess.add(nextNode)
       else: #has no ancestors, must be starting node
         returnSet.add(currentNode)
     return returnSet
-      
+
   def getBetweenNodes(self):
     '''returns a list of just the between nodes'''
     returnList = []
@@ -1124,20 +1150,20 @@ class mesh(object):
 
   def __distCompare(self, name):
     '''helper comparison method based on the name distance of passed in nodes'''
-    returnFunct = lambda x,y: self.__numericCompare(self.nodeDist[x][name], \
+    returnFunct = lambda x, y: self.__numericCompare(self.nodeDist[x][name], \
                                              self.nodeDist[y][name])
     return returnFunct #yes returns a function since sort() only takes 2 args
 
   def __shortenPath(self, path):
     '''finds shortcuts in the path'''
-    shortPath = [] 
+    shortPath = []
     partialPath = path[:] #beginning to end of path
     while len(partialPath) > 0:
       thisNode = partialPath.pop() #remove end
       shortPath.insert(0, thisNode) #do this regardless
       if len(partialPath) > 0:
         bestShortcut, shortcutIndex = False, len(partialPath)
-        for neighbor,neighDist in self.nodeNeighbors[thisNode]:
+        for neighbor, neighDist in self.nodeNeighbors[thisNode]:
           if neighbor != partialPath[-1]: #one must be, but we ignore it
             if neighbor in partialPath: #found a shortcut
               lastIndex = partialPath.index(neighbor)
@@ -1145,7 +1171,7 @@ class mesh(object):
                 shortcutIndex, bestShortcut = lastIndex, neighbor
         if bestShortcut:
           partialPath = partialPath[:shortcutIndex+1]
-    return shortPath      
+    return shortPath
 
   def __findPathOutBranchBound(self, startNode, centerName, excludePts):
     '''uses branch and bound to find a path from start to outside convexhull'''
@@ -1157,7 +1183,7 @@ class mesh(object):
       thisNode = nodesLeft.pop(thisIndex)
       thisValue = valuesLeft.pop(thisIndex)
       visitedNodes.add(thisNode)
-      for neighbor,neighDist in self.nodeNeighbors[thisNode]:
+      for neighbor, neighDist in self.nodeNeighbors[thisNode]:
         if neighbor not in visitedNodes: #don't want loops
           if neighbor not in nodesLeft: #already on the stack
             if self.nodeClass[neighbor] != 1: #don't care, don't go through inside
@@ -1176,14 +1202,14 @@ class mesh(object):
                 valuesLeft.append(self.nodeDist[neighbor][centerName])
                 tree[neighbor] = thisNode
     #failure...
-    return False, False 
+    return False, False
 
   def getNeighborsNotInside(self, iterableNodes, excludeSet=False):
     '''returns neighbors of iterableNodes not in excludeSet or iterableNodes,
     also does not include neighbors on the inside of the surface'''
     neighborNodes = set()
     for node in iter(iterableNodes):
-      for neighborNode,neighDist in self.nodeNeighbors[node]:
+      for neighborNode, neighDist in self.nodeNeighbors[node]:
         if neighborNode not in iterableNodes and \
                   ((not excludeSet) or neighborNode not in excludeSet):
           if self.nodeClass[neighborNode] != 1: #.isInside():
@@ -1195,7 +1221,7 @@ class mesh(object):
     also does not include neighbors on the inside of the surface'''
     neighborNodes = set()
     for node in iter(iterableNodes):
-      for neighborNode,neighDist in self.nodeNeighbors[node]:
+      for neighborNode, neighDist in self.nodeNeighbors[node]:
         if neighborNode not in iterableNodes and \
                   ((not excludeSet) or neighborNode not in excludeSet):
           if 0 == self.nodeClass[neighborNode] or \
@@ -1208,10 +1234,10 @@ class mesh(object):
     only returns surface nodes'''
     neighborNodes = set()
     for node in iter(iterableNodes):
-      for neighborNode,neighDist in self.nodeNeighbors[node]:
+      for neighborNode, neighDist in self.nodeNeighbors[node]:
         if neighborNode not in iterableNodes and \
                   ((not excludeSet) or neighborNode not in excludeSet):
-          if self.nodeClass[neighborNode] in [3,5]:
+          if self.nodeClass[neighborNode] in [3, 5]:
             neighborNodes.add(neighborNode)
     return neighborNodes
 
@@ -1220,10 +1246,10 @@ class mesh(object):
     only returns nodes outside or between'''
     neighborNodes = set()
     for node in iter(iterableNodes):
-      for neighborNode,neighDist in self.nodeNeighbors[node]:
+      for neighborNode, neighDist in self.nodeNeighbors[node]:
         if neighborNode not in iterableNodes and \
                   ((not excludeSet) or neighborNode not in excludeSet):
-          if self.nodeClass[neighborNode] in [0,2]:
+          if self.nodeClass[neighborNode] in [0, 2]:
             neighborNodes.add(neighborNode)
     return neighborNodes
 
@@ -1238,17 +1264,17 @@ class mesh(object):
     '''returns a set of just the surface nodes in iterablenodes'''
     surfaceNodes = set()
     for node in iter(iterableNodes):
-      if self.nodeClass[node] in [3,5]:
+      if self.nodeClass[node] in [3, 5]:
         surfaceNodes.add(node)
     return surfaceNodes
 
   def findDisjointUnions(self, iterableNodes):
-    '''takes an iterable list of nodes, breaks into disjoint sets based on 
+    '''takes an iterable list of nodes, breaks into disjoint sets based on
     neighbors and returns a list of these sets'''
-    discs = unionFind()
+    discs = unionfind2.unionFind()
     for node in iter(iterableNodes):
       discs.find(node) #make sure it is added even if no neighbors
-      for neighborNode,neighDist in self.nodeNeighbors[node]:
+      for neighborNode, neighDist in self.nodeNeighbors[node]:
         if neighborNode in iterableNodes: #otherwise don't care
           discs.union(node, neighborNode)
     return discs.toLists()
@@ -1258,7 +1284,7 @@ class mesh(object):
     if pointOne not in pointNeighbors:           #initialize list
       pointNeighbors[pointOne] = []
     if pointTwo not in pointNeighbors[pointOne]: #no duplicates
-      pointNeighbors[pointOne].append(pointTwo) 
+      pointNeighbors[pointOne].append(pointTwo)
     if pointTwo not in pointNeighbors:           #initialize list
       pointNeighbors[pointTwo] = []
     if pointOne not in pointNeighbors[pointTwo]: #no duplicates
@@ -1274,7 +1300,7 @@ class mesh(object):
 
   def __decideWhichCloser(self, thisPt, loopPts):
     '''checks both loops, sees which the point is closer to'''
-    minDists,lower = [False,False],1
+    minDists, lower = [False, False], 1
     for index in xrange(len(loopPts)):
       minDists[index] = self.__calculateMinPointToDist(thisPt, loopPts[index])
     if minDists[0] < minDists[1]:
@@ -1282,11 +1308,11 @@ class mesh(object):
     return lower, minDists[lower] #in case you want dist too
 
   def __divideTwoCloseGroups(self, loopPtsOne, loopPtsTwo):
-    '''this is where the plugs are made. algorithm splits all points into 2 
+    '''this is where the plugs are made. algorithm splits all points into 2
     sets based on which loop it is closer to. plugs are adjacent to each other
     and adjacent (eventually) to a loop point.'''
     loopPts = (loopPtsOne, loopPtsTwo)
-    allPts,triedPts = set(),set()
+    allPts, triedPts = set(), set()
     allPts.update(self.getNeighborsOutsideOrBetween(loopPtsOne))
     allPts.update(self.getNeighborsOutsideOrBetween(loopPtsTwo))
     pointGroups = (set(loopPtsOne), set(loopPtsTwo))
@@ -1294,10 +1320,10 @@ class mesh(object):
       allPts.difference_update(pointGroup)
     removePts = set()
     for point in allPts:
-      if self.nodeClass[point] not in [0,2]: #not out or between
+      if self.nodeClass[point] not in [0, 2]: #not out or between
         removePts.add(point)
     allPts.difference_update(removePts) #don't want neighboring points on the surface
-    #only points within maxDist of any loop point are considered, this ensures  
+    #only points within maxDist of any loop point are considered, this ensures
     # a complete plug across the whole opening
     while len(allPts) > 0:
       thisPt = allPts.pop()
@@ -1326,11 +1352,11 @@ class mesh(object):
                 if neighborOpposite:
                   break #out of 4 loop 12 lines previous
       if neighborOpposite: #now take action
-        pointGroups[lower].add(thisPt) 
+        pointGroups[lower].add(thisPt)
         for neighborPt in neighborsNotInside:
           if neighborPt not in pointGroups[0] and \
                                 neighborPt not in pointGroups[1]:
-            if self.nodeClass[neighborPt] in [0,2]: #out or betw
+            if self.nodeClass[neighborPt] in [0, 2]: #out or betw
               allPts.add(neighborPt)
     #print len(pointGroups[0]), len(pointGroups[1])
     return pointGroups
@@ -1343,9 +1369,9 @@ class mesh(object):
     ringToExclude = {}
     ringToCenterName = {}
     possibleHoleStarts = []
-    rings = [False,False] #two lists of sets
-    discs = [False,False] #two lists of sets
-    for indexSide,regLoopPtListSide in enumerate(regLoopPtList):
+    rings = [False, False] #two lists of sets
+    discs = [False, False] #two lists of sets
+    for indexSide, regLoopPtListSide in enumerate(regLoopPtList):
       ringThisSide = set(regLoopPtListSide)
       rings[indexSide] = frozenset(ringThisSide)
     for side in xrange(len(discs)):
@@ -1353,7 +1379,7 @@ class mesh(object):
       if 1 == other: #only these some things once
         groups = self.__divideTwoCloseGroups(rings[side], rings[other])
         wholeDiscSet = set() #cumulative over matching pairs of discs
-        for indexGroup,group in enumerate(groups):
+        for indexGroup, group in enumerate(groups):
           wholeDiscSet.update(group)
           discThisGroup = frozenset(group)
           ringToDisc[rings[indexGroup]] = discThisGroup
@@ -1363,9 +1389,9 @@ class mesh(object):
             for node in iter(group):
               pts.append(self.nodeXyz[node])
             if indexGroup == 0: #debugging
-              pointDebug(pts, filename=outFileName + ".plug." + str(indexLoop) + "." + str(indexGroup) + ".py", mainColor=(.1,.9,.1))
+              tstdebug.pointDebug(pts, filename=outFileName + ".plug." + str(indexLoop) + "." + str(indexGroup) + ".py", mainColor=(.1,.9,.1))
             else:
-              pointDebug(pts, filename=outFileName + ".plug." + str(indexLoop) + "." + str(indexGroup) + ".py", mainColor=(.9,.1,.1))
+              tstdebug.pointDebug(pts, filename=outFileName + ".plug." + str(indexLoop) + "." + str(indexGroup) + ".py", mainColor=(.9,.1,.1))
         possibleHoleStarts.append(self.findMaxima(centerName, wholeDiscSet)[0][0])
         ringToExclude[rings[side]] = ringToDisc[rings[other]] #don't go through other side
         ringToExclude[rings[other]] = ringToDisc[rings[side]] #don't go through other side
@@ -1378,14 +1404,14 @@ class mesh(object):
     '''finds and returns the maxima'''
     disc = ringToDiscAll[ring]
     excludeSet = ringToExcludeAll[ring]
-    #print len(ring),len(disc),
+    #print len(ring), len(disc),
     maximaDisc, maximaDist = self.findMaxima(centerName, disc)
     if debugOut:
       pts = [] #here to end of loop is debugging
       for node in iter(maximaDisc):
         pts.append(self.nodeXyz[node])
         #print node.classification
-      pointDebug(pts, filename=outFileName + ".plug.localmaxima." + str(ringCount) + ".py", mainColor=(.1,.3,.9))
+      tstdebug.pointDebug(pts, filename=outFileName + ".plug.localmaxima." + str(ringCount) + ".py", mainColor=(.1,.3,.9))
     return maximaDisc, maximaDist
 
   def growOneMaxima(self, ringToMaximaAll, ring, maximaDisc, centerName, \
@@ -1394,8 +1420,8 @@ class mesh(object):
     '''grows out from one maxima, adds best path, doesn't return since stuff
     modified in place (pointNeighbors, ringToMaximaAll, outsidePoints'''
     excludeSet = ringToExcludeAll[ring]
-    ringToMaximaAll[ring],paths,bestPath = [],[],0
-    for index,maximaDiscTry in enumerate(maximaDisc):
+    ringToMaximaAll[ring], paths, bestPath = [], [], 0
+    for index, maximaDiscTry in enumerate(maximaDisc):
       path,value = self.__findPathOutBranchBound(maximaDiscTry, centerName, \
                                                  excludeSet)
       #print len(path)
@@ -1404,7 +1430,7 @@ class mesh(object):
         if len(path) < len(paths[bestPath]):
           bestPath = len(paths) - 1
     if len(paths) > 0:
-      ringToMaximaAll[ring].append(paths[bestPath][0])  #the maxima used 
+      ringToMaximaAll[ring].append(paths[bestPath][0])  #the maxima used
       for pathIndex in xrange(len(paths[bestPath])-1): #does pairs, don't do last one
         otherIndex = pathIndex + 1
         self.__addPointNeighbors(pointNeighbors, \
@@ -1420,7 +1446,7 @@ class mesh(object):
     if ring in ringNeighborsAll: #do after only both have maxima
       otherRing = ringNeighborsAll[ring][0]
       if otherRing in ringToMaximaAll:
-        discs = [ringToDiscAll[ring],ringToDiscAll[ring]]
+        discs = [ringToDiscAll[ring], ringToDiscAll[ring]]
         #each maxima on each side needs to map to all on opposite side
         for maximaOneSide in ringToMaximaAll[ring]:
           for maximaOtherSide in ringToMaximaAll[otherRing]:
@@ -1443,7 +1469,7 @@ class mesh(object):
 
   def findMaxima(self, name, iterableNodes):
     '''finds the maxima among the iterableNodes according to name'''
-    maxSet,maxVal = set(),-1.
+    maxSet, maxVal = set(), -1.
     for node in iter(iterableNodes):
       if self.nodeDist[node][name] == maxVal:
         maxSet.add(node)
@@ -1454,13 +1480,13 @@ class mesh(object):
     returnMaxList = []
     while len(maxSet) > 0:
       returnMaxList.append(maxSet.pop())
-    return tuple(returnMaxList),maxVal
+    return tuple(returnMaxList), maxVal
 
   def __connectTwoMaxima(self, centerName, discs, maximas):
     '''connects two maxima together, discs and maximas are tuples.
     uses branch and bound to find the best path with the lowest dist on it.
     doesn't allow path to wander very far from straightline path, nodes should
-    be close and is better than restricting to discs which are sometimes 
+    be close and is better than restricting to discs which are sometimes
     not completely connected with each other.'''
     visitedNodes = set() #all the things seen
     tree = {} #empty tree, goes up
@@ -1473,7 +1499,7 @@ class mesh(object):
       thisNode = nodesLeft.pop(thisIndex)
       thisValue = valuesLeft.pop(thisIndex)
       visitedNodes.add(thisNode)
-      for neighbor,neighborDist in self.nodeNeighbors[thisNode]:
+      for neighbor, neighborDist in self.nodeNeighbors[thisNode]:
         if not discs or neighbor in discs[0] or neighbor in discs[1]:
           if neighbor not in visitedNodes: #don't want loops
             if neighbor not in nodesLeft: #already on the stack
@@ -1555,7 +1581,7 @@ class mesh(object):
   def __getPathPlugs(self, plugPoints, pathPoints):
     '''helper to find the plugs each path passes through'''
     plugs = "-"
-    for indexPlug,plugPoint in enumerate(plugPoints):
+    for indexPlug, plugPoint in enumerate(plugPoints):
       for pathPoint in pathPoints:
         if plugPoint.reference == pathPoint.reference:
           plugs += str(indexPlug) + "-"
@@ -1563,8 +1589,8 @@ class mesh(object):
     return plugs
 
   def getPaths(self, centerName, pointNeighbors, outsidePoints, plugPoints):
-    '''finds all paths from each outside point to all others, 
-       also tracks which plugs each path passes through, 
+    '''finds all paths from each outside point to all others,
+       also tracks which plugs each path passes through,
        reports shortest path unique wrt begin, end, plugs'''
     paths = []
     #force paths to be unique wrt start, end, and plugPoints passed through
@@ -1584,7 +1610,7 @@ class mesh(object):
               pathEndDict[indexTwo].append(path)
         for indexTwo in pathEndDict.keys():
           possPaths = pathEndDict[indexTwo]
-          if 1 == len(possPaths): 
+          if 1 == len(possPaths):
             nodePath = self.makeNodes(possPaths[0])
             plugs = self.__getPathPlugs(plugPoints, nodePath)
             paths.append((indexOne, indexTwo, plugs, nodePath))
@@ -1604,7 +1630,7 @@ class mesh(object):
               elif 1 < len(possPlugPaths):
                 #pick min-length path
                 minLengthPathIndex = 0
-                for pathIndexHere,path in enumerate(possPlugPaths):
+                for pathIndexHere, path in enumerate(possPlugPaths):
                   if len(path) < len(possPlugPaths[minLengthPathIndex]):
                     minLengthPathIndex = pathIndexHere
                 smallPath = possPlugPaths[minLengthPathIndex]
@@ -1657,12 +1683,12 @@ class mesh(object):
           fileTemp.write("0.2, ")
       fileTemp.write(" ]\n")
       fileTemp.write("cmd.load_cgo(surfObj,'grid" +str(code) +filename + "')\n")
-      fileTemp.close()          
+      fileTemp.close()
 
 class meshFromSpheres(mesh):
   '''a class that creates a new mesh from a given list of spheres,
   can be made to be a VDW surface or solvent accessible surface, etc.'''
-  
+
   def __init__(self, grid, mins, maxs, gridSize, spheres):
     '''creates a mesh that lies on a previously specified grid'''
     self.gridNodes = []     #dictionaries of nodes, keyed on gridIndex or ptIndex
@@ -1670,7 +1696,7 @@ class meshFromSpheres(mesh):
 
   def __init__(self, spheres, gridSpacing=1.0, outputName="debug.spheres.py"):
     '''creates a mesh that lies on a new grid with given spacing'''
-    self.surfaceNodes = [] 
+    self.surfaceNodes = []
     self.surfacePoints = []
     self.nodeDist = {} #moving data storage out of node class into dicts
     self.nodeNeighbors = {}
@@ -1679,7 +1705,7 @@ class meshFromSpheres(mesh):
     self.nodeOffGridXyz = {}
     self.nodeNode = {}
     mins, maxs =  geometry.findMinsMaxsSpheres(spheres) #call geometry method
-    #add 1.5*gridSpacing to min and max, ensure gridpoints outside surface 
+    #add 1.5*gridSpacing to min and max, ensure gridpoints outside surface
     for coord in range(3):
       mins[coord] = mins[coord] - gridSpacing*1.5
       maxs[coord] = maxs[coord] + gridSpacing*1.5
@@ -1693,8 +1719,8 @@ class meshFromSpheres(mesh):
     tempPts = []
     for node in self.surfaceNodes:
       tempPts.append(self.nodeXyz[node])
-    pointDebug(tempPts, filename=outputName, mainColor=(.9,.4,.1),radius=gridSpacing/10.)
-    
+    tstdebug.pointDebug(tempPts, filename=outputName, mainColor=(.9,.4,.1), radius=gridSpacing/10.)
+
   def __createEmptyGridNodes(self, mins, maxs, spacing, classification=0):
     '''makes a grid full of nodes, set to default outside'''
     self.gridNodes = []     #dictionaries of nodes, keyed on gridIndex or ptIndex
@@ -1721,12 +1747,12 @@ class meshFromSpheres(mesh):
     #no need to return, as gridNodes have been modified
 
   def __updateLineBreaks(self, linebreaks, coords):
-    '''linebreaks is a list of in/out vertices, coords is a single pair, 
+    '''linebreaks is a list of in/out vertices, coords is a single pair,
     update and return new linebreaks'''
     if 0 == len(linebreaks):
       return coords #easy case
     else: #now harder case, find place to put
-      newLB = [] 
+      newLB = []
       lineBreakIndex = 0
       while lineBreakIndex < len(linebreaks) and \
                  linebreaks[lineBreakIndex] < coords[0]: #find first first
@@ -1735,7 +1761,7 @@ class meshFromSpheres(mesh):
       if lineBreakIndex == len(linebreaks): #exhausted original list, tag to end
         newLB.extend(coords)
         return newLB
-      #otherwise keep going, 
+      #otherwise keep going,
       if 1 == lineBreakIndex % 2: #means we ignore the first, superseded
         pass
       else: #new, so insert
@@ -1746,12 +1772,12 @@ class meshFromSpheres(mesh):
       if lineBreakIndex == len(linebreaks): #exhausted original list, tag to end
         newLB.append(coords[1])
         return newLB
-      if 1 == len(newLB) % 2 and 0 == lineBreakIndex % 2: 
+      if 1 == len(newLB) % 2 and 0 == lineBreakIndex % 2:
         newLB.append(coords[1])
       while lineBreakIndex < len(linebreaks):
         newLB.append(linebreaks[lineBreakIndex])
         lineBreakIndex += 1 #increment
-      return newLB #either way return the new one    
+      return newLB #either way return the new one
 
   def __createSurfNodesOneDir(self, indexOne, indexTwo, spheres, axis):
     '''creates surface nodes along one line in the axis direction'''
@@ -1800,12 +1826,12 @@ class meshFromSpheres(mesh):
                            self.nodeXyz[curGridNode][1], \
                             lineBreaks[lineBreakIndex]]
         elif 1==axis:
-          surfacePoint = [self.nodeXyz[curGridNode][0], 
+          surfacePoint = [self.nodeXyz[curGridNode][0],
                            lineBreaks[lineBreakIndex], \
                             self.nodeXyz[curGridNode][2]]
         elif 0==axis:
           surfacePoint = [lineBreaks[lineBreakIndex], \
-                           self.nodeXyz[curGridNode][1], 
+                           self.nodeXyz[curGridNode][1],
                             self.nodeXyz[curGridNode][2]]
         pointListRef = [pointIndex]
         pointListRef.extend(surfacePoint)
@@ -1818,7 +1844,7 @@ class meshFromSpheres(mesh):
         self.connectNeighbors(lastGridNode, newSurfNode, lastDist)
         if 0 == lineBreakIndex % 2: #odd
           self.nodeClass[curGridNode] = 1
-        lineBreakIndex += 1        
+        lineBreakIndex += 1
       elif lastGridNode:
         thisDist = geometry.distL2(self.nodeXyz[lastGridNode], \
                                    self.nodeXyz[curGridNode])
@@ -1829,15 +1855,15 @@ class meshFromSpheres(mesh):
   def __createSurfaceNodes(self, spheres):
     '''creates surface nodes, sets grid nodes to interior if inside sphere,
     connects surface nodes to grid nodes and grid nodes to each other'''
-    for eachX in xrange(self.lengths[0]):        
-      for eachY in xrange(self.lengths[1]):        
-        self.__createSurfNodesOneDir(eachX, eachY, spheres, 2)     
-    for eachX in xrange(self.lengths[0]):        
-      for eachZ in xrange(self.lengths[2]):        
-        self.__createSurfNodesOneDir(eachX, eachZ, spheres, 1)     
-    for eachY in xrange(self.lengths[1]):        
-      for eachZ in xrange(self.lengths[2]):        
-        self.__createSurfNodesOneDir(eachY, eachZ, spheres, 0)     
+    for eachX in xrange(self.lengths[0]):
+      for eachY in xrange(self.lengths[1]):
+        self.__createSurfNodesOneDir(eachX, eachY, spheres, 2)
+    for eachX in xrange(self.lengths[0]):
+      for eachZ in xrange(self.lengths[2]):
+        self.__createSurfNodesOneDir(eachX, eachZ, spheres, 1)
+    for eachY in xrange(self.lengths[1]):
+      for eachZ in xrange(self.lengths[2]):
+        self.__createSurfNodesOneDir(eachY, eachZ, spheres, 0)
 
 class meshJustSurface(mesh):
   '''mesh for just the surface, no grid ever read in'''
@@ -1845,7 +1871,7 @@ class meshJustSurface(mesh):
   def __init__(self, pointXYZ, pointNeighbor):
     '''creates a mesh from just the surface'''
     self.gridNodes = []    #this will be empty
-    self.surfaceNodes = [] 
+    self.surfaceNodes = []
     self.nodeDist = {} #moving data storage out of node class into dicts
     self.nodeNeighbors = {}
     self.nodeClass = {}
@@ -1860,8 +1886,8 @@ class meshJustSurface(mesh):
 
   def surfNodeInitialize(self, pointXYZ):
     '''now initialize the surface nodes'''
-    for point in pointXYZ: 
-      ptIndex,ptXYZ = int(point[0]), point[1:4] 
+    for point in pointXYZ:
+      ptIndex, ptXYZ = int(point[0]), point[1:4]
       self.surfaceNodes.append(ptIndex)
       self.nodeXyz[ptIndex] = ptXYZ
       self.nodeOffGridXyz[ptIndex] = ptXYZ
@@ -1872,10 +1898,9 @@ class meshJustSurface(mesh):
   def surfNodeConnect(self, pointXYZ, pointNeighbor):
     '''now connect up all the surface nodes'''
     for point in pointXYZ: #assuming no cavities
-      ptIndex,ptXYZ = int(point[0]), tuple(point[1:4])
+      ptIndex, ptXYZ = int(point[0]), tuple(point[1:4])
       #now connect surface nodes to each other
       for otherPoint in pointNeighbor[ptIndex-1][2:]:
         otherXYZ = pointXYZ[otherPoint-1][1:4]
         self.connectNeighbor(ptIndex, otherPoint, \
                              geometry.distL2(ptXYZ, otherXYZ))
-

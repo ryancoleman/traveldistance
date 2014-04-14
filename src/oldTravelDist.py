@@ -1,15 +1,17 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
-import math,  string
-import sys, os #for running commandline instead of through pymol
+import math
+import string
+import sys
+import os  # for running commandline instead of through pymol
 from os.path import isfile
 #following custom module must be in same directory or in usual path
-import tstdata 
-from phi import phi #phi map reader/writer
-import tstdebug #debugging functions, moved out of codebase
-import geometry  #geometric primitives
-from pdb import pdbData 
-import grid  #moved primitive grid functions
+import tstdata
+from sharp_phi import phi  # phi map reader/writer
+import tstdebug  # debugging functions, moved out of codebase
+import geometry   # geometric primitives
+from pdb import pdbData
+import grid   # moved primitive grid functions
 import cavity
 import orstHelper
 import travelDistNoMesh
@@ -17,7 +19,7 @@ import travelDistNoMesh
 def tstTravelDepthNoPhi(tstFileName, gridSize=1.0):
   '''does old style (v1.0) travel depth with no phi-map, finds own inside and
   outside data, proceeds as normal'''
-  tstD = tstdata.tstData(tstFileName) #read the file into the data structure
+  tstD = tstdata.tstData(tstFileName)  # read the file into the data structure
   if 'CONVEX_HULL_TRI_POINT_LIST' not in tstD.dict.keys():
     print "Run tstConvexHull.py on this tst data file first."
     sys.exit(1)
@@ -26,8 +28,8 @@ def tstTravelDepthNoPhi(tstFileName, gridSize=1.0):
   for record in tstD.dict['CONVEX_HULL_TRI_POINT_LIST']:
     convexHullPoints.update(record[1:])
   #do the biggest disjoint set of tris/points stuff
-  allPoints, allTris, cavPoints, cavTris = cavity.assumeNoCavities( \
-      tstD.dict['POINT_XYZ'], tstD.dict['TRIANGLE_POINT'], \
+  allPoints, allTris, cavPoints, cavTris = cavity.assumeNoCavities(
+      tstD.dict['POINT_XYZ'], tstD.dict['TRIANGLE_POINT'],
       tstD.dict['POINT_NEIGHBOR'])
   #find the minimum coordinates in each dimension
   mins = tstD.dict['POINT_XYZ'][0][1:]
@@ -42,41 +44,41 @@ def tstTravelDepthNoPhi(tstFileName, gridSize=1.0):
   maxsSave = maxs[:]
   #cache a bunch of computations on each triangle
   #triTuples does not contain the ones that are for cavities
-  triTuples = geometry.cacheTriangle(tstD.dict['TRIANGLE_POINT'], \
-                            tstD.dict['POINT_XYZ'], allTris)
-  convexTriTuples = geometry.cacheTriangle( \
-                tstD.dict['CONVEX_HULL_TRI_POINT_LIST'], tstD.dict['POINT_XYZ'])
+  triTuples = geometry.cacheTriangle(
+      tstD.dict['TRIANGLE_POINT'], tstD.dict['POINT_XYZ'], allTris)
+  convexTriTuples = geometry.cacheTriangle(
+      tstD.dict['CONVEX_HULL_TRI_POINT_LIST'], tstD.dict['POINT_XYZ'])
   #grid encoding -1 = outside ch, 0 = between ch, ms, -2 = inside ms
-  mins, maxs = [],[] #so values computed are saved
+  mins, maxs = [], []  # so values computed are saved
   mins = [math.floor(x)-gridSize for x in minsSave]
   maxs = [math.ceil(x)+gridSize for x in maxsSave]
-  gridD = grid.makeNewEmptyGrid(mins,maxs,gridSize,-1)  #all set to outside ch
+  gridD = grid.makeNewEmptyGrid(mins, maxs, gridSize, -1)  # set to outside ch
   #tstdebug.debugGridCountVals(gridD)
   #first step, check and set outside ch
-  orstHelper.decideInside(gridD, convexTriTuples, convexHullPoints, \
-                 tstD.dict['CONVEX_HULL_POINT_TRI_LIST'], \
-                 tstD.dict['POINT_XYZ'], \
-                 tstD.dict['CONVEX_HULL_TRI_POINT_LIST'], \
-                 0, False, 2) #0 inside convex hull, False any value, 2=max tris
+  orstHelper.decideInside(
+      gridD, convexTriTuples, convexHullPoints, 
+      tstD.dict['CONVEX_HULL_POINT_TRI_LIST'], tstD.dict['POINT_XYZ'],
+      tstD.dict['CONVEX_HULL_TRI_POINT_LIST'], 0, False, 2)
+   #0 inside convex hull, False any value, 2=max tris
   #tstdebug.debugGridCountVals(gridD)
   #now find inside molecular surface
-  orstHelper.decideInside(gridD, triTuples, allPoints, \
-                 tstD.dict['POINT_TRIANGLE'], tstD.dict['POINT_XYZ'], \
-                 tstD.dict['TRIANGLE_POINT'], -2) #-2 inside everything 
+  orstHelper.decideInside(
+      gridD, triTuples, allPoints, tstD.dict['POINT_TRIANGLE'],
+      tstD.dict['POINT_XYZ'], tstD.dict['TRIANGLE_POINT'], -2)
+  #-2 inside everything
   #tstdebug.debugGridCountVals(gridD)
   #following lines make files that allow visual debugging in pymol
-  #tstdebug.debugGrid(gridD, "debug.grid." + str(gridSize) + ".py")      
-  #tstdebug.debugGridNoBlue(gridD, "debug.grid.nb." + str(gridSize) + ".py")   
+  #tstdebug.debugGrid(gridD, "debug.grid." + str(gridSize) + ".py")
+  #tstdebug.debugGridNoBlue(gridD, "debug.grid.nb." + str(gridSize) + ".py")
   #tstdebug.debugGridJustGreen(gridD, "debug.grid.jg." + str(gridSize) + ".py")
   #now...
   #here's the (relatively simple) surface travel distance calculation finally
-  #  assign following encoding -1 = outside ch, 0 = on border, 
-  #   pos ints = dist from border, -2 = far inside ms, 
+  #  assign following encoding -1 = outside ch, 0 = on border,
+  #   pos ints = dist from border, -2 = far inside ms,
   #   other neg ints = -(dist)-3
   #whole algorithm wrapped into big function...
-  extraEdges, surfaceEdgeBoxes = grid.findLongSurfEdges(  \
-     tstD.dict['POINT_XYZ'], tstD.dict['POINT_NEIGHBOR'], \
-                    gridSize, mins, maxs)
+  extraEdges, surfaceEdgeBoxes = grid.findLongSurfEdges(
+     tstD.dict['POINT_XYZ'], tstD.dict['POINT_NEIGHBOR'], gridSize, mins, maxs)
   volumePoints = False
   if 'POINT_TRAVEL_DEPTH_CHECK' in tstD.dict.keys():
     volumePoints = tstD.dict['POINT_TRAVEL_DEPTH_CHECK']
@@ -99,7 +101,7 @@ def tstTravelDepthNoPhi(tstFileName, gridSize=1.0):
   #tstdebug.debugTravelSurfGrid(gridD, "debug.travel.surf.grid." + str(gridSize) + ".py",extraEdges,mins,maxs,gridSize,maximumTD)
   #save data into tstData
   tstD.dict['DEPTH_TRAVEL_DIST'] = pointTravelDist
-  #write data to file    
+  #write data to file
   tstFile = open(tstFileName, 'a')
   tstFile.write("DEPTH_TRAVEL_DIST\n")
   for line in pointTravelDist:
@@ -110,7 +112,7 @@ def tstTravelDepthNoPhi(tstFileName, gridSize=1.0):
     tstFile.write(noPlusLine)
     tstFile.write("\n")
   tstFile.write("END DEPTH_TRAVEL_DIST\n")
-  tstFile.close()  
+  tstFile.close()
   if volumePointDepths:
     tstD.dict['POINT_TRAVEL_DEPTH_REPORT'] = volumePointDepths
     tstFile = open(tstFileName, 'a')
@@ -148,7 +150,7 @@ def tstTravelDepthNoPhi(tstFileName, gridSize=1.0):
     tstFile.write(noPlusLine)
     tstFile.write("\n")
   tstFile.write("END TRACEBACK_LIST\n")
-  tstFile.close()  
+  tstFile.close()
 
 def tstTravelDepthRun(tstD, phiData, tstFileName="temp.tst"):
   if 'CONVEX_HULL_TRI_POINT_LIST' not in tstD.dict.keys():
@@ -158,15 +160,14 @@ def tstTravelDepthRun(tstD, phiData, tstFileName="temp.tst"):
   convexHullPoints = set()
   for record in tstD.dict['CONVEX_HULL_TRI_POINT_LIST']:
     convexHullPoints.update(record[1:])
-  gridD,mins,maxs =  grid.makeTrimmedGridFromPhi(phiData,\
-                tstD.dict['POINT_XYZ'], \
-                convexHullPoints, 0.6, -2.0, -1.0)
+  gridD, mins, maxs =  grid.makeTrimmedGridFromPhi(
+      phiData, tstD.dict['POINT_XYZ'], convexHullPoints, 0.6, -2.0, -1.0)
   gridSize = 1.0/phiData.scale
-  del phiData #no longer needed in this function, so delete this reference
+  del phiData  # no longer needed in this function, so delete this reference
   #tstdebug.debugGridCountVals(gridD)
   #do the biggest disjoint set of tris/points stuff
-  allPoints, allTris, cavPoints, cavTris = cavity.assumeNoCavities( \
-      tstD.dict['POINT_XYZ'], tstD.dict['TRIANGLE_POINT'], \
+  allPoints, allTris, cavPoints, cavTris = cavity.assumeNoCavities(
+      tstD.dict['POINT_XYZ'], tstD.dict['TRIANGLE_POINT'],
       tstD.dict['POINT_NEIGHBOR'])
   convexTriTuples = geometry.cacheTriangle( \
                 tstD.dict['CONVEX_HULL_TRI_POINT_LIST'], tstD.dict['POINT_XYZ'])
@@ -184,16 +185,16 @@ def tstTravelDepthRun(tstD, phiData, tstFileName="temp.tst"):
                  tstD.dict['CONVEX_HULL_POINT_TRI_LIST'], \
                  tstD.dict['POINT_XYZ'], \
                  tstD.dict['CONVEX_HULL_TRI_POINT_LIST'], \
-                 0, -1, 2) #0 inside convex hull, -1 outside (only valid to change), 2 = max tris 
+                 0, -1, 2) #0 inside convex hull, -1 outside (only valid to change), 2 = max tris
   #tstdebug.debugGridCountVals(gridD)
   #following lines make files that allow visual debugging in pymol
-  #tstdebug.debugGrid(gridD, "debug.grid." + str(gridSize) + ".py")      
-  #tstdebug.debugGridNoBlue(gridD, "debug.grid.nb." + str(gridSize) + ".py")   
+  #tstdebug.debugGrid(gridD, "debug.grid." + str(gridSize) + ".py")
+  #tstdebug.debugGridNoBlue(gridD, "debug.grid.nb." + str(gridSize) + ".py")
   #tstdebug.debugGridJustGreen(gridD, "debug.grid.jg." + str(gridSize) + ".py")
   #now...
   #here's the (relatively simple) surface travel distance calculation finally
-  #  assign following encoding -1 = outside ch, 0 = on border, 
-  #   pos ints = dist from border, -2 = far inside ms, 
+  #  assign following encoding -1 = outside ch, 0 = on border,
+  #   pos ints = dist from border, -2 = far inside ms,
   #   other neg ints = -(dist)-3
   #whole algorithm wrapped into big function...
   extraEdges, surfaceEdgeBoxes = grid.findLongSurfEdges(  \
@@ -297,7 +298,7 @@ def tstTravelDepth(tstFileName,phiFileName):
            tstTravelDepthRun(tstD, phiData, tstFileName) #modifies tstD in place
   #transform grid to actual travel distance
   phiTravelDepthData.write(tstFileName+".travel.phi")
-  #write data to file    
+  #write data to file
   tstFile = open(tstFileName, 'a')
   tstFile.write("DEPTH_TRAVEL_DIST\n")
   for line in tstD.dict['DEPTH_TRAVEL_DIST']:
@@ -308,7 +309,7 @@ def tstTravelDepth(tstFileName,phiFileName):
     tstFile.write(noPlusLine)
     tstFile.write("\n")
   tstFile.write("END DEPTH_TRAVEL_DIST\n")
-  tstFile.close()  
+  tstFile.close()
   if volumePointDepths:
     tstD.dict['POINT_TRAVEL_DEPTH_REPORT'] = volumePointDepths
     tstFile = open(tstFileName, 'a')
@@ -333,7 +334,7 @@ def tstTravelDepth(tstFileName,phiFileName):
     tstFile.write(noPlusLine)
     tstFile.write("\n")
   tstFile.write("END TRACEBACK_LIST\n")
-  tstFile.close()  
+  tstFile.close()
 
 def tstTravelSurfInside(tstFileName,phiFileName=False):
   tstD = tstdata.tstData(tstFileName) #read the file into the data structure
@@ -355,8 +356,8 @@ def tstTravelSurfInside(tstFileName,phiFileName=False):
       tstD.dict['POINT_XYZ'], tstD.dict['TRIANGLE_POINT'], \
       tstD.dict['POINT_NEIGHBOR'])
   #here's the (relatively simple) surface travel distance calculation finally
-  #  assign following encoding -1 = outside ch, 0 = on border, 
-  #   pos ints = dist from border, -2 = far inside ms, 
+  #  assign following encoding -1 = outside ch, 0 = on border,
+  #   pos ints = dist from border, -2 = far inside ms,
   #   other neg ints = -(dist)-3
   #whole algorithm wrapped into big function...
   extraEdges, surfaceEdgeBoxes = grid.findLongSurfEdges(  \
@@ -398,7 +399,7 @@ def tstTravelSurfInside(tstFileName,phiFileName=False):
     tstFile.write(noPlusLine)
     tstFile.write("\n")
   tstFile.write("END ATOM_TRAVEL_IN\n")
-  tstFile.close()  
+  tstFile.close()
 
 def tstTravelSurfInsideOld(tstFileName,phiFileName=False):
   '''does the old algorithm of just computing the shortest distance to any
@@ -439,7 +440,7 @@ def tstTravelSurfInsideOld(tstFileName,phiFileName=False):
     tstFile.write(noPlusLine)
     tstFile.write("\n")
   tstFile.write("END ATOM_DEPTH_OLD\n")
-  tstFile.close()  
+  tstFile.close()
 
 def copyPhiMap(phiFileIn, phiFileOut):
   '''simple, just copies the phi map and writes it, to check binary i/o'''
@@ -452,11 +453,11 @@ def examinePhiMap(phiFileIn):
   print phiData.histogramValues()
 
 #this is where main is... maybe add some other arguments like gridSize?
-if -1 != string.find(sys.argv[0], "oldTravelDist"): 
+if -1 != string.find(sys.argv[0], "oldTravelDist"):
   if 1 < len(sys.argv) and sys.argv[1] == "depth" and  len(sys.argv) > 3:
     tstFile, phiFile = sys.argv[2:4]
     print tstFile, phiFile
-    tstTravelDepth(tstFile, phiFile) 
+    tstTravelDepth(tstFile, phiFile)
   elif 1 < len(sys.argv) and sys.argv[1] == "depthold"  and len(sys.argv) > 2:
     tstFile = sys.argv[2]
     gridSize = 1.0
@@ -471,23 +472,23 @@ if -1 != string.find(sys.argv[0], "oldTravelDist"):
   elif 1 < len(sys.argv) and sys.argv[1] == "surfin" and  len(sys.argv) > 3:
     tstFile, phiFile = sys.argv[2:4]
     print tstFile, phiFile
-    tstTravelSurfInside(tstFile, phiFile) 
+    tstTravelSurfInside(tstFile, phiFile)
   elif 1 < len(sys.argv) and sys.argv[1] == "surfinold" and  len(sys.argv) > 3:
     tstFile, phiFile = sys.argv[2:4]
     print tstFile, phiFile
-    tstTravelSurfInsideOld(tstFile, phiFile) 
+    tstTravelSurfInsideOld(tstFile, phiFile)
   elif 1 < len(sys.argv) and sys.argv[1] == "cavityremove" and  len(sys.argv) > 3:
     tstFile, tstOut, phiFile, phiOut = sys.argv[2:6]
     print tstFile, tstOut, phiFile, phiOut
-    cavity.tstCavityRemoval(tstFile, tstOut, phiFile, phiOut) 
+    cavity.tstCavityRemoval(tstFile, tstOut, phiFile, phiOut)
   elif 1 < len(sys.argv) and sys.argv[1] == "copyphi" and  len(sys.argv) > 3:
     phiFileIn, phiFileOut = sys.argv[2:4]
     print phiFileIn, phiFileOut
-    copyPhiMap(phiFileIn, phiFileOut)  
+    copyPhiMap(phiFileIn, phiFileOut)
   elif 1 < len(sys.argv) and sys.argv[1] == "examinephi" and  len(sys.argv) > 2:
     phiFileIn= sys.argv[2]
     print phiFileIn
-    examinePhiMap(phiFileIn)  
+    examinePhiMap(phiFileIn)
   else:
     print "Usage: tstTravelDist.py depth tstFile phiFile"
     print "Usage: tstTravelDist.py depthold tstFile"
@@ -497,6 +498,3 @@ if -1 != string.find(sys.argv[0], "oldTravelDist"):
     print "Usage: tstTravelDist.py cavityremove tstFile tstFileOut phiFile phiFileOut"
     print "Usage: tstTravelDist.py copyphi phiFileIn phiFileOut"
     print "Usage: tstTravelDist.py examinephi phiFileIn"
-  
-
-

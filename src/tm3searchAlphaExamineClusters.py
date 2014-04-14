@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #reads in tm3 files, ignores tree structure, just looks for nodes/pockets
 #that are similar
@@ -7,7 +7,7 @@ import tm3, string, sys
 
 if -1 != string.find(sys.argv[0], "tm3searchAlphaExamineClusters.py"):
   tmDataList = []
-  alpha = float(sys.argv[1]) #the second parameter should be a float, 
+  alpha = float(sys.argv[1]) #the second parameter should be a float,
                       #which is multiplied by the redudancy scores
   filenames = sys.argv[2:]
   filenames.sort() #so coloring is consistent

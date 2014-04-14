@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 import string, sys, comparePaths, os, pdb, geometry
 
@@ -16,7 +16,7 @@ def countCrossingsZ(path, barrier):
 
 def checkPathBarriers(prefix):
   tstName = prefix + ".nocav.tst"
-  findHolesName = tstName + ".findholes.log" 
+  findHolesName = tstName + ".findholes.log"
   findHolesFile = open(findHolesName, 'r')
   findHolesLines = findHolesFile.readlines()
   findHolesFile.close()
@@ -43,22 +43,22 @@ def checkPathBarriers(prefix):
   logFile = open(barrierHolesName, 'w')
   goodLogFile = open(goodBarrierHolesName, 'w')
   badLogFile = open(badBarrierHolesName, 'w')
-  #the following 5 things are calculated and written for each path, headers 
+  #the following 5 things are calculated and written for each path, headers
   #the 6th, barrier separation, is really the same for each structure
-  logFile.write("endsBeyond1count barrier1count endsBetweenCount ") 
+  logFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   logFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   goodLogFile.write("prefix ")
-  goodLogFile.write(string.strip(findHolesLines[0]) + " ") 
-  goodLogFile.write("endsBeyond1count barrier1count endsBetweenCount ") 
+  goodLogFile.write(string.strip(findHolesLines[0]) + " ")
+  goodLogFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   goodLogFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   badLogFile.write("prefix ")
-  badLogFile.write(string.strip(findHolesLines[0]) + " ") 
-  badLogFile.write("endsBeyond1count barrier1count endsBetweenCount ") 
+  badLogFile.write(string.strip(findHolesLines[0]) + " ")
+  badLogFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   badLogFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   holeNumber = 1
   poreFile = tstName + "." + str(holeNumber) + poreSuffix
   while os.path.exists(poreFile):
-    path = comparePaths.readCGOPath(poreFile)    
+    path = comparePaths.readCGOPath(poreFile)
     intersections = [0,0]
     for index, barrier in enumerate(barrierZ):
       intersections[index] = countCrossingsZ(path, barrier)
@@ -93,15 +93,10 @@ def checkPathBarriers(prefix):
   goodLogFile.close()
   badLogFile.close()
 
-if -1 != string.find(sys.argv[0], "pathBarriersCheck"): 
+if -1 != string.find(sys.argv[0], "pathBarriersCheck"):
   if len(sys.argv) >= 2:
     prefix = sys.argv[1]
     prefix = prefix.replace(".nocav.tst.findholes.log", "")#just in case
     checkPathBarriers(prefix)
   else:
     print "pathBarriersCheck.py prefix[.nocav.tst.findholes.log]"
-
-
-
-
-

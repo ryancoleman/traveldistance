@@ -26,7 +26,7 @@ def makeTst(pdbFileName, gridSpacing, pathTo="$TDHOME/bin/",whichSrf="tri", \
             probeSize=False, radScaleIn=False):
   pathTo = os.path.expandvars(pathTo)
   if "tri" == whichSrf: #pick which method to use, default
-    srf = trisrf    
+    srf = trisrf
     probe = triprobe
   elif "mesh" == whichSrf: #alternate, better for tunnels
     srf = meshsrf
@@ -48,9 +48,11 @@ def makeTst(pdbFileName, gridSpacing, pathTo="$TDHOME/bin/",whichSrf="tri", \
   for dimension in range(3):
     for index, coord in enumerate(pdbEntry.coords):
       mins[dimension] = min(mins[dimension], \
-                  coord[dimension]-(pdb.radii[atoms[index][0]]*radScaleUse))
+                  coord[dimension] - \
+                  (pdb.radiiDefault[atoms[index][0]]*radScaleUse))
       maxs[dimension] = max(maxs[dimension], \
-                  coord[dimension]+(pdb.radii[atoms[index][0]]*radScaleUse))
+                  coord[dimension] + \
+                  (pdb.radiiDefault[atoms[index][0]]*radScaleUse))
   difference = 0
   for dimension in range(3):
     difference = max(difference,maxs[dimension] - mins[dimension])
@@ -78,7 +80,7 @@ def makeTst(pdbFileName, gridSpacing, pathTo="$TDHOME/bin/",whichSrf="tri", \
   #print percentFill, execString
   try:
     os.unlink("trisrf.tri")
-  except OSError: 
+  except OSError:
     pass #this is okay, just making sure it is deleted
   trisrfProc = os.popen4(execString)
   if "tri" == whichSrf: #pick which method to use, default
@@ -123,7 +125,7 @@ def makeTst(pdbFileName, gridSpacing, pathTo="$TDHOME/bin/",whichSrf="tri", \
     os.unlink("fort.10")
     os.unlink("trigen.py")
     os.unlink("triline.py")
-  except OSError: 
+  except OSError:
     pass #again, just cleaning up junk files
   try:
     os.unlink("mesh.pdb")
@@ -133,7 +135,7 @@ def makeTst(pdbFileName, gridSpacing, pathTo="$TDHOME/bin/",whichSrf="tri", \
     os.unlink("fort.10")
     os.unlink("trigen.py")
     os.unlink("triline.py")
-  except OSError: 
+  except OSError:
     pass #again, just cleaning up junk files
   log.write(finishedRunningGen)
   log.close()

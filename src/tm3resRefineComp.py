@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #reports pockets with highest overlap with the set of residues
 
@@ -32,7 +32,7 @@ if -1 != string.find(sys.argv[0], "tm3resRefineComp.py"):
           doSelfScore=False, justNodes=dotData.treeToBestNode, \
           mst=True, lineMst=True, lineMstEnds=False, \
           refinePockets=True, possNodes=dotData.treeToPossNodes, \
-          dotResidues=dotData) 
+          dotResidues=dotData)
   dotData.printHelpful()
   #linemstends doesn't work that well so disabled for now
   names,matrix = [],{}

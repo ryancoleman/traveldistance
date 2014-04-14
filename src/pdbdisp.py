@@ -103,7 +103,7 @@ class displayObj(object):
     value = value[0]
     if cycle: #new case, make more like topo map...
       #ignore mediumValueColor
-      #use the colors in the gradient as whole colors, switch based on mod value 
+      #use the colors in the gradient as whole colors, switch based on mod value
       whichCol = int((value-min)/4) % (len(gradient)/3)
       red = gradient[int(whichCol*3+0)]
       gre = gradient[int(whichCol*3+1)]
@@ -113,7 +113,7 @@ class displayObj(object):
       if gradient[0]==gradient[3] and gradient[3]==gradient[6] and \
             gradient[1]==gradient[4] and gradient[4]==gradient[7] and \
             gradient[2]==gradient[5] and gradient[5]==gradient[8]: #all the same
-        return [gradient[0],gradient[1],gradient[2]] #just output first 
+        return [gradient[0],gradient[1],gradient[2]] #just output first
       if min > value:
         return [gradient[0],gradient[1],gradient[2]]
       elif min <= value and value < med:
@@ -135,7 +135,7 @@ class displayObj(object):
         return [0.0,0.0,0.0]
     elif len(gradient) == 24:
       valueOct = int(value)-1
-      #print valueOct   
+      #print valueOct
       red = gradient[valueOct*3]
       gre = gradient[valueOct*3+1]
       blu = gradient[valueOct*3+2]
@@ -208,16 +208,16 @@ class displayObj(object):
         pdbObj.append(self.cylRad)
       else:
         print bFactor, masklow, maskhigh
-    cmd.load_cgo(pdbObj, pdbName +"."+ str(self.drawCount))    
+    cmd.load_cgo(pdbObj, pdbName +"."+ str(self.drawCount))
     self.drawCount += 1
- 
+
   def pdbDisplay(self):
     '''creates an actual pdb object of the protein or just the part near the
     surface/group of interest'''
     pdbText = "\n".join(self.pdbDatas[-1].rawData)
     cmd.read_pdbstr(pdbText, self.pdbNames[-1]+"."+str(self.drawCount)+".pdb")
     self.drawCount += 1
-    
+
 #this is really really dumb but i can't get it to work otherwise
 displayInstance = displayObj()
 
@@ -270,5 +270,3 @@ cmd.extend("pdbOpen",pdbOpen)
 cmd.extend("pdbOpenBurial",pdbOpenBurial)
 cmd.extend("pdbDisplay",pdbDisplay)
 cmd.extend("pdbDisplayCyls",pdbDisplayCyls)
-
-

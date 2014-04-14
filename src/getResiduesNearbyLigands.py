@@ -1,6 +1,6 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
-#reads in a list of codes, finds pdb + ligand files, outputs 
+#reads in a list of codes, finds pdb + ligand files, outputs
 #residues nearby each ligand in the pdb
 
 import string, sys, pdb, glob

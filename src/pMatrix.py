@@ -3,7 +3,7 @@ import operator
 
 """Linear Algebra pMatrix Class
 
-The pMatrix class is an implementation of a linear algebra matrix.  
+The pMatrix class is an implementation of a linear algebra matrix.
 Arithmetic operations, trace, determinant, and minors are defined for it.  This
 is a lightweight alternative to a numerical Python package for people who need
 to do basic linear algebra.
@@ -22,17 +22,17 @@ matrix a, assign b=a, and then change values in b, you will change values in a
 as well.  Matrix copying should be done with copy.deepcopy.
 
 This implementation has no memory-saving optimization for sparse matricies.  A
-derived class may implement a more sophisticated storage method by overriding 
+derived class may implement a more sophisticated storage method by overriding
 the __getitem__ and __setitem__ functions.
 
-Determinants are taken by expanding by minors on the top row.  The private 
+Determinants are taken by expanding by minors on the top row.  The private
 functions supplied for expansion by minors are more generic than what is needed
 by this implementation.  They may be used by a derived class that wishes to do
 more efficient expansion of sparse matricies.
 
 By default, pMatrix elements are members of the complex field, but if you want
 to perform linear algebra on something other than numbers you may redefine
-pMatrix.null_element, pMatrix.identity_element, and pMatrix.inverse_element and 
+pMatrix.null_element, pMatrix.identity_element, and pMatrix.inverse_element and
 override the is_scalar_element function.
 
 References:
@@ -137,7 +137,7 @@ class pMatrix(object):
                 A matrix can be created in three ways.
 
                 1. A single integer argument is supplied.  The constructor creates a
-                null square matrix of that size.  For example 
+                null square matrix of that size.  For example
 
                         pMatrix(2)
 
@@ -324,7 +324,7 @@ class pMatrix(object):
                 This is a private function called by __mul__ and __rmul__.
                 """
                 r = []
-                for row in self.m:                              
+                for row in self.m:
                         r.append(map(lambda x: x*scalar, row))
                 return pMatrix(r)
 
@@ -475,7 +475,7 @@ class pMatrix(object):
 def unit_matrix(n):
         """Creates an nxn unit matirx
 
-        The unit matrix is a diagonal matrix whose diagonal is composed of 
+        The unit matrix is a diagonal matrix whose diagonal is composed of
         identity elements.  For example, unit_matrix(3) returns the matrix
 
                 1 0 0

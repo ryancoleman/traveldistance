@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 #script to read .tst format and make surfaces in pymol
 #ryan coleman
 
@@ -9,7 +9,7 @@ import math,  string
 import sys, os
 from tstdata import tstData
 
-  
+
 
 #this function is the opening to pymol to open a tst file, read in the data
 def tstOpen(filename):

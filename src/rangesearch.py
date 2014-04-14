@@ -1,4 +1,4 @@
-#ryan g. coleman ryangc@mail.med.upenn.edu 
+#ryan g. coleman ryangc@mail.med.upenn.edu
 #this file is a module to do 2D orthogonal range searching
 #by the simplest algorithm with the following properties:
 # space requirements for tree O(n log n)
@@ -6,7 +6,7 @@
 # query time  O(log^2 n + k) where k is the number of points in the range
 #also allows any data to be stored hanging off the points in the data structure
 #written in something like 12 hours march 23rd through 25th 2005
-#3.2008 upgraded to python2.5, including sets.Set() -> set() conversion
+#3.2008 upgraded to python , including sets.Set() -> set() conversion
 
 import operator # for itemgetter
 
@@ -14,7 +14,7 @@ import operator # for itemgetter
 class orthoRangeSearchTree(object):
   """builds a 2D orthogonal range search tree and allows queries from it.
 
-  Constructor takes points in the plane and builds a 2D range search tree 
+  Constructor takes points in the plane and builds a 2D range search tree
   in O(n log n) time and space, where n is the number of points passed in.
 
   Queries in the form of rectangles return all points in the rectangle in
@@ -23,23 +23,23 @@ class orthoRangeSearchTree(object):
   (note on complexity: uses's python tuned up quicksort, which in worst-case
   quadratic, but almost always (n log n))
 
-  This algorithm uses the simplest form of the algorithm for this, with the 
+  This algorithm uses the simplest form of the algorithm for this, with the
   correction allowing multiple points with the same x or y coordinates.
 
   Specially adapted to contain any amount of data tied to each point, just
   put it in the 'point' list passed in.
 
-  Algorithms adapted from Chapter 5 of: 
+  Algorithms adapted from Chapter 5 of:
 
   Computational Geometry: Algorithms and Applications
   Second Edition
-  Mark de Berg, Otfried Schwarzkopf TU Eindhoven (the Netherlands) 
+  Mark de Berg, Otfried Schwarzkopf TU Eindhoven (the Netherlands)
   Marc van Kreveld, Mark Overmars, Utrecht University (the Netherlands)
 
   2nd rev. ed. 2000. 367 pages, 370 fig.
   Hardcover DM 59
   ISBN: 3-540-65620-0
-  """  
+  """
 
   __orst = [] #orthogonal range search tree data structure saved here
   __inputData = [] #data about points, etc.
@@ -79,7 +79,7 @@ class orthoRangeSearchTree(object):
 
   #private helper method used to make binary search trees in arrays
   #leaves inputList alone, copies what is necessary and returns it
-  #inputList should contain sublists of length 2,where index 0 is the 
+  #inputList should contain sublists of length 2,where index 0 is the
   #sorted element, and index 1 is carried along (pointer to real data)
   def __makeBinTreeArray(self, inputList):
     #inputlist must be sorted on the 0th element of its sublist
@@ -119,7 +119,7 @@ class orthoRangeSearchTree(object):
     #effectively make a 1-d range tree
     thisBSTA = self.__makeBinTreeArray(ySorted)
     if len(ySorted) == 1 and len(xSorted) == 1: #leaf node case
-      thisEntry = [xSorted[0], thisBSTA, False, False] 
+      thisEntry = [xSorted[0], thisBSTA, False, False]
       return thisEntry
     else: #split and recurse
       medianX = self.__median(len(xSorted))
@@ -144,38 +144,38 @@ class orthoRangeSearchTree(object):
       return thisEntry
       #recursive calls complete data structure building
 
-  #main init (constructor for the class)  
+  #main init (constructor for the class)
   def __init__(self,inputData,xAxis=0,yAxis=1):
     """takes a planar set of points and constructs the range tree.
-  
+
     a list of list is passed in as inputData with at least 2 elements in the
-    sublists, a x and y coordinate.  Which is x and which is y can be specified 
-    by the xAxis and yAxis parameters.  The rest of the data in each sublist is 
+    sublists, a x and y coordinate.  Which is x and which is y can be specified
+    by the xAxis and yAxis parameters.  The rest of the data in each sublist is
     kept at the point, and is all returned when queried.
 
     O(n log n) time and space, where n is the number of points passed in.
- 
+
     (note on complexity: uses's python tuned up quicksort, which in worst-case
     quadratic, but almost always (n log n))
 
     To resolve a complete ordering, if points have same x and y coordinates,
     the passed-in order is used.
-    
+
     Arguments:
     inputData -- no default, list is modified/destroyed/don't mess with it!
     xAxis -- default 0
     yAxis -- default 1
     """
-    
+
     self.__orst = [] #clear this
     #first, must define complete ordering of points, sort by both x and y
     #record initial ordering
-    self.__inputData = inputData #keep reference, assume we can fiddle with 
+    self.__inputData = inputData #keep reference, assume we can fiddle with
                                  #passed in data and caller won't mess it up
     #save input ordering of points...
     for index,point in enumerate(inputData):
-      point.append(index)    
-    initOrder = len(inputData[0])    
+      point.append(index)
+    initOrder = len(inputData[0])
     #sort on x, copy out x-coordinate and initial index
     inputData.sort(key=operator.itemgetter(xAxis)) #lambda x,y:cmp(x[xAxis],y[xAxis]))
     xSorted = [(xxx[xAxis],xxx[initOrder-1]) for xxx in inputData]
@@ -220,7 +220,7 @@ class orthoRangeSearchTree(object):
     current = 0 #root
     curVal = bsta[current][0]
     while self.__left(current) < len(bsta) and \
-        (rightLimit <= curVal or leftLimit > curVal): 
+        (rightLimit <= curVal or leftLimit > curVal):
       #stop once at leaf node, or at split
       #if in here, go whichever way down tree
       if rightLimit <= curVal:
@@ -240,11 +240,11 @@ class orthoRangeSearchTree(object):
       if len(bsta[yTop]) == 2: #at a leaf
         if y1 <= bsta[yTop][0] and bsta[yTop][0] <= y2:
           #print "adding", self.__inputData[bsta[yTop][1]]
-          appendResult.append(self.__inputData[bsta[yTop][1]]) #done 
+          appendResult.append(self.__inputData[bsta[yTop][1]]) #done
       else: #not a leaf--recurse
         self.__oneDReportSubtree(y1,y2,bsta,appendResult,self.__left(yTop))
         self.__oneDReportSubtree(y1,y2,bsta,appendResult,self.__right(yTop))
-      
+
   #private helper that does 1d-queries on passed in bsta
   #y1 and y2 are range, appendResult is array of results being built
   def __oneDRangeQuery(self,y1,y2,bsta,appendResult):
@@ -253,28 +253,28 @@ class orthoRangeSearchTree(object):
     if len(bsta[botSplit]) == 2: #denotes a leaf
       #print "a leaf"
       if y1 <= bsta[botSplit][0] and bsta[botSplit][0] <= y2:
-        #print "adding ", self.__inputData[bsta[botSplit][1]] 
-        appendResult.append(self.__inputData[bsta[botSplit][1]]) #done 
+        #print "adding ", self.__inputData[bsta[botSplit][1]]
+        appendResult.append(self.__inputData[bsta[botSplit][1]]) #done
     else:
       #print "not a leaf"
       #print "LEFT Y"      #LEFT
       current = self.__left(botSplit)
       while len(bsta[current]) != 2: #un-leaf
         if y1 <= bsta[current][0]:
-          self.__oneDReportSubtree( 
+          self.__oneDReportSubtree(
                  y1,y2,bsta,appendResult,self.__right(current))
           current = self.__left(current)
         else:
           current = self.__right(current)
       #clean up for current leaf
       if y1 <= bsta[current][0] and bsta[current][0] <= y2:
-        #print "adding ", self.__inputData[bsta[current][1]] 
-        appendResult.append(self.__inputData[bsta[current][1]]) #done 
+        #print "adding ", self.__inputData[bsta[current][1]]
+        appendResult.append(self.__inputData[bsta[current][1]]) #done
       #print "RIGHT Y"      #RIGHT
       current = self.__right(botSplit)
       while len(bsta[current]) != 2: #un-leaf
         if y2 > bsta[current][0]:
-          self.__oneDReportSubtree( 
+          self.__oneDReportSubtree(
                  y1,y2,bsta,appendResult,self.__left(current))
           current = self.__right(current)
         else:
@@ -282,8 +282,8 @@ class orthoRangeSearchTree(object):
       #clean up for current leaf
       if y1 <= bsta[current][0] and bsta[current][0] <= y2:
         #print "adding ", self.__inputData[bsta[current][1]]
-        appendResult.append(self.__inputData[bsta[current][1]]) #done 
-      #DONE 
+        appendResult.append(self.__inputData[bsta[current][1]]) #done
+      #DONE
 
 
   def rangeQuery(self,x1,x2,y1,y2):
@@ -293,8 +293,8 @@ class orthoRangeSearchTree(object):
     O(log^2 n + k) where k is the number of returned points.
 
     Range can be made inclusive by adding epsilon (small positive) to x2 and y2
-  
-    Arguments:                  
+
+    Arguments:
     x1 -- x-coordinate number 1 (left)
     x2 -- x-coordinate number 2 (right)
     y1 -- y-coordinate number 1 (down)
@@ -359,7 +359,7 @@ class orthoRangeSearchTree(object):
     else:
       returnN.append('$')
     return returnN
-   
+
 
   def printOrstTopLevelTree(self):
     """prints the nodes in the top level (x-coord) of the tree structure."""
@@ -410,15 +410,15 @@ def generateRandomRange():
 def runTests(count=1, rangeCount=10, sizeTree=500):
   """runs count number of tests of building and rangeCount number of query checks.
 
-  Generates random x,y pairs, builds trees, runs both kinds of queries and makes 
-  sure the results match. 
+  Generates random x,y pairs, builds trees, runs both kinds of queries and makes
+  sure the results match.
 
   Reports differences.
   """
 
   print "prints a . for every check passed and a newline for every tree checked"
   for index in xrange(count):
-    pairs = generateRandomPoints(sizeTree) 
+    pairs = generateRandomPoints(sizeTree)
     orst = orthoRangeSearchTree(pairs)
     print "tree built"
     for queryIndex in xrange(rangeCount):
@@ -434,9 +434,8 @@ def runTests(count=1, rangeCount=10, sizeTree=500):
         print len(realXY), len(dumbXY)
         print realSet.symmetric_difference(dumbSet)
         print testQuery
-        return orst, testQuery #break out for now, allow debugging        
+        return orst, testQuery #break out for now, allow debugging
       else:
         print ".",
     print " "
   return 0,0
-

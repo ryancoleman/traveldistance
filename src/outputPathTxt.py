@@ -1,9 +1,9 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 #ryan g coleman ryangc@mail.med.upenn.edu
 
 import pdb
-from geometry import dist
-import sys, string
+import sys
+import string
 import tstdebug
 import comparePaths
 from paths import outputRadiiTxt
@@ -11,8 +11,8 @@ from paths import outputRadiiTxt
 #tstdebug.debugSetGridSpheres(pathIn, stepSize, root
 def readOutputRadiiTxt(original, txtfile):
   '''outputs a txtfile of distance vs radius'''
-  origPath = comparePaths.readCGOPathWithRadius(original) #0 is radius
-  outputRadiiTxt(origPath, txtfile)  
+  origPath = comparePaths.readCGOPathWithRadius(original)  # 0 is radius
+  outputRadiiTxt(origPath, txtfile)
 
 if -1 != string.find(sys.argv[0], "outputPathTxt"):
   if len(sys.argv) > 2:

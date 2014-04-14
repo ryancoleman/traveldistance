@@ -1,10 +1,10 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 #ryan g. coleman ryangc@mail.med.upenn.edu
 
 #analyzes the b-factor column of pdb file... for travel-in analysis
 
 import sys, string, pdb
-import analyzePdbB 
+import analyzePdbB
 
 def analyzePdbBfromFile(listFilename, buriedThresh=2.):
   residues = {} # a dict of dicts where the sub-dicts are keyed on atom name
@@ -56,8 +56,7 @@ def analyzePdbBfromFile(listFilename, buriedThresh=2.):
   analyzePdbB.makeHistogramReport(residues, listFilename+ ".histogram.bfactor")
 
 #this is main
-if -1 != string.find(sys.argv[0], "analyzePdbB_fromFile.py"): 
+if -1 != string.find(sys.argv[0], "analyzePdbB_fromFile.py"):
   if len(sys.argv) > 1:
     for filename in sys.argv[1:]:
       analyzePdbBfromFile(filename) #passing in a filename now
-

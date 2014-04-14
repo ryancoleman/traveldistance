@@ -1,10 +1,10 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #ryan g. coleman ryan.g.coleman@gmail.com ryangc@mail.med.upenn.edu
 #kim sharp lab http://crystal.med.upenn.edu
 
-#analyzes and computes p-values for difference of means test, reads data 
-#from a file with column data and 2 files for the 2 data sets to switch to 
+#analyzes and computes p-values for difference of means test, reads data
+#from a file with column data and 2 files for the 2 data sets to switch to
 #construct p-values.
 
 import string, sys
@@ -50,7 +50,7 @@ def readList(inputFileName):
     return data
 
 def getMean(summaryDataColumn, listPdb):
-  '''for each entry in the second argument, finds the matching value in the 
+  '''for each entry in the second argument, finds the matching value in the
   first argument, adds these up and divides by the length'''
   summary = 0.
   for pdb in listPdb:
@@ -68,7 +68,7 @@ def analyzeColumn(summaryDataColumn, listPdbs, outputFileName,numTests=1000000):
   pValCounts =[0.,0.] #above, below
   for test in range(numTests):
     newLists = statistics.permuteLists(listPdbs)
-    testMean = getDiffMean(summaryDataColumn, newLists)    
+    testMean = getDiffMean(summaryDataColumn, newLists)
     if testMean >= origDiffMean:
       pValCounts[0] += 1.
     if testMean <= origDiffMean:
@@ -84,7 +84,7 @@ def analyzeColumn(summaryDataColumn, listPdbs, outputFileName,numTests=1000000):
   outputFile.write("\n")
   outputFile.close()
 
-if -1 != string.find(sys.argv[0], "analyze_packing.py"): 
+if -1 != string.find(sys.argv[0], "analyze_packing.py"):
   try:
     summaryData = readSummaryFile(sys.argv[1])
     listPdbs = [readList(fileName) for fileName in sys.argv[2:4]]

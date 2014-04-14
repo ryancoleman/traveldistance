@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #reads in tm3 files, ignores tree structure, just looks for nodes/pockets
 #that are similar
@@ -23,9 +23,9 @@ def animateScript(tmData, tstData, sortCol, outName):
       print 'cmd.do("png ', str(outName + string.zfill(index, 6)+'.png') + '")'
   print 'cmd.do("ray")'
   print 'cmd.do("png ', str(outName + string.zfill(index+1, 6)+'.png') + '")'
-  
+
 
 if -1 != string.find(sys.argv[0], "tm3animatepockets.py"):
   tmData = tm3.tmTreeFromFile(sys.argv[1])
   tstData = sys.argv[1].replace(".tree.tm3", "")
-  animateScript(tmData, tstData, 3, tstData+".movie.turn.") 
+  animateScript(tmData, tstData, 3, tstData+".movie.turn.")

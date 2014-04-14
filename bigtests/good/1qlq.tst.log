@@ -1,0 +1,131 @@
+ meshsrfA aug 2007 grid size:          193
+ changed epsmp to real
+ use contour level, set to 0.5
+ interpolating cutpoints
+ % fill? 
+ 1qlq.pdb                                
+ grid size                  :         193
+ percent of box to be filled:   21.80000    
+ probe radius (A)           :   1.200000    
+ radius expansion:   0.2000000    
+ contour level              :  0.6000000    
+    
+ atomic coordinates being read from file
+ 1qlq.pdb                                
+ ...
+         471  Coordinate records read
+         471  Atoms with non-zero radius found
+ scale   (grids/A):   0.9999999    
+   
+ xmin,xmax     (A):   32.78600       64.51100    
+ ymin,ymax     (A):  0.4060000       33.04100    
+ zmin,zmax     (A):  0.4409999       39.89700    
+ x,y,z range   (A):    34.12500       35.03500       41.85600    
+ scale   (grids/A):   0.9999999    
+ object centre (A):    48.64850       16.72350       20.16900    
+   
+    
+ initializing SAV map...
+    
+ # of points inside black volume:       13097
+  giving volume (A^3) of:    13097.00    
+ # of points on surface of black volume:        6485
+  giving surface area (A^2) of:    3744.117    
+  finishing off dielectric map...
+ probe place points done:         6485
+ # of points inside white volume:        7414
+  giving SAV volume (A^3) of:    7414.002    
+ # of points on surface of white volume:        5343
+  giving SAV surface area (A^2) of:    3084.783    
+ # of surface points:         2122
+ with # of neighbors inside,freq: 
+           0           0
+           1           4
+           2          98
+           3         652
+           4         682
+           5         686
+           6           0
+  
+ # of surface points:         2122
+ with # of surface neighbors,freq: 
+           0         115
+           1         443
+           2         737
+           3         563
+           4         262
+           5           2
+           6           0
+ # of edge cuts found:         4418
+ # of boxes with high points 
+           0     7068134
+           1         835
+           2         797
+           3         409
+           4         767
+           5         381
+           6         619
+           7         599
+           8        5347
+ number of surface boxes:         4407
+ # of boxes with cuts
+           0     6963464
+           1           0
+           2           0
+           3        1434
+           4        1839
+           5         790
+           6         344
+           7           0
+           8           0
+           9           0
+          10           0
+          11           0
+          12           0
+ number of surface boxes:         4407
+ number of triangles:         8832
+ neighbors: 
+ pdb records read:          471
+ triangle records read:        26496
+ # of triangles:         8832
+ cant find vertex to pdb atom mapping file trisrf.rec
+  or records missing after:    134545185
+ generating vertex list...
+ # of unique points:         4418
+  
+ mean point order by F/V =    5.997284    
+ Point order frequency: 
+     1     0
+     2     0
+     3     0
+     4   102
+     5  1424
+     6  1719
+     7   766
+     8   376
+     9    26
+    10     5
+    11     0
+    12     0
+ mean point order =    5.997284    
+  
+ generating vertex conectivity...
+ # done, # points;         4418        4418
+  # of point subsets:            1  > one means cavities
+ Faces, Vertices, Edges:         8832        4418       13248
+ # of surfaces (S):            1
+ expected, actual points:         4418        4418
+ expected, actual edges:        13248       13248
+ F + V - E - 2S =            0
+ # of handles:            0
+ generating outward normals...
+ normals are average of vertex and 1st neighbors
+ max,min, av curvature:   -1.927742       1.182364      8.4495820E-02
+ smoothing curvature...
+  
+ min,max,range,mid of points
+  32.9630  64.3340  31.3710  48.7400
+   1.0380  32.4090  31.3710  13.8696
+   0.4830  39.8550  39.3720  17.9470
+ radius of gyration:    13.67380    
+ Original Area, Volume:    3172.61707026511        7774.90910379030     

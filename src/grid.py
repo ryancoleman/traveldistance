@@ -7,11 +7,10 @@ from geometry import dist, distL2
 
 def getIndices(mins, gridSize, pt):
   '''helper function to find the box a point is in'''
-  xIndex = int(math.floor((pt[0]-mins[0])/gridSize))
-  yIndex = int(math.floor((pt[1]-mins[1])/gridSize))
-  zIndex = int(math.floor((pt[2]-mins[2])/gridSize))
-  #print xIndex,yIndex,zIndex,mins,pt,maxs
-  return xIndex,yIndex,zIndex   
+  xIndex = int(math.floor((pt[0] - mins[0]) / gridSize))
+  yIndex = int(math.floor((pt[1] - mins[1]) / gridSize))
+  zIndex = int(math.floor((pt[2] - mins[2]) / gridSize))
+  return xIndex, yIndex, zIndex
 
 def assignAtomDepths(gridD, gridSize, mins, maxs, pdbD, minVal=0.):
   atomDepths = []
@@ -20,7 +19,7 @@ def assignAtomDepths(gridD, gridSize, mins, maxs, pdbD, minVal=0.):
     #print gridIndex, coord, len(gridD), len(gridD[0]), len(gridD[0][0])
     atomDepths.append(max(minVal, \
                    gridD[gridIndex[0]][gridIndex[1]][gridIndex[2]][0]))
-  return atomDepths  
+  return atomDepths
 
 def fillBoxesSets(grid):
   outsideBoxes,insideBoxes = set(), set()
@@ -33,21 +32,21 @@ def fillBoxesSets(grid):
       for z in xrange(0,lenZ):
         thisBox = grid[x][y][z]
         if thisBox[0] == -1:
-          outsideBoxes.update([(x,y,z)])
+          outsideBoxes.update([(x, y, z)])
         elif thisBox[0] == 0:
-          insideBoxes.update([(x,y,z)])
+          insideBoxes.update([(x, y, z)])
           #re-encode box to be large so can tell when 'real' value is present
-          newBox = lenX+lenY+lenZ,thisBox[1],thisBox[2],thisBox[3]
+          newBox = lenX + lenY + lenZ, thisBox[1], thisBox[2], thisBox[3]
           grid[x][y][z] = newBox
         elif thisBox[0] == -2:
-          insideBoxes.update([(x,y,z)])
+          insideBoxes.update([(x, y, z)])
   return outsideBoxes,insideBoxes
   #grid modified in place as well
 
 def getMaximaOnly(grid, maxGreater=0):
   '''returns a copy of the grid, with everything but the maxima removed
   should be run after finalizing grid distances so all non-negative'''
-  lens = [len(grid),len(grid[0]),len(grid[0][0])]
+  lens = [len(grid), len(grid[0]), len(grid[0][0])]
   newGrid = []
   for indexX,rowX in enumerate(grid):
     newX = []
@@ -57,26 +56,26 @@ def getMaximaOnly(grid, maxGreater=0):
         thisBox = grid[indexX][indexY][indexZ][0]
         maxima = maxGreater
         requiredBoxes = 26
-        for adjBox in getAllAdjacentBoxes((indexX,indexY,indexZ), \
-                                          lens[0], lens[1], lens[2]):
+        for adjBox in getAllAdjacentBoxes(
+            (indexX, indexY, indexZ), lens[0], lens[1], lens[2]):
           requiredBoxes -= 1
           if grid[adjBox[0]][adjBox[1]][adjBox[2]][0] >= thisBox:
             maxima -= 1
         if maxima >= 0 and requiredBoxes == 0:
           newY.append(entryZ)
         else:
-          newY.append((0,entryZ[1],entryZ[2],entryZ[3]))
+          newY.append((0, entryZ[1], entryZ[2], entryZ[3]))
       newX.append(newY)
     newGrid.append(newX)
   return newGrid
-        
+
 def getMaximaRanking(grid):
   '''returns a copy of the grid, with the value being the number of neighbors
   not greater than this one
   should be run after finalizing grid distances so all non-negative'''
   lens = [len(grid),len(grid[0]),len(grid[0][0])]
   newGrid = []
-  for indexX,rowX in enumerate(grid): 
+  for indexX,rowX in enumerate(grid):
     newX = []
     for indexY,rowY in enumerate(rowX):
       newY = []
@@ -84,29 +83,29 @@ def getMaximaRanking(grid):
         thisBox = grid[indexX][indexY][indexZ][0]
         maxima = 0
         requiredBoxes = 26
-        for adjBox in getAllAdjacentBoxes((indexX,indexY,indexZ), \
-                                          lens[0], lens[1], lens[2]):
+        for adjBox in getAllAdjacentBoxes(
+            (indexX, indexY, indexZ), lens[0], lens[1], lens[2]):
           requiredBoxes -= 1
           if grid[adjBox[0]][adjBox[1]][adjBox[2]][0] <= thisBox: #ties ties
-            maxima += 1   
+            maxima += 1
         if maxima >= 0 and requiredBoxes == 0 and thisBox > 0:
           newY.append((maxima,entryZ[1],entryZ[2],entryZ[3]))
         else:
-          newY.append((0,entryZ[1],entryZ[2],entryZ[3]))
+          newY.append((0, entryZ[1], entryZ[2], entryZ[3]))
       newX.append(newY)
     newGrid.append(newX)
   return newGrid
-        
+
 def calculateOffsets(grid1, grid2, gridSize):
   '''figures out the difference in offsets between two grids
   (with the same spacing)'''
-  differences = [] 
+  differences = []
   for index,value in enumerate(grid1[0][0][0][1:]):
     differences.append(value-grid2[0][0][0][index+1])
   offsets = [int((x/gridSize)) for x in differences]
-  #print grid1[0][0][0][1:], grid2[0][0][0][1:],differences, offsets
+  #print grid1[0][0][0][1:], grid2[0][0][0][1:], differences, offsets
   return offsets
-       
+
 #helper function that calculates L1 distance from end-point to end-point
 def calcEdgeGridDist(pt1, pt2, mins, maxs, gridSize, metric='L1'):
   return dist(getIndices(mins,gridSize,pt1), \
@@ -215,15 +214,15 @@ def makeNewEmptyGrid(mins, maxs, gap, value=0):
       newX.append(newY)
     newGrid.append(newX)
   return newGrid
-  
+
 def findPointMinsMaxs(phiData, pointXYZ, pointList):
   minsPts = pointXYZ[0][1:]
   maxsPts = pointXYZ[0][1:]
   for point in pointList:
     xyz = pointXYZ[point-1][1:]
     for coord in range(3):
-      minsPts[coord] = min(minsPts[coord], xyz[coord])   
-      maxsPts[coord] = max(maxsPts[coord], xyz[coord])   
+      minsPts[coord] = min(minsPts[coord], xyz[coord])
+      maxsPts[coord] = max(maxsPts[coord], xyz[coord])
   mins, maxs = phiData.getMinsMaxs()
   gap = 1./phiData.scale
   newMins = list(getIndices(mins, gap, minsPts))
@@ -232,7 +231,7 @@ def findPointMinsMaxs(phiData, pointXYZ, pointList):
 
 def makeTrimmedGridFromPhi(phiData, pointXYZ, pointList, \
                            threshold=6.0, inside=-2.0, outside=-1.0, border=2):
-  '''makes a trimmed grid from the phi data, hopefully faster than 
+  '''makes a trimmed grid from the phi data, hopefully faster than
   makeGridFromPhi then trimGrid, does not support threshold=False'''
   mins, maxs = phiData.getMinsMaxs()
   gap = 1./phiData.scale
@@ -285,8 +284,7 @@ def makeTrimmedGridFromPhi(phiData, pointXYZ, pointList, \
   newMaxVals = [x+gap/2. for x in newGrid[-1][-1][-1][1:]]
   return newGrid,newMinVals,newMaxVals
 
-def trimGrid(grid, gridSize, pointXYZ, pointList, \
-             inside=-2.0, border=1):
+def trimGrid(grid, gridSize, pointXYZ, pointList, inside=-2.0, border=1):
   '''trims grid so boundary on each coordinate is only 1 grid cube
   returns grid, mins, maxs of new grid'''
   minsPts = pointXYZ[0][1:]
@@ -294,8 +292,8 @@ def trimGrid(grid, gridSize, pointXYZ, pointList, \
   for point in pointList:
     xyz = pointXYZ[point-1][1:]
     for coord in range(3):
-      minsPts[coord] = min(minsPts[coord], xyz[coord])   
-      maxsPts[coord] = max(maxsPts[coord], xyz[coord])   
+      minsPts[coord] = min(minsPts[coord], xyz[coord])
+      maxsPts[coord] = max(maxsPts[coord], xyz[coord])
   lens = [len(grid),len(grid[0]),len(grid[0][0])]
   newMins, newMaxs = [10000000.0,10000000.0,100000000.0],[-1000000.,-1000000.,-1000000]
   for indexX,rowX in enumerate(grid):
@@ -351,7 +349,7 @@ def copyGrid(grid):
       newX.append(newY)
     newGrid.append(newX)
   return newGrid
-        
+
 def resetGrid(grid, value=0.):
   '''returns a copy of the grid where all values set to some number'''
   for indexX,rowX in enumerate(grid):
@@ -359,11 +357,11 @@ def resetGrid(grid, value=0.):
       for indexZ,entryZ in enumerate(rowY):
         newEntry = value,entryZ[1],entryZ[2],entryZ[3]
         grid[indexX][indexY][indexZ] = newEntry
-        
+
 #change -2-travel dist to travel dist
 def finalizeGridTravelDist(grid, gridSize):
   maxTD = 0.0
-  for indexX,rowX in enumerate(grid):   
+  for indexX,rowX in enumerate(grid):
     for indexY,rowY in enumerate(rowX):
       for indexZ,entryZ in enumerate(rowY):
         if entryZ[0] == -1:
@@ -393,7 +391,7 @@ def findPointsInCube(index, mins, maxs, gridSize, allPoints, points):
   return returnVec
 
 def findLongSurfEdges(pointList, pointNeighborList, gridSize, mins, maxs):
-  '''returns the extra edges, i.e. a dictionary of all surface edges between  
+  '''returns the extra edges, i.e. a dictionary of all surface edges between
   grid cubes with their euclidean distance between grid cube centers'''
   extraEdges = {} #empty dictionary
   surfaceEdgeBoxes = {}
@@ -404,7 +402,7 @@ def findLongSurfEdges(pointList, pointNeighborList, gridSize, mins, maxs):
     endList = []
     for neighbors in pointNeighbors[2:]: #pN[1] is # of neighbors
       pointEnd = pointList[neighbors-1]
-      endIndex = getIndices(mins, gridSize, pointEnd[1:])  
+      endIndex = getIndices(mins, gridSize, pointEnd[1:])
       gridLength = calcEdgeGridDist(pointStart[1:], pointEnd[1:], \
                                     mins, maxs, gridSize, metric='LINF')
       realLength = calcEdgeGridDist(pointStart[1:], pointEnd[1:], \
@@ -436,14 +434,14 @@ def assignPointsValues(pointList, gridD, gridSize, mins, maxs, allPoints=False):
       #print point[0], " not added, set to -1" #debugging fix loop
       pointTravelDist.append([point[0], -1])
     elif gridD[xIndex][yIndex][zIndex][0] > 0:
-      pointTravelDist.append([point[0], \
-                             (gridD[xIndex][yIndex][zIndex][0])*gridSize])
+      pointTravelDist.append(
+          [point[0], (gridD[xIndex][yIndex][zIndex][0])*gridSize])
     elif gridD[xIndex][yIndex][zIndex][0] >= -1:
       pointTravelDist.append([point[0], 0])
     elif gridD[xIndex][yIndex][zIndex][0] == -2:  #problem
       #print point[0], " not added, set to -2" #debugging fix loop
       pointTravelDist.append([point[0], -2])
     else:
-      pointTravelDist.append([point[0], \
-                             (-2-gridD[xIndex][yIndex][zIndex][0])*gridSize])
+      pointTravelDist.append(
+          [point[0], (-2-gridD[xIndex][yIndex][zIndex][0])*gridSize])
   return pointTravelDist

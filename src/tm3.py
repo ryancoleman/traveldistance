@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #this file is for storing and writing 'tm3' files.
 #http://www.cs.umd.edu/hcil/treemap/doc4.1/create_TM3_file.html
@@ -11,6 +11,7 @@
 import string, sys, operator #python libraries
 import statistics  #averages and such
 import dot         #dot files for reading/writing to graphviz or aisee
+import munkreskuhn #algorithm to find optimal matching between bipartite graphs
 
 #these types are defined here for later
 floatType = type(1.)
@@ -39,7 +40,7 @@ def getLineMst(connections):
         connsLimit2[node] = []
       connsLimit2[node].append(otherNode)
   #find start
-  lowestSingle = None   
+  lowestSingle = None
   for head,tails in connsLimit2.iteritems():
     if len(tails) == 1:
       if lowestSingle is None:
@@ -69,17 +70,17 @@ def getLineMst(connections):
 def getStandardColumnsMeanStddev():
   '''returns a dict that has been pre-calculated based on the cast/surfnet
   data set, which seem to be pretty reasonable values for the mean and stddev'''
-  columnToMean = {1: 2021.5149160870699, 2: 4611.729596728087, 
-                  6: 5.1688493192518639, 7: 1.0553398650040864, 
-                  8: 1.397754830189109, 9: 1787.604724497015, 
-                  10: 18.882273257259961, 17: -7.1678825213817818, 
-                  19: 18.9604617953798, 20: 15.147237413589277, 
-                  21: 12.084412899466979} 
-  colToStddev = {1: 3893.0666553174933, 2: 10372.377624807914, 
-                 6: 8.1288279132363161, 7: 1.5324445735835186, 
-                 8: 2.8725940273764614, 9: 3608.5463294631663, 
-                 10: 26.678589504726215, 17: 8.5735418064033091, 
-                 19: 26.833793052868906, 20: 22.42064979940854, 
+  columnToMean = {1: 2021.5149160870699, 2: 4611.729596728087,
+                  6: 5.1688493192518639, 7: 1.0553398650040864,
+                  8: 1.397754830189109, 9: 1787.604724497015,
+                  10: 18.882273257259961, 17: -7.1678825213817818,
+                  19: 18.9604617953798, 20: 15.147237413589277,
+                  21: 12.084412899466979}
+  colToStddev = {1: 3893.0666553174933, 2: 10372.377624807914,
+                 6: 8.1288279132363161, 7: 1.5324445735835186,
+                 8: 2.8725940273764614, 9: 3608.5463294631663,
+                 10: 26.678589504726215, 17: 8.5735418064033091,
+                 19: 26.833793052868906, 20: 22.42064979940854,
                  21: 19.025192702415332}
   return columnToMean, colToStddev
 
@@ -91,7 +92,7 @@ def calcColumnsMeanStddev(columnList, tmDataList):
     colData = []
     for tmData in tmDataList:
       colData.extend(tmData.getListColumn(column))
-    colAvg = statistics.computeAverage(colData)
+    colAvg = statistics.computeMean(colData)
     colStddev = statistics.computeStdDev(colData, colAvg)
     columnsToMean[column] = colAvg
     columnsToStddev[column] = colStddev
@@ -136,6 +137,55 @@ def findSelfScore(tmData, columnList, resColNums, colToMean, colToStddev):
       selfScore[node] = 0.
   return selfScore
 
+def findSimilarTrees(tmDataList, columnListNames,  \
+                     sizeColName,  sizeMin=-1., \
+                     sizeMax=10000000000, outputEachPair=False,
+                     justKeepBest=False):
+  '''does munkreskuhn matching over pocket-pocket shapes to get a score
+  per tree, returns table of these'''
+  columnList = tmDataList[0].titlesToColumns(columnListNames)
+  sizeCol = tmDataList[0].titleToColumn(sizeColName)
+  colToMean, colToStddev = calcColumnsMeanStddev(columnList, tmDataList)
+  totalMatrix = {}
+  for tmDataCount1, tmData1 in enumerate(tmDataList):
+    totalMatrix[tmData1] = {}
+    for tmDataCount2, tmData2 in enumerate(tmDataList):
+      if tmDataCount2 > tmDataCount1:
+        dotData = dot.dot([tmData1, tmData2])
+        rowNames,colNames,matchMatrix,tooBig= dotData.computeSearchConnections(\
+                              1e10000000, columnList, colToMean, colToStddev, \
+                              False, sizeCol, False, False, \
+                              sizeMin=sizeMin, sizeMax=sizeMax, \
+                              doSelfScore=False, returnMatrix=True)
+        if not justKeepBest:
+          matches = munkreskuhn.assignAndReturnMatches(matchMatrix)
+          sumScore = 0
+          for match in matches:
+            sumScore += match[2]
+          totalMatrix[tmData1][tmData2] = sumScore/float(len(matches))
+          if outputEachPair: #output a gdl for each pair of the munkres match
+            newMatches = []
+            justNodes = tooBig
+            for match in matches:
+              node1 = rowNames[match[0]]
+              node2 = colNames[match[1]]
+              justNodes.append(node1)
+              justNodes.append(node2)
+              newMatches.append([tmData1, tmData2, node1, node2, match[2]])
+            dotData.matchList = newMatches
+            dotData.addSearchConnections(1e1000000, remove=True)
+            dotData.writeGdl( \
+                tmData1.inputFileName+"_"+tmData2.inputFileName+".gdl", \
+                justNodes=justNodes, edges=True, force=True)
+        else: #just find the best match
+          minMatchMatrix = 1e10000000
+          for row in matchMatrix:
+            for entry in row:
+              if entry < minMatchMatrix:
+                minMatchMatrix = entry
+          totalMatrix[tmData1][tmData2] = minMatchMatrix
+  return totalMatrix
+
 def findSimilarNodes(tmDataList, columnListNames,  \
                      maxThr, maxConnectionCount, skipConnCount, \
                      resCols, sizeColName, sameStruct=False, sizeMin=-1., \
@@ -167,7 +217,7 @@ def findSimilarNodes(tmDataList, columnListNames,  \
       selfScores.update(selfSc)
   #print selfScores.values()
   if len(tmDataList) == 1: #can't compare if only 1 struct
-    #want to output nodes + self scores in sorted order for debugging of 
+    #want to output nodes + self scores in sorted order for debugging of
     #self scoring system
     treeName = tmDataList[0].inputFileName #only one
     selfScoreList = list(selfScores.iteritems())
@@ -194,7 +244,7 @@ def findSimilarNodes(tmDataList, columnListNames,  \
         changeNode, examinedNode = dotData.refinePockets(columnList, colToMean,\
                                colToStddev, resColNums, sizeCol, selfScores, \
                                sizeMin=sizeMin, sizeMax=sizeMax, \
-                               doSelfScore=doSelfScore, justNodes=justNodes, 
+                               doSelfScore=doSelfScore, justNodes=justNodes,
                                matchList=matchList, possNodes=possNodes, \
                                notTheseNodes=eliminatedNodes)
         if changeNode: #only recompute if there was a change
@@ -210,7 +260,7 @@ def findSimilarNodes(tmDataList, columnListNames,  \
         else: #worst wasn't changed this round
           eliminatedNodes.append(examinedNode)
           if examinedNode is None:
-            notDone = False 
+            notDone = False
       if dotResidues is not None:
         dotResidues.setBestNodes(justNodes)
     connections = 0
@@ -232,7 +282,7 @@ def findSimilarNodes(tmDataList, columnListNames,  \
         if clusterOutput: #do but record the num of clusters as they are added
           dotData.addSearchConnections(maxThr, maxConnCount=connections*25, \
                  mst=mst, clusterOutput=clusterOutput)
-        if lineMst: #do all again 
+        if lineMst: #do all again
           dotData.addSearchConnections(maxThr, maxConnCount=connections, \
                                      lineMst=True)
           if printThings:
@@ -247,10 +297,10 @@ def findSimilarNodes(tmDataList, columnListNames,  \
             print "linemst",
             for item in mslList:
               print item,
-            print " " 
+            print " "
             print "linemstscore, ", mslScore
         if lineMstEnds: #do one more time
-          #want to do same as linemst but give hints as to the endpoints 
+          #want to do same as linemst but give hints as to the endpoints
           startNode = justNodes[tmDataList[0]]
           endNode = justNodes[tmDataList[-1]]
           dotData.addSearchConnections(maxThr, maxConnCount=connections, \
@@ -261,10 +311,10 @@ def findSimilarNodes(tmDataList, columnListNames,  \
                    justNodes=justNodesValues)
           mslList = getLineMst(dotData.connections)
           if printThings:
-            print "linemstends", 
+            print "linemstends",
             for item in mslList:
               print item,
-            print " " 
+            print " "
       connections += skipConnCount
     matchList.sort(lambda x,y: cmp(x[4],y[4])) #sort by score. best first
     if printThings:
@@ -375,7 +425,7 @@ class tmTree(object):
       return False
 
   def mergeSingleChild(self, aNodeId):
-    '''checks to make sure node has a single child. deletes this node, making 
+    '''checks to make sure node has a single child. deletes this node, making
     the child and parent attach to each other'''
     if self.isSingleChild(aNodeId): #check otherwise don't do it
       children = self.tree[self.idNode[aNodeId]]
@@ -410,6 +460,17 @@ class tmTree(object):
         stackList.append(child)
     return outputList
 
+  def areNotOffspring(self, aNode, otherNodes):
+    '''checks to see if any otherNodes were children or other offspring of aNode
+    returns true if none are offspring.'''
+    stack = [aNode]
+    while len(stack) > 0:
+      thisNode = stack.pop()
+      if otherNodes.count(thisNode) > 0:
+        return False
+      stack.extend(self.tree[thisNode])
+    return True
+
   def getListColumn(self, column):
     '''gets a list of all the values of all the nodes for one column'''
     retList = []
@@ -431,7 +492,7 @@ class tmTree(object):
 
   def getLeafToGroup(self):
     '''returns a dict of each leaf to all groups above it in the tree.
-    actually returns a dict of each node to all nodes above it. since some 
+    actually returns a dict of each node to all nodes above it. since some
     leaves are actually branch points.'''
     leafToGroup = {}
     stackList = [[self.root]]
@@ -476,7 +537,7 @@ class tmTree(object):
         outFile.write(neighborNode + "\t")
       outFile.write("\n")
     outFile.close()
-  
+
   def titlesToColumns(self, titles):
     '''returns list of columns that the named titles are in'''
     listOut = []
@@ -500,13 +561,13 @@ class tmTree(object):
     resIds2 = set(string.split(tmNode2.attributes[resColumn],"+"))
     try:
       resIds1.remove('') #how did these get here? stupid string methods
-      resIds2.remove('') 
+      resIds2.remove('')
     except KeyError:
       pass #ignore if not there
     union = float(len(resIds1.union(resIds2)))
     if union > 0.: #otherwise automatically no match
       #print resIds1, resIds2, union , len(resIds1.intersection(resIds2))
-      thisScore = (float(len(resIds1.intersection(resIds2)))/union) 
+      thisScore = (float(len(resIds1.intersection(resIds2)))/union)
       return thisScore
     else:
       return 0. #no overlap (union), so score is automatically 0
@@ -538,7 +599,7 @@ class tmTree(object):
       except KeyError:
         pass #ignore if not there
       #now convert to ALA1, ALA2, etc
-      newResIds1 = self.convertResSetToIdentities(resIds1)    
+      newResIds1 = self.convertResSetToIdentities(resIds1)
       resIds.append(newResIds1)
     unionSet = resIds[0].copy()
     for otherSet in resIds[1:]:
@@ -548,7 +609,7 @@ class tmTree(object):
       intersectSet = resIds[0].copy()
       for otherSet in resIds[1:]:
         intersectSet.intersection_update(otherSet)
-      thisScore = (float(len(intersectSet))/union) 
+      thisScore = (float(len(intersectSet))/union)
       return thisScore
     else:
       return 0. #no overlap (union), so score is automatically 0
@@ -562,15 +623,15 @@ class tmTree(object):
     resIds2 = set(string.split(tmNode2.attributes[resColumn],"+"))
     try:
       resIds1.remove('') #how did these get here? stupid string methods
-      resIds2.remove('') 
+      resIds2.remove('')
     except KeyError:
       pass #ignore if not there
     #now convert to ALA1, ALA2, etc
-    newResIds1 = self.convertResSetToIdentities(resIds1)    
-    newResIds2 = self.convertResSetToIdentities(resIds2)    
+    newResIds1 = self.convertResSetToIdentities(resIds1)
+    newResIds2 = self.convertResSetToIdentities(resIds2)
     union = float(len(newResIds1.union(newResIds2)))
     if union > 0.: #otherwise automatically no match
-      thisScore = (float(len(newResIds1.intersection(newResIds2)))/union) 
+      thisScore = (float(len(newResIds1.intersection(newResIds2)))/union)
       return thisScore
     else:
       return 0. #no overlap (union), so score is automatically 0
@@ -585,7 +646,7 @@ class tmTree(object):
     resPocketCount = len(resIds2)
     try:
       resIds1.remove('') #how did these get here? stupid string methods
-      resIds2.remove('') 
+      resIds2.remove('')
     except KeyError:
       pass #maybe not there after all
     union = float(len(resIds1.union(resIds2)))
@@ -593,7 +654,7 @@ class tmTree(object):
       #print resIds1, resIds2, union , len(resIds1.intersection(resIds2))
       if not lessThanRes:
         thisScore = 100-(float(len(resIds1.intersection(resIds2)))/union) * 100.
-        return thisScore, resPocketCount 
+        return thisScore, resPocketCount
       else: #means want to return a score based on having just list, not more
         lList = float(len(resIds1))
         pList = float(len(resIds2))
@@ -638,9 +699,9 @@ class tmTreeFromFile(tmTree):
     treeFile = open(fileName, 'r')
     try:
       idTree = {} #temporary tree, used to make self.tree later
-      attributeLine = treeFile.readline()            
+      attributeLine = treeFile.readline()
       attributeTitles = string.split(string.strip(attributeLine), '\t')
-      tmTree.__init__(self, attributeTitles)    
+      tmTree.__init__(self, attributeTitles)
       types = string.split(treeFile.readline())
       for line in treeFile: #the rest of the lines
         tokens =  string.split(line)
@@ -653,7 +714,7 @@ class tmTreeFromFile(tmTree):
           idTree[thisId] = [] #leaves have no children
         self.idNode[thisId] = newNode
         rootId = tokens[len(types)]
-        parentId = tokens[-2]    
+        parentId = tokens[-2]
         if rootId == thisId:  #this is the root
           self.root = newNode
         else:
@@ -671,8 +732,8 @@ class tmTreeFromFile(tmTree):
           childList.append(self.idNode[child])
         self.tree[self.idNode[parent]] = childList
       self.buildParent() #also build the parent list, necessary for node dels
-    
-#main is only run for testing import of tm3 from commandline        
+
+#main is only run for testing import of tm3 from commandline
 if -1 != string.find(sys.argv[0], "tm3.py"):
   for filename in sys.argv[1:]:
     tmData = tmTreeFromFile(filename)
@@ -682,4 +743,3 @@ if -1 != string.find(sys.argv[0], "tm3.py"):
     #    if tmData.isLeaf(node.getId()):
     #      print node.getId(),
     #print
-

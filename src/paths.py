@@ -4,30 +4,30 @@
 #file contains lots of path primitive methods
 
 from mesh import mesh, meshFromSpheres #data structures
-from pdb import pdbData 
+from pdb import pdbData
 import geometry
-from statistics import computeAverage
+from statistics import computeMean
 import tstdata
 
 def pathLength(path):
   '''computes the total length from point to point'''
   length = 0
-  lastPathPt = path[0][1:4] #init for loop   
+  lastPathPt = path[0][1:4] #init for loop
   for nextPathPtRad in path[1:]:
     nextPathPt = nextPathPtRad[1:4]
     length += geometry.distL2(nextPathPt, lastPathPt)
-    lastPathPt = nextPathPt  
+    lastPathPt = nextPathPt
   return length
-          
+
 def pathCrowFliesLength(path):
   '''computes the distance from the first to the last point'''
-  firstPt = path[0][1:4] 
+  firstPt = path[0][1:4]
   lastPt = path[-1][1:4]
   return geometry.distL2(firstPt, lastPt)
-        
+
 def computeWindingMetric(path):
   '''returns length/crowflies length, higher is windingier'''
-  return pathLength(path)/(pathCrowFliesLength(path)+.00000000001) 
+  return pathLength(path)/(pathCrowFliesLength(path)+.00000000001)
 
 def findAllMinima(path,eps=0.01):
   '''finds the minima, including one minima from a length that isn't
@@ -50,17 +50,17 @@ def findAllMinima(path,eps=0.01):
         listIndices.append(firstInMinima)
         firstInMinima = -1
   if firstInMinima != -1:
-    listIndices.append(firstInMinima) 
+    listIndices.append(firstInMinima)
   return listIndices
 
 def insideMaxRadius(path, indexOne, indexTwo):
   '''finds the max radius inbetween the two indices, inclusive'''
-  maxInsideRadius = 0.   
+  maxInsideRadius = 0.
   for pathPt in path[indexOne:indexTwo+1]:
     if not maxInsideRadius or (pathPt[0] and pathPt[0] > maxInsideRadius):
       maxInsideRadius = pathPt[0]
   return maxInsideRadius
-  
+
 def insideTwoMinimaRadiusMax(path):
   '''finds 2 global minima, finds maxima between them'''
   listMinima = findAllMinima(path)
@@ -104,9 +104,9 @@ def averageTheta(path):
     secondVec = geometry.getVector(node[1:4], secondPt)
     theta = geometry.getAngle(firstVec, secondVec)
     thetas.append(theta)
-    firstPt = secondPt  
+    firstPt = secondPt
     secondPt = node[1:4]
-  averageTheta = computeAverage(thetas)
+  averageTheta = computeMean(thetas)
   return thetas, averageTheta
 
 def pathMaxDistance(nodePath, distanceName):
@@ -114,9 +114,9 @@ def pathMaxDistance(nodePath, distanceName):
   maxDist = nodePath[0].distances[distanceName]
   for node in nodePath[1:]: #no need to check first again
     if node.distances[distanceName] > maxDist:
-      maxDist = node.distances[distanceName]  
+      maxDist = node.distances[distanceName]
   return maxDist
-  
+
 def pathMinRadius(path):
   '''finds the overall minimum of the radius (stored in 0th element)'''
   minRadius = False
@@ -136,7 +136,7 @@ def pathMaxInsideRadius(path):
   while top > bottom and path[top-1][0] <= topVal:
     top -= 1
     topVal = path[top][0]
-  maxInsideRadius = 0.   
+  maxInsideRadius = 0.
   for pathPt in path[bottom:min(top+1,len(path)-1)]:
     if not maxInsideRadius or (pathPt[0] and pathPt[0] > maxInsideRadius):
       maxInsideRadius = pathPt[0]
@@ -151,11 +151,11 @@ def outputNodesText(listNodes, outFileName):
   for node in iter(listNodes):
     for coord in node.xyz:
       fileTemp.write(str(coord) + " ")
-    fileTemp.write("\n")   
+    fileTemp.write("\n")
   fileTemp.close()
 
 def getResiduesBetweenPoints(pair, pdbD):
-  '''a pair of nodes, finds center and radius, returns residues within'''  
+  '''a pair of nodes, finds center and radius, returns residues within'''
   aXYZ = pair[0].getXYZ()
   bXYZ = pair[1].getXYZ()
   radius = geometry.distL2(aXYZ, bXYZ)/2.
@@ -182,7 +182,7 @@ def getNearbyResidues(pointPath, pdbD, nearbyDistance=0.):
 
 def outputNearbyResidues(pointPath, outName, pdbRawData, nearbyDistance):
   '''outputs 2 different files. 1. residues near the minimum radius
-  2. residues near the entire path.   
+  2. residues near the entire path.
   near is defined as radius + nearbyDistance'''
   pdbD = pdbData()
   pdbD.processLines(pdbRawData)
@@ -203,15 +203,15 @@ def outputRadiiTxt(origPath, txtfile):
   distanceRadiusPairs = [(0, origPath[0][0])] #first pair is 0, first radius
   lastPt,lastDist = origPath[0][1:],0
   for pt in origPath[1:]: #all but first
-    newDistance = geometry.distL2(pt[1:], lastPt)  
+    newDistance = geometry.distL2(pt[1:], lastPt)
     newRadius = pt[0]
-    lastPt = pt[1:]  
+    lastPt = pt[1:]
     lastDist += newDistance
     distanceRadiusPairs.append((lastDist, newRadius))
   outputFile = open(txtfile, 'w')
   for distance,radius in distanceRadiusPairs:
     outputFile.write(str(distance) + ", " + str(radius) + " \n")
-  outputFile.close()  
+  outputFile.close()
 
 def checkPath(path, loopPointsList, pointXYZ, xyzStart=1):
   '''checks to see if the path intersects any topological loop on the surf'''

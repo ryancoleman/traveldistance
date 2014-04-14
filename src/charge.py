@@ -1,5 +1,5 @@
-#!/usr/bin/env python2.5
-# Ryan G. Coleman, Kim A. Sharp, http://crystal.med.upenn.edu, 
+#!/usr/bin/env python
+# Ryan G. Coleman, Kim A. Sharp, http://crystal.med.upenn.edu,
 # ryan.g.coleman@gmail.com ryangc@mail.med.upenn.edu
 
 #file takes care of reading .crg files and putting them into dictionary struct
@@ -9,15 +9,17 @@
 #0123456789012345678901234
 #          1         2
 
-import string, sys, os
+import string
+import sys
+import os
 
 class charge(object):
   '''reads in a .crg file, makes a usable data structure'''
   hydrophobicThreshold = 0.45
 
-  def __init__(self, \
-        chargeFileName="$TDHOME/src/charge_parameters/parse.crg",
-        altChg="/disks/node18/coleman/src/charge_parameters/parse.crg"):
+  def __init__(
+      self, chargeFileName="$TDHOME/src/charge_parameters/parse.crg",
+      altChg="/disks/node18/coleman/src/charge_parameters/parse.crg"):
     '''reads in the file, sets up the structure, etc'''
     chargeFileName = os.path.expandvars(chargeFileName)
     altChg = os.path.expandvars(altChg)
@@ -29,14 +31,15 @@ class charge(object):
       chargeFile = open(altChg, 'r')
     try:
       for line in chargeFile:
-        if line[0] == '!' or line[:22] == 'atom__resnumbc_charge_':
-          pass #means a comment
+        if line[0] == '!' or line[:22] == 'atom__resnumbc_charge_' or \
+            line[:22] == 'aaaaaarrrnnnncqqqqqqqq':
+          pass  # means a comment
         else:
           try:
             atom = string.strip(line[0:4]).upper()
             res = string.strip(line[5:14]).upper()
             ch = float(line[15:22])
-            if len(res) == 0: #no residue, default for atoms if not found
+            if len(res) == 0:  # no residue, default for atoms if not found
               self.atoms[atom] = ch
             else:
               if res not in self.residues:
@@ -45,20 +48,21 @@ class charge(object):
           except TypeError:
             print "warning: error reading line: " + line
     except StopIteration:
-      pass #EOF
+      pass  # EOF
 
   def getCharge(self, atomName, resName):
     '''given a residue and atom, find the charge'''
     atomUp = string.strip(atomName.upper())
-    resUp = string.strip(resName.upper()) #don't want to mess with case sensitivity
-    if resUp in self.residues and atomUp in self.residues[resUp]: #normal
+    resUp = string.strip(resName.upper())
+    #don't want to mess with case sensitivity
+    if resUp in self.residues and atomUp in self.residues[resUp]:  # normal
       return self.residues[resUp][atomUp]
-    elif atomUp in self.atoms: #trying to use default
+    elif atomUp in self.atoms:  # trying to use default
       return self.atoms[atomUp]
-    elif atomUp[0] in self.atoms: #trying to use just atom type
+    elif atomUp[0] in self.atoms:  # trying to use just atom type
       return self.atoms[atomUp[0]]
-    else: #can't do it
-      return None 
+    else:  # can't do it
+      return None
 
   def getTrinaryCharge(self, atomName, resName):
     '''returns -1, 0 or +1 depending on charge and hydrophobic threshold'''
@@ -69,7 +73,7 @@ class charge(object):
       return 0
     elif tempCharge > 0:
       return +1
-    else: #must be < 0
+    else:  # must be < 0
       return -1
 
 #main, only runs if testing reading of files

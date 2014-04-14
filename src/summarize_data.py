@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #ryan g. coleman ryan.g.coleman@gmail.com ryangc@mail.med.upenn.edu
 #kim sharp lab http://crystal.med.upenn.edu
@@ -7,7 +7,7 @@ import string, sys
 import statistics
 import analyze_packing
 
-if -1 != string.find(sys.argv[0], "summarize_data.py"): 
+if -1 != string.find(sys.argv[0], "summarize_data.py"):
   try:
     summaryData = analyze_packing.readSummaryFile(sys.argv[1])
     listPdbs= [analyze_packing.readList(fileName) for fileName in sys.argv[2:4]]

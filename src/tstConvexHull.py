@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 #script to read .tst format and make surfaces in pymol
 #ryan coleman
 
@@ -8,15 +8,15 @@ import math,  string
 #for running commandline instead of through pymol
 import sys, os
 import tstdata
-  
+
 def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
   tstD = tstdata.tstData(tstFileName) #read the file into the data structure
   tempFile = open(tstFileName + ".tempQHullFile", 'w')
   tempFile.write("3\n") #dimension
   tempFile.write(str(len(tstD.dict['POINT_XYZ'])) + "\n") #number of points
   for points in tstD.dict['POINT_XYZ']:
-    tempFile.write(str(points[1]) + " ") 
-    tempFile.write(str(points[2]) + " ") 
+    tempFile.write(str(points[1]) + " ")
+    tempFile.write(str(points[2]) + " ")
     tempFile.write(str(points[3]) + "\n")
   tempFile.close()
   #call to qhull
@@ -55,7 +55,7 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
       numberFaces += 1 #1-index the list
       triNumToFaceNum[numberFaces] = count
       triIndices.insert(0, numberFaces)
-      convexHullFaces.append(triIndices)    
+      convexHullFaces.append(triIndices)
       for points in triIndices[1:]:
         pointsInTriList[points-1][0] += 1
         pointsInTriList[points-1].append(triIndices[0])
@@ -80,7 +80,7 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
         for coord in range(3):
           normalTotal[coord] += triangleNormals[faces-1][coord+1]
       normal = [x/float(pointsAndFaces[0]) for x in normalTotal]
-    normal.insert(0, index+1)  
+    normal.insert(0, index+1)
     chNormals.append(normal)
   #add index data to pointsInTriList
   for index,pointInTri in enumerate(pointsInTriList):
@@ -129,7 +129,7 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
   tstFile.close()
 
 #this is where main will go
-if -1 != string.find(sys.argv[0], "tstConvexHull.py"): 
+if -1 != string.find(sys.argv[0], "tstConvexHull.py"):
   if len(sys.argv) > 2: #else do nothing, read in as module
     for tstFile in sys.argv[2:]:
       print "running convex hull for", tstFile

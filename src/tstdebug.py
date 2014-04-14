@@ -14,21 +14,21 @@ def debugTravelGrid(grid, filename, maxTD=5.0):
         if onePoint[0] != -1 and onePoint[0] != -2:
           fileTemp.write("COLOR, ")
           if onePoint[0] == -2:
-            fileTemp.write("0.1, ")    
-            fileTemp.write("0.1, ")    
+            fileTemp.write("0.1, ")
+            fileTemp.write("0.1, ")
             fileTemp.write("0.1, ")
           else:
             depth = onePoint[0]
             if depth < 0:
               depth = -2-depth
             fileTemp.write(str(1.-(depth/maxTD)))
-            fileTemp.write(", ")    
+            fileTemp.write(", ")
             fileTemp.write(str((depth/maxTD)))
-            fileTemp.write(", ")    
+            fileTemp.write(", ")
             fileTemp.write("0.01, ")
           fileTemp.write("SPHERE, ")
           for coord in onePoint[1:]:
-            fileTemp.write(str(coord) + ", ") 
+            fileTemp.write(str(coord) + ", ")
           fileTemp.write("0.2, \n")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'grid" +filename + "')\n")
@@ -44,21 +44,21 @@ def debugTravelSurfGrid(grid, filename, extraEdges, mins,maxs,gridSize, maxTD=5.
         if extraEdges.has_key(pointIndex):
           fileTemp.write("COLOR, ")
           if onePoint[0] == -2:
-            fileTemp.write("0.1, ")    
-            fileTemp.write("0.1, ")    
+            fileTemp.write("0.1, ")
+            fileTemp.write("0.1, ")
             fileTemp.write("0.1, ")
           else:
             depth = onePoint[0]
             if depth < 0:
               depth = -2-depth
             fileTemp.write(str(1.-(depth/maxTD)))
-            fileTemp.write(", ")    
+            fileTemp.write(", ")
             fileTemp.write(str((depth/maxTD)))
-            fileTemp.write(", ")    
+            fileTemp.write(", ")
             fileTemp.write("0.01, ")
           fileTemp.write("SPHERE, ")
           for coord in onePoint[1:]:
-            fileTemp.write(str(coord) + ", ") 
+            fileTemp.write(str(coord) + ", ")
           fileTemp.write("0.2, \n")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'grid" +filename + "')\n")
@@ -88,20 +88,20 @@ def debugGrid(grid, filename):
       for onePoint in oneY:
         fileTemp.write("COLOR, ")
         if onePoint[0] == -1:
-          fileTemp.write("0.1, ")    
           fileTemp.write("0.1, ")
-          fileTemp.write("0.95, ")    
+          fileTemp.write("0.1, ")
+          fileTemp.write("0.95, ")
         elif onePoint[0] == 0:
-          fileTemp.write("0.1, ")    
-          fileTemp.write("0.95, ")    
+          fileTemp.write("0.1, ")
+          fileTemp.write("0.95, ")
           fileTemp.write("0.1, ")
         elif onePoint[0] == -2:
-          fileTemp.write("0.95, ")    
-          fileTemp.write("0.1, ")    
+          fileTemp.write("0.95, ")
+          fileTemp.write("0.1, ")
           fileTemp.write("0.1, ")
         fileTemp.write("SPHERE, ")
         for coord in onePoint[1:]:
-          fileTemp.write(str(coord) + ", ") 
+          fileTemp.write(str(coord) + ", ")
         fileTemp.write("0.2, ")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'grid" +filename + "')\n")
@@ -115,12 +115,12 @@ def debugGridContours(grid, filename):
       for onePoint in oneY:
         if onePoint[0] > 6.0:
           fileTemp.write("COLOR, ")
-          fileTemp.write("0.1, ")    
           fileTemp.write("0.1, ")
-          fileTemp.write("0.95, ")    
+          fileTemp.write("0.1, ")
+          fileTemp.write("0.95, ")
           fileTemp.write("SPHERE, ")
           for coord in onePoint[1:]:
-            fileTemp.write(str(coord) + ", ") 
+            fileTemp.write(str(coord) + ", ")
           fileTemp.write("0.2, ")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'grid" +filename + "')\n")
@@ -136,16 +136,16 @@ def debugGridNoBlue(grid, filename):
         if onePoint[0] != -1:
           fileTemp.write("COLOR, ")
           if onePoint[0] == 0:
-            fileTemp.write("0.1, ")    
-            fileTemp.write("0.95, ")    
+            fileTemp.write("0.1, ")
+            fileTemp.write("0.95, ")
             fileTemp.write("0.1, ")
           elif onePoint[0] == -2:
-            fileTemp.write("0.95, ")    
-            fileTemp.write("0.1, ")    
+            fileTemp.write("0.95, ")
+            fileTemp.write("0.1, ")
             fileTemp.write("0.1, ")
           fileTemp.write("SPHERE, ")
           for coord in onePoint[1:]:
-            fileTemp.write(str(coord) + ", ") 
+            fileTemp.write(str(coord) + ", ")
           fileTemp.write("0.2, ")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'grid" +filename + "')\n")
@@ -161,12 +161,12 @@ def debugGridJustGreen(grid, filename):
         if onePoint[0] == 0:
           fileTemp.write("COLOR, ")
           if onePoint[0] == 0:
-            fileTemp.write("0.1, ")    
-            fileTemp.write("0.95, ")    
+            fileTemp.write("0.1, ")
+            fileTemp.write("0.95, ")
             fileTemp.write("0.1, ")
           fileTemp.write("SPHERE, ")
           for coord in onePoint[1:]:
-            fileTemp.write(str(coord) + ", ") 
+            fileTemp.write(str(coord) + ", ")
           fileTemp.write("0.2, ")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'grid" +filename + "')\n")
@@ -177,32 +177,32 @@ def debugTris(line, triList, ptList, fileName):
   surfObj = "from pymol.cgo import * \nfrom pymol import cmd\nsurfObj = [ "
   for point in ptList:
     surfObj += "COLOR, "
-    surfObj += "0.1, "    
     surfObj += "0.1, "
-    surfObj += "0.95, "    
+    surfObj += "0.1, "
+    surfObj += "0.95, "
     surfObj += "SPHERE, "
     for coord in point:
-      surfObj += str(coord) + ", " 
+      surfObj += str(coord) + ", "
     surfObj += "0.1, "
   surfObj += " BEGIN, TRIANGLES, "
   for tri in triList:
     for point in tri:
       surfObj += "COLOR, "
-      surfObj += "1.0, "    
+      surfObj += "1.0, "
       surfObj += "0.0, "
-      surfObj += "0.5, "    
+      surfObj += "0.5, "
       surfObj += "VERTEX, "
       for coord in point:
-        surfObj += str(coord) + ", " 
+        surfObj += str(coord) + ", "
   surfObj += "END, BEGIN, LINES, "
   for point in line:
     surfObj += "COLOR, "
-    surfObj += "1.0, "     
+    surfObj += "1.0, "
     surfObj += "0.5, "
-    surfObj += "0.0, "    
+    surfObj += "0.0, "
     surfObj += "VERTEX, "
     for coord in point:
-      surfObj += str(coord) + ", " 
+      surfObj += str(coord) + ", "
   surfObj += "END ]\n"
   surfObj += "cmd.load_cgo(surfObj,'surf" +str(line[0][0]) + "." + str(line[0][1]) + "')\n"
   fileOut = open(fileName, 'w')
@@ -216,12 +216,12 @@ def debugTriangles(triList, allTris, ptXYZ, fileName, ptList=False, \
   for tri in triList:
     for point in allTris[tri-1][1:]:
       surfObj += "COLOR, "
-      surfObj += str(triColor[0]) + ", "    
-      surfObj += str(triColor[1]) + ", "    
-      surfObj += str(triColor[2]) + ", "    
+      surfObj += str(triColor[0]) + ", "
+      surfObj += str(triColor[1]) + ", "
+      surfObj += str(triColor[2]) + ", "
       surfObj += "VERTEX, "
       for coord in ptXYZ[point-1][1:]:
-        surfObj += str(coord) + ", " 
+        surfObj += str(coord) + ", "
   surfObj += "END ]\n"
   surfObj += "cmd.load_cgo(surfObj,'tris" + fileName + "')\n"
   surfObj += "\nsurfObj2 = [ "
@@ -230,16 +230,16 @@ def debugTriangles(triList, allTris, ptXYZ, fileName, ptList=False, \
   lastPt = ptList[len(ptList)-1]
   for point in ptList:
     surfObj += "COLOR, "
-    surfObj += "0.0, "     
+    surfObj += "0.0, "
     surfObj += "0.5, "
-    surfObj += "0.9, "    
+    surfObj += "0.9, "
     surfObj += "VERTEX, "
     for coord in ptXYZ[lastPt-1][1:]:
-      surfObj += str(coord) + ", " 
+      surfObj += str(coord) + ", "
     surfObj += "VERTEX, "
     for coord in ptXYZ[point-1][1:]:
       surfObj += str(coord) + ", "
-    lastPt = point 
+    lastPt = point
   surfObj += "END ]\n"
   surfObj += "cmd.load_cgo(surfObj2,'lines" + fileName + "')\n"
   fileOut = open(fileName, 'w')
@@ -253,12 +253,12 @@ def debugTrianglesPtList(triList, allTris, ptXYZ, fileName, ptListList=False, \
   for tri in triList:
     for point in allTris[tri-1][1:]:
       surfObj += "COLOR, "
-      surfObj += str(triColor[0]) + ", "    
-      surfObj += str(triColor[1]) + ", "    
-      surfObj += str(triColor[2]) + ", "    
+      surfObj += str(triColor[0]) + ", "
+      surfObj += str(triColor[1]) + ", "
+      surfObj += str(triColor[2]) + ", "
       surfObj += "VERTEX, "
       for coord in ptXYZ[point-1][1:]:
-        surfObj += str(coord) + ", " 
+        surfObj += str(coord) + ", "
   surfObj += "END ]\n"
   surfObj += "cmd.load_cgo(surfObj,'tris" + fileName + "')\n"
   for ptListIndex, ptList in enumerate(ptListList):
@@ -268,16 +268,16 @@ def debugTrianglesPtList(triList, allTris, ptXYZ, fileName, ptListList=False, \
     lastPt = ptList[len(ptList)-1]
     for point in ptList:
       surfObj += "COLOR, "
-      surfObj += "0.0, "     
+      surfObj += "0.0, "
       surfObj += "0.3, "
-      surfObj += "0.9, "    
+      surfObj += "0.9, "
       surfObj += "VERTEX, "
       for coord in ptXYZ[lastPt-1][1:]:
-        surfObj += str(coord) + ", " 
+        surfObj += str(coord) + ", "
       surfObj += "VERTEX, "
       for coord in ptXYZ[point-1][1:]:
         surfObj += str(coord) + ", "
-      lastPt = point 
+      lastPt = point
     surfObj += "END ]\n"
     surfObj += "cmd.load_cgo(surfObjL" + str(ptListIndex) + ",'lines" +str(ptListIndex)+ fileName + "')\n"
   fileOut = open(fileName, 'w')
@@ -290,12 +290,12 @@ def debugTrianglesNotOrig(triList, ptXYZ, fileName, ptList=False):
   for tri in triList:
     for point in tri:
       surfObj += "COLOR, "
-      surfObj += "1.0, "    
+      surfObj += "1.0, "
       surfObj += "0.0, "
-      surfObj += "0.5, "    
+      surfObj += "0.5, "
       surfObj += "VERTEX, "
       for coord in ptXYZ[point-1][1:]:
-        surfObj += str(coord) + ", " 
+        surfObj += str(coord) + ", "
   surfObj += "END ]\n"
   surfObj += "cmd.load_cgo(surfObj,'tris" + fileName + "')\n"
   surfObj += "\nsurfObj2 = [ "
@@ -303,16 +303,16 @@ def debugTrianglesNotOrig(triList, ptXYZ, fileName, ptList=False):
   lastPt = ptList[len(ptList)-1]
   for point in ptList:
     surfObj += "COLOR, "
-    surfObj += "0.0, "     
+    surfObj += "0.0, "
     surfObj += "0.5, "
-    surfObj += "0.9, "    
+    surfObj += "0.9, "
     surfObj += "VERTEX, "
     for coord in ptXYZ[lastPt-1][1:]:
-      surfObj += str(coord) + ", " 
+      surfObj += str(coord) + ", "
     surfObj += "VERTEX, "
     for coord in ptXYZ[point-1][1:]:
       surfObj += str(coord) + ", "
-    lastPt = point 
+    lastPt = point
   surfObj += "END ]\n"
   surfObj += "cmd.load_cgo(surfObj2,'lines" + fileName + "')\n"
   fileOut = open(fileName, 'w')
@@ -337,7 +337,7 @@ def debugTriangleList(triListList, allTris, ptXYZ, fileName, ptListList=False):
         surfObj += ", "
         surfObj += "VERTEX, "
         for coord in ptXYZ[point-1][1:]:
-          surfObj += str(coord) + ", " 
+          surfObj += str(coord) + ", "
     surfObj += "END ]\n"
   if ptListList:
     for index,ptList in enumerate(ptListList):
@@ -346,16 +346,16 @@ def debugTriangleList(triListList, allTris, ptXYZ, fileName, ptListList=False):
       lastPt = ptList[len(ptList)-1]
       for point in ptList:
         surfObj += "COLOR, "
-        surfObj += "0.0, "     
+        surfObj += "0.0, "
         surfObj += "0.5, "
-        surfObj += "0.9, "    
+        surfObj += "0.9, "
         surfObj += "VERTEX, "
         for coord in ptXYZ[lastPt-1][1:]:
-          surfObj += str(coord) + ", " 
+          surfObj += str(coord) + ", "
         surfObj += "VERTEX, "
         for coord in ptXYZ[point-1][1:]:
           surfObj += str(coord) + ", "
-        lastPt = point 
+        lastPt = point
       surfObj += "END ]\n"
   for index, triList in enumerate(triListList):
     surfObj += "cmd.load_cgo(surfObj" + str(index) + ",'tris" + str(index) + "." + fileName + "')\n"
@@ -375,15 +375,15 @@ def debugTracebacks(grid, tracebacks, filename, minDist=0.0):
         fileTemp.write("CYLINDER, ")
         for gridPt in (start,end):
           for coord in grid[gridPt[0]][gridPt[1]][gridPt[2]][1:]:
-            fileTemp.write(str(coord) + ", ") 
+            fileTemp.write(str(coord) + ", ")
         #radius
-        fileTemp.write("0.1, ")    
-        #color
-        fileTemp.write("1.0, ")    
-        fileTemp.write("0.1, ")    
         fileTemp.write("0.1, ")
-        fileTemp.write("0.5, ")    
-        fileTemp.write("0.6, ")    
+        #color
+        fileTemp.write("1.0, ")
+        fileTemp.write("0.1, ")
+        fileTemp.write("0.1, ")
+        fileTemp.write("0.5, ")
+        fileTemp.write("0.6, ")
         fileTemp.write("0.6, ")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'" + str(minDist) + "." +  filename + "')\n")
@@ -403,15 +403,15 @@ def debugOneTraceback(grid, tracebacks, filename, ending):
         fileTemp.write("CYLINDER, ")
         for gridPt in (start,end):
           for coord in grid[gridPt[0]][gridPt[1]][gridPt[2]][1:]:
-            fileTemp.write(str(coord) + ", ") 
+            fileTemp.write(str(coord) + ", ")
         #radius
-        fileTemp.write("0.1, ")    
-        #color
-        fileTemp.write("1.0, ")    
-        fileTemp.write("0.1, ")    
         fileTemp.write("0.1, ")
-        fileTemp.write("0.4, ")    
-        fileTemp.write("0.6, ")    
+        #color
+        fileTemp.write("1.0, ")
+        fileTemp.write("0.1, ")
+        fileTemp.write("0.1, ")
+        fileTemp.write("0.4, ")
+        fileTemp.write("0.6, ")
         fileTemp.write("0.6, ")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'" + filename + "')\n")
@@ -423,7 +423,7 @@ def findDeepestTraceback(tracebacks):
     if dist > maxDist:
       maxDist, maxEnd = dist,end
   return maxEnd
- 
+
 def debugDeepestTraceback(grid, tracebacks, filename):
   debugOneTraceback(grid,tracebacks,filename,findDeepestTraceback(tracebacks))
 
@@ -439,15 +439,15 @@ def debugSetGridSpheres(outputSet, gridSize, filename, endPoints=False, radius=F
   for point in outputSet:
     fileTemp.write("COLOR, ")
     if tuple(point[1:]) in endPointsSet: #color it red
-      fileTemp.write("0.95, ")    
-      fileTemp.write("0.1, ")    
+      fileTemp.write("0.95, ")
+      fileTemp.write("0.1, ")
       fileTemp.write("0.1, ")
     else:
       for color in mainColor:
-        fileTemp.write(str(color) + ", ")    
+        fileTemp.write(str(color) + ", ")
     fileTemp.write("SPHERE, ")
     for coord in point[1:]:
-      fileTemp.write(str(coord) + ", ") 
+      fileTemp.write(str(coord) + ", ")
     if radius:
       fileTemp.write(str(point[0]) + ", \n")
     else:
@@ -455,7 +455,7 @@ def debugSetGridSpheres(outputSet, gridSize, filename, endPoints=False, radius=F
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'" +filename + "')\n")
   fileTemp.close()
-  
+
 def outputGridClusters(grid, unionfindStructure, triGrid, actualSet=False):
   #writes a grid where everything is 0, the biggest set is +2, the ones with tris are -2
   #the ones outside the convex hull are marked as +4 or -4
@@ -499,10 +499,10 @@ def pointDebug(pointList, radius=0.5, filename="temp.py", mainColor=(0.0,.01,.9)
   for point in pointList:
     fileTemp.write("COLOR, ")
     for color in mainColor:
-      fileTemp.write(str(color) + ", ")    
+      fileTemp.write(str(color) + ", ")
     fileTemp.write("SPHERE, ")
     for coord in point:
-      fileTemp.write(str(coord) + ", ") 
+      fileTemp.write(str(coord) + ", ")
     fileTemp.write(str(radius) + ", \n")
   fileTemp.write(" ]\n")
   fileTemp.write("cmd.load_cgo(surfObj,'" +filename + "')\n")
@@ -510,7 +510,7 @@ def pointDebug(pointList, radius=0.5, filename="temp.py", mainColor=(0.0,.01,.9)
 
 colorGrads = {'flat':[1.0,1.0,1.0, 1.0,1.0,1.0, 1.0,1.0,1.0],
               'black':[0.0,0.0,0.0, 0.0,0.0,0.0, 0.0,0.0,0.0],
-              'mono':[1.0,1.0,1.0, 0.5,0.5,0.5, 0.0,0.0,0.0],   
+              'mono':[1.0,1.0,1.0, 0.5,0.5,0.5, 0.0,0.0,0.0],
               'gwg':[0.5,0.5,0.5, 1.0,1.0,1.0, 0.0,1.0,0.0],
               'rwb':[1.0,0.0,0.0, 1.0,1.0,1.0, 0.0,0.0,1.0],
               'bwr':[0.0,0.0,1.0, 1.0,1.0,1.0, 1.0,0.0,0.0],
@@ -528,11 +528,11 @@ def decideColor(value, min, med, max, gradient,cycle=False):
     whichCol = int((value-min)/4) % (len(gradient)/3)
     red = gradient[int(whichCol*3+0)]
     gre = gradient[int(whichCol*3+1)]
-    blu = gradient[int(whichCol*3+2)]   
+    blu = gradient[int(whichCol*3+2)]
     return [red,gre,blu]
   elif len(gradient) == 9:
     if min > value:
-      return [gradient[0],gradient[1],gradient[2]]   
+      return [gradient[0],gradient[1],gradient[2]]
     elif min <= value and value < med:
       alpha = (value-min)/(med-min)
       red = (1.-alpha)*gradient[0] + (alpha)*gradient[3]
@@ -557,5 +557,3 @@ def decideColor(value, min, med, max, gradient,cycle=False):
     gre = gradient[valueOct*3+1]
     blu = gradient[valueOct*3+2]
     return [red,gre,blu]
-
-

@@ -3,8 +3,8 @@
 
 import tstdata #data structure
 import sys #for exiting
-from priodict import priorityDictionary 
-import geometry 
+from priodict import priorityDictionary
+import geometry
 import tstdebug # for debugging
 import mesh
 import math
@@ -43,7 +43,7 @@ def fillInHolesAndGrow(triPointsOrig, pointTriListOrig, pointXyzOrig, \
       if 0 == countHandleRemoved:
         loopTrisSave = loopTris
         loopPtsSave = loopPts
-      if len(smallestList) > 0: 
+      if len(smallestList) > 0:
         regLoopOkay, smallest = False, False
         smallestIndex = 0
         while not regLoopOkay and len(smallestList) > smallestIndex:
@@ -75,7 +75,7 @@ def fillInHolesAndGrow(triPointsOrig, pointTriListOrig, pointXyzOrig, \
           ringToExcludeAll.update(ringToExclude)
           ringToCenterNameAll.update(ringToCenterName)
           #possibleHoleStartsAll.extend(possHoleStarts) #not done like this anymore
-          ringToPotentialMaximaAll.update(ringToPotentialMaxima) 
+          ringToPotentialMaximaAll.update(ringToPotentialMaxima)
       altOffset += 1
       if altOffset > 30: #hacky kludge to get results
         #print "couldn't find any more appropriate loops"
@@ -90,7 +90,7 @@ def fillInHolesAndGrow(triPointsOrig, pointTriListOrig, pointXyzOrig, \
         returnLoops.insert(index, regLoops[smallest])
         returnPoints.insert(index, regPts[smallest])
         break #stop the for loop, we added it
-    #sometimes a triangle is made of 3 points adjacent in the loop... this is 
+    #sometimes a triangle is made of 3 points adjacent in the loop... this is
     #a big problem later (makes edges with more than 2 triangles)
     #so we detect here and remove them with the loop to maintain topological correctness
     trisToRemove = regLoops[smallest][:] #copy
@@ -187,7 +187,7 @@ def __checkRegularLoop(regLoops, regPts, oneToCheck, trisRemoved, newTris):
 def __removeLoop(loopsToRemove, trisToRemove, pointTriList, triPoints, \
                  trisRemoved, newTris, debugOut, outFileName, pointXyz, \
                  countHandleRemoved):
-  '''remove a loop from the structure, all data in first 4 parameters is 
+  '''remove a loop from the structure, all data in first 4 parameters is
   modified in place, no returns'''
   if loopsToRemove:
     for checkLoop in loopsToRemove:
@@ -224,7 +224,7 @@ def __removeLoop(loopsToRemove, trisToRemove, pointTriList, triPoints, \
         pointTriList[delTriPoint-1] = newPTL
       triPoints[delTri-1] = [False] #can't fully delete because of indexing
     #now time to add new ones
-    for loopIndex,vertexLoop in enumerate(loopsToRemove):    
+    for loopIndex,vertexLoop in enumerate(loopsToRemove):
       trisToAdd = __trianglinizeLoopNoDupes(vertexLoop, \
                                                   triPoints, pointTriList)
       if debugOut:
@@ -292,7 +292,7 @@ def fillInHoles(triPointsOri, pointTriListOri, pointXyzOri, normXyzOri, \
         returnLoops.insert(index, regLoops[smallest])
         returnPoints.insert(index, regPts[smallest])
         break #stop the for loop, we added it
-    #sometimes a triangle is made of 3 points adjacent in the loop... this is 
+    #sometimes a triangle is made of 3 points adjacent in the loop... this is
     #a big problem later (makes edges with more than 2 triangles)
     #so we detect here and remove them with the loop to maintain topological correctness
     trisToRemove = regLoops[smallest][:] #copy
@@ -328,8 +328,8 @@ def __trianglinizeLoopNoDupes(vertexLoop, triPoints, pointTriList):
       if modVertLoop == vertexLoop:
         return False #utter failure
   return possibleTrisToAdd
-    
-  
+
+
 def fillInHolesTst(tstd, numHandles, outFileName, debugOut):
   """just a wrapper and easier way to call fillInHoles"""
   pointTriList = tstd.dict['POINT_TRIANGLE']
@@ -338,11 +338,11 @@ def fillInHolesTst(tstd, numHandles, outFileName, debugOut):
   normXyz = tstd.dict['NORM_XYZ']
   return fillInHoles(triPoints, pointTriList, pointXyz, normXyz, numHandles, \
                      outFileName, debugOut)
-  
+
 def expandDisc(triPoints, pointTriList, pointXyz, alternateStartOffset=0, \
                verboseDebug=False, verboseDebugFileName="temp.py"):
   '''entirely based on kim sharp's idea to expand a triangle, keeping boundary
-  a simple disc, which leads to a collection of strips which are topologically 
+  a simple disc, which leads to a collection of strips which are topologically
   important. if no handles, then expands until only a single triangle left'''
   #randomly pick the first triangle to start
   first = len(triPoints) - alternateStartOffset  #start at end, avoids new added tris better
@@ -358,10 +358,10 @@ def expandDisc(triPoints, pointTriList, pointXyz, alternateStartOffset=0, \
   unseenTris = set()
   for triPointRec in triPoints:
     if triPointRec != [False]:
-      unseenTris.add(triPointRec[0]) 
+      unseenTris.add(triPointRec[0])
   unseenTris.remove(first)
   if verboseDebug:
-    uniqueStr = str(triPoints.count([False])) + "." 
+    uniqueStr = str(triPoints.count([False])) + "."
     numberTri = len(discTris)
     strNum = '%06d' % numberTri
     fractionSeen = float(numberTri)/float(len(triPoints))
@@ -383,7 +383,7 @@ def expandDisc(triPoints, pointTriList, pointXyz, alternateStartOffset=0, \
   while len(availableTris) > 0:
     #print len(clockwiseBoundaryPoints), len(discTris), len(unseenTris), len(availableTris) #debug
     nextPossibleTri = availableTris.smallest()
-    nextEdge = availTrisToEdge[nextPossibleTri] 
+    nextEdge = availTrisToEdge[nextPossibleTri]
     del availTrisToEdge[nextPossibleTri] #remove clutter
     curDistance = availableTris[nextPossibleTri]
     del availableTris[nextPossibleTri]
@@ -442,7 +442,7 @@ def expandDisc(triPoints, pointTriList, pointXyz, alternateStartOffset=0, \
             availTrisToEdge[unmarkTri] = otherEdge
           if unmarkTri in stripTris:
             stripTris.remove(unmarkTri) #only 1 of these will work
-          elif unmarkTri in unseenTris: 
+          elif unmarkTri in unseenTris:
             unseenTris.remove(unmarkTri)#only 1 of these will work
       #also update boundary points, 2 cases
       if 0 == numberEdgesInBoundary: #insertion case
@@ -548,7 +548,7 @@ def expandLoop(loop, boundaries, triPoints, pointTriList, pointXyz, \
                   availableTris[side][adjTri] > combinedLength:
           if adjTri in availableTris[side]:
             #print adjTri in availableTris[side], combinedLength
-            del availableTris[side][adjTri] 
+            del availableTris[side][adjTri]
           availableTris[side][adjTri] = combinedLength #would add current if not 0
           availableTriEdges[side][adjTri] = edge #otherwise something faster already seen
   side = 0 #side is set to which side is being processed, other is set to the other obviously
@@ -588,7 +588,7 @@ def expandLoop(loop, boundaries, triPoints, pointTriList, pointXyz, \
         #print "crossover2", countOtherEdges, prevTri, nextPossibleTri, otherTri
         #tstdebug.debugTriangleList([tracebacks.keys()], triPoints, pointXyz, "temp.built.up.to.this.py")
         return __crossoverReportLoop(nextPossibleTri, otherTri, tracebacks, loop, triPoints, pointTriList, pointXyz)
-    try: 
+    try:
       found = clockwiseBoundaryPointList[side].index(otherPoint)
     except ValueError:
       found = -1
@@ -642,7 +642,7 @@ def expandLoop(loop, boundaries, triPoints, pointTriList, pointXyz, \
           tracebacks[unmarkTri].append(nextPossibleTri)
           if unmarkTri in stripTris:
             stripTris.remove(unmarkTri) #only 1 of these will work
-          elif unmarkTri in unseenTris: 
+          elif unmarkTri in unseenTris:
             unseenTris.remove(unmarkTri)#only 1 of these will work
           else:
             print "serious error in tst data structure 1 loop"
@@ -714,7 +714,7 @@ def expandDiscTst(tstd):
 def getLoopsTst(tstd):
   pointTriList = tstd.dict['POINT_TRIANGLE']
   triPoints = tstd.dict['TRIANGLE_POINT']
-  return getLoops(triPoints, pointTriList, tstd.dict['POINT_XYZ']) 
+  return getLoops(triPoints, pointTriList, tstd.dict['POINT_XYZ'])
 
 def getLoops(triPoints, pointTriList, pointXyz,  \
                                       alternateStartOffset=0):
@@ -740,7 +740,7 @@ def getLoops(triPoints, pointTriList, pointXyz,  \
     newList = []
     for value in values:
       newList.append(listHalfLoops[value])
-    loopConnections[key] = newList  
+    loopConnections[key] = newList
   loops = makeLoops(tree,loopConnections)
   return loops
 
@@ -809,17 +809,17 @@ def classifyRegularLoop(loopTris, loopPts, triPoints, pointXyz):
   countSame,countDiff = 0,0
   for loopTri in loopTris:
     triPointXYZ = []
-    for point in triPoints[loopTri-1][1:]: 
+    for point in triPoints[loopTri-1][1:]:
       triPointXYZ.append(pointXyz[point-1][1:])
     normal = geometry.getTriNormal(triPointXYZ[0],triPointXYZ[1],triPointXYZ[2])
     centerTri = geometry.getAverage(triPointXYZ)
     vector = []
-    for index in range(3):  
+    for index in range(3):
       vector.append(centerTri[index] - geometricCenter[index])
     #make sure vector and normal are nonzero, both can happen, don't count it
     if (vector[0] == 0. and vector[1] == 0. and vector[2] == 0.) or \
          (normal[0] == 0. and normal[1] == 0. and normal[2] == 0.):
-      pass #this condition happens when the center of the tri is near the 
+      pass #this condition happens when the center of the tri is near the
            #average of the points in the loop or when the tri is really small
     else:
       angle = geometry.getAngle(vector, normal)
@@ -845,7 +845,7 @@ def eulerCharacteristic(triPoints, pointTriList):
   euler = vertices - edges + faces
   #print vertices, edges, faces, euler
   return euler
-      
+
 #assumes single piece
 def countHandles(triPoints, pointTriList):
   euler = eulerCharacteristic(triPoints, pointTriList)
@@ -879,14 +879,14 @@ def getVertexBoundary(loop, pointTriList, triPoints, pointXyz=False, returnBoth=
         if nonAdjacentEdge != False:
           print "serious error in loop structure 1"
           print loop, triangle
-          tstdebug.debugTriangleList([loop], triPoints, pointXyz, "crash.loop.py") 
-          tstdebug.debugTriangleList([[triangle]], triPoints, pointXyz, "crash.tri.py") 
+          tstdebug.debugTriangleList([loop], triPoints, pointXyz, "crash.loop.py")
+          tstdebug.debugTriangleList([[triangle]], triPoints, pointXyz, "crash.tri.py")
           sys.exit(1)
         nonAdjacentEdge = edge
     if nonAdjacentEdge == False:
       #if pointXyz != False:
         #print triangle
-        #tstdebug.debugTriangleList([[triangle]], triPoints, pointXyz, "crash.tri.py") 
+        #tstdebug.debugTriangleList([[triangle]], triPoints, pointXyz, "crash.tri.py")
       #print "serious error in loop structure 7, no pointXyz needed to debug"
       return False #forces re-try
     added = False
@@ -916,7 +916,7 @@ def getVertexBoundary(loop, pointTriList, triPoints, pointXyz=False, returnBoth=
       sys.exit(1)
   #trim off the repeated ends
   for boundaryList in boundaryLists:
-    if len(boundaryList) > 0: #this only happens once, because the beg/end 
+    if len(boundaryList) > 0: #this only happens once, because the beg/end
       boundaryList.pop()      #are always the same by construction
   #special failure case... one border empty on certain occasions,
   #return false and let caller handle it
@@ -975,7 +975,7 @@ def makeLoops(tree, loopConnections):
           else:
             stillTrimming = False
         finalLoop = newLoop[index-1:]
-        finalLoop.extend(endNewLoop) 
+        finalLoop.extend(endNewLoop)
         returnList.append(finalLoop)
     if 2 == len(tree): #trunk (not a branch or leaf)
       stackTreeTraversed.insert(0, (tree[1],traversed[:]))
@@ -1039,7 +1039,7 @@ def buildListHalfLoops(tree,connectionTargets):
         stackTreesTraversed.insert(0,(branch,curTraversed[:]))
   return halfLoops #no more in stack, so return dictionary built
 
-# tree making function  ---changed from recursion to iteration 
+# tree making function  ---changed from recursion to iteration
 def makeTreeBranch(firstTri, seenTris, unseenTris, triPoints, pointTriList, \
                    lastTri=False):
   loopConnections = {}
@@ -1059,7 +1059,7 @@ def makeTreeBranch(firstTri, seenTris, unseenTris, triPoints, pointTriList, \
       adjTri = findTriAcrossEdge(edge, unseenTris,pointTriList,triPoints)
       if -1 != adjTri:
         adjacentTris.append(adjTri)
-      else: 
+      else:
         connectionTri = findTriAcrossEdge(edge, seenTris, pointTriList, \
                             triPoints, notThisTris=set([lastTri,firstTri]))
         if -1 != connectionTri: #record the connection in loopConnections now
@@ -1084,7 +1084,7 @@ def makeTreeBranch(firstTri, seenTris, unseenTris, triPoints, pointTriList, \
         unseenTris.remove(nextTri)
         seenTris.add(nextTri) #both these must be done before recursive calls
       treeInsert[point] = [firstTri, 'replace1', 'replace2']
-      for index,nextTri in enumerate(adjacentTris): 
+      for index,nextTri in enumerate(adjacentTris):
         stackToProcess.insert(0, [nextTri,firstTri,seenTris,unseenTris, \
                                   treeInsert[point], index+1]) #the 'replace'
     elif 3 == len(adjacentTris): #very bad... messy for data structure ,restart
@@ -1216,7 +1216,7 @@ def __crossoverReportLoop(crossoverTri, otherTri, tracebacks, oldLoop, \
           loop.append(oldLoop[index])
         for index in range(end):
           loop.append(oldLoop[index])
-      else: #count up from end then up to start      
+      else: #count up from end then up to start
         for index in range(end+1, len(oldLoop)):
           loop.insert(0, oldLoop[index])
         for index in range(start):
@@ -1227,12 +1227,12 @@ def __crossoverReportLoop(crossoverTri, otherTri, tracebacks, oldLoop, \
 
 def __getNextLoop(index, loopLength):
    return (index + 1) % loopLength
-  
+
 def __getPrevLoop(index, loopLength):
     return (index - 1 + loopLength) % loopLength
 
 def  __possiblyTrimLoop(loop, oldLoop, triPoints, pointTriList, pointXyz):
-  '''trims and returns loop, cutting out pieces of oldloop if they connect 
+  '''trims and returns loop, cutting out pieces of oldloop if they connect
   in 3-way overlaps'''
   returnLoop = [] #copy instead of break
   loopSet = set(loop)
@@ -1249,7 +1249,7 @@ def  __possiblyTrimLoop(loop, oldLoop, triPoints, pointTriList, pointXyz):
           #print index, next, prev, adjIndex, loop, oldLoop #debugging
           #have to find which way to cut:
           while len(returnLoop) == 0:
-            if loop[next] in oldLoopSet: 
+            if loop[next] in oldLoopSet:
               if adjIndex > index:
                 for place,tri in enumerate(loop):
                   if place <= index or adjIndex <= place:
@@ -1271,7 +1271,7 @@ def  __possiblyTrimLoop(loop, oldLoop, triPoints, pointTriList, pointXyz):
               prev = __getPrevLoop(prev, len(loop))
               next = __getNextLoop(next, len(loop))
           if len(returnLoop) > 1:
-            #returnloop should be okay... but possible we have 2 places wrong.. so 
+            #returnloop should be okay... but possible we have 2 places wrong.. so
             #call this loop again...
             #print "problem found and fixed once"
             #print returnLoop
@@ -1294,7 +1294,7 @@ def lengthEdges(adjTri, triPoints, pointXyz, excludeEdges=[]):
     for point in leftEdge:
       points.append(pointXyz[point-1][1:])
     combinedLength += geometry.distL2(points[0], points[1])
-  return combinedLength        
+  return combinedLength
 
 def lengthAcrossTris(triOne, triTwo, adjEdge, triPoints, pointXyz):
   """measures from one point to the other, across midpoint of adjacent edge"""
@@ -1314,7 +1314,7 @@ def lengthAcrossTris(triOne, triTwo, adjEdge, triPoints, pointXyz):
     edgePoints.append(pointXyz[point-1][1:])
   edgeCenter = (edgePoints[0][0] + edgePoints[1][0])/2., \
                (edgePoints[0][1] + edgePoints[1][1])/2., \
-               (edgePoints[0][2] + edgePoints[1][2])/2. 
+               (edgePoints[0][2] + edgePoints[1][2])/2.
   return geometry.distL2(edgeCenter, farPoints[0]) + \
             geometry.distL2(edgeCenter, farPoints[1])
 
@@ -1330,11 +1330,9 @@ def makeClockwise(triQuestionable, triPoints, pointTriList):
   #stupid cases now...
   if adjTriPts.index(edge[0]) + 1 == adjTriPts.index(edge[1]):
     #print "reversing"
-    triQuestionable.reverse()  
+    triQuestionable.reverse()
   elif adjTriPts.index(edge[0]) - 2 == adjTriPts.index(edge[1]):
     #print "reversing"
-    triQuestionable.reverse()  
+    triQuestionable.reverse()
   #print triQuestionable
   return triQuestionable
-
-

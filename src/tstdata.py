@@ -1,12 +1,12 @@
 #module contains tstData class
 #ryan g coleman ryangc@mail.med.upenn.edu
 
-import string, bz2 
+import string, bz2
 from geometry import dist,distL2
 
 class tstData(object):
   '''this class holds all the data from a tst data file in a dictionary
-  it automatically reads in any standard formatted record 
+  it automatically reads in any standard formatted record
   (and ignores parentheses)'''
 
   #one example of necessaryKeys that can be used
@@ -99,7 +99,7 @@ class tstData(object):
             curRec = []
           else: #add this line to the current record
             if not necessaryKeys or curRecName in necessaryKeys:
-              #try to avoid some issues with floats that are too long by 
+              #try to avoid some issues with floats that are too long by
               #inserting spaces before minus '-' signs...
               newLine = string.replace(line, '-', ' -')
               tokens = string.split(newLine)
@@ -125,7 +125,7 @@ class tstData(object):
                     curRec.append(ints[0])
                   elif len(ints) > 1:
                     curRec.append(ints)
-                  recordTypes[curRecName] = 'int' 
+                  recordTypes[curRecName] = 'int'
                 except ValueError:
                   try:  #first try to convert to floats
                     floats = [float(x) for x in tokens]
@@ -133,7 +133,7 @@ class tstData(object):
                       curRec.append(floats[0])
                     elif len(floats) > 1:
                       curRec.append(floats)
-                    recordTypes[curRecName] = 'float' 
+                    recordTypes[curRecName] = 'float'
                   except ValueError: #if completely failed, use strings
                     curRec.append(line[:-1]) #remove the \n
                     recordTypes[curRecName] = 'string'
@@ -156,7 +156,7 @@ class tstData(object):
   def countHandles(self):
     euler = self.eulerCharacteristic()
     handles = (euler-2)/-2
-    return handles 
+    return handles
 
   def buildNeighbors(self, allPoints):
     '''builds a neighbor dictionary'''
@@ -170,7 +170,7 @@ class tstData(object):
           endXYZ = self.dict['POINT_XYZ'][neighborPoint-1][1:]
           distance = distL2(startXYZ, endXYZ)
           tempList.append([neighborPoint,distance])
-        self.__neighbors[pointStart] = tempList    
+        self.__neighbors[pointStart] = tempList
     return self.__neighbors
 
 def writeEntryIntegers(data,title,endtitle,file):
@@ -219,7 +219,7 @@ def trianglinizeLoop(loopPoints):
   if len(loopPoints) >= 2: #otherwise can't do anything
     startPt = loopPoints[0]
     lastPt = loopPoints[1]
-    for nextPt in loopPoints[2:]:   
+    for nextPt in loopPoints[2:]:
       tris.append([startPt, lastPt, nextPt])
       lastPt = nextPt
   return tris
@@ -288,5 +288,3 @@ class tstDataWritable(tstData):
         "PROPERTY_XYZ", \
         "END PROPERTY_XYZ",tstFile)
     tstFile.close()
-
-

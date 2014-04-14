@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.5
+#!/usr/bin/env python
 
 #Ryan G. Coleman, Kim A. Sharp
 #ryan.g.coleman@gmail.com http://crystal.med.upenn.edu
@@ -9,8 +9,8 @@
 #2 kinds of input, first the pdb_record, then the triangles:
 """
 PDB_RECORD
-ATOM      1  N   HIS     4      10.859  -0.424   8.156  1.65 28.87             
-ATOM      2  CA  HIS     4      10.020   0.343   9.069  1.90 28.74 
+ATOM      1  N   HIS     4      10.859  -0.424   8.156  1.65 28.87
+ATOM      2  CA  HIS     4      10.020   0.343   9.069  1.90 28.74
 ...
 END PDB_RECORD
 TRIANGLE_XYZ
@@ -64,7 +64,7 @@ def readTri(triName):
   return pdbD, triLineToNum, triPoints
 
 def makePointXyz(triLineToNum):
-  '''takes a dictionary of pointString -> pointNum and makes a list of 
+  '''takes a dictionary of pointString -> pointNum and makes a list of
   pointNum, pointX, pointY, pointZ'''
   #make the reverse dict
   reverseDict = {}
@@ -105,7 +105,7 @@ def nearbyPoints(pointXyz, pdbD):
     pointNum = pointCoord[0]
     xyz = pointCoord[1:4]
     closestIndex, closestDist = 0, 1000000000000.
-    for index, atom in enumerate(pdbD.coords):    
+    for index, atom in enumerate(pdbD.coords):
       thisDist = geometry.dist(xyz, atom, metric="L2SQUARED") #l2^2 monotonic
       if thisDist < closestDist:
         closestDist = thisDist
@@ -157,14 +157,14 @@ def makePointTriAndNeighbor(pointTriDict, triPointDict):
   for point in points:
     tris = pointTriDict[point][:] #must copy[:] since going to get destroyed
     outputPtTri.append([point, len(tris)]) #know num,but not order
-    outputPtNeighbor.append([point, len(tris)])     
+    outputPtNeighbor.append([point, len(tris)])
     curTri = tris[0] #could pick any to start
     curPoint = getNextPoint(triPointDict[curTri], point)
     orderedTris, orderedPoints = [curTri], [curPoint] #start lists
     tris.remove(curTri)
     while len(tris) > 0:
       nextPt = getNextPoint(triPointDict[curTri], curPoint)
-      possNextTris = pointTriDict[nextPt]    
+      possNextTris = pointTriDict[nextPt]
       nextTri = False
       for possNextTri in possNextTris:
         if possNextTri in tris:
@@ -179,7 +179,7 @@ def makePointTriAndNeighbor(pointTriDict, triPointDict):
   return outputPtTri, outputPtNeighbor
 
 def calcNormals(pointXyz, triPointDict, pointTriDict):
-  '''calculate normals for each point by averaging the adjacent tri normals''' 
+  '''calculate normals for each point by averaging the adjacent tri normals'''
   triNormals = {}
   for tri in triPointDict.keys():
     points = triPointDict[tri]
@@ -227,7 +227,7 @@ def triToTst(triName, tstName):
   tstD.dict['PROPERTY_XYZ']= fakeForNow(tstD.dict['POINT_XYZ'])
   #print tstD.dict.keys()
   tstD.write(tstName)
-  
+
 if __name__ == "__main__" and -1 != string.find(sys.argv[0], "trigenTst.py"):
   #otherwise this script has been imported, no reason to run
   if len(sys.argv) > 1:
@@ -237,5 +237,5 @@ if __name__ == "__main__" and -1 != string.find(sys.argv[0], "trigenTst.py"):
     else: #assume how to make name
       tstName = triName[:-4] + ".tst"
     triToTst(triName, tstName)
-  else: 
+  else:
     print "usage: trigenTst.py name.tri [name.tst]"
