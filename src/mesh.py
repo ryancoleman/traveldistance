@@ -129,7 +129,9 @@ class mesh(object):
     #now all nodes have been added and neighbors calculated
 
   def setPtHydro(self, pointsHydro):
-    '''should be a tst formatted record of the surface point to -1, 0, 1 hydro'''
+    '''
+    should be a tst formatted record of the surface point to -1, 0, 1 hydro
+    '''
     self.nodeHydro = {}
     if pointsHydro:
       for point, charge in pointsHydro:
@@ -1062,7 +1064,7 @@ class mesh(object):
       if distanceName in self.nodeDist[node]:
         distance = self.nodeDist[node][distanceName]
       else:
-        distance = 0. #means it was far outside convex hull
+        distance = 0.  # means it was far outside convex hull
       if minD is None or distance < minD:
         minD = distance
       if maxD is None or distance > maxD:
@@ -1075,17 +1077,19 @@ class mesh(object):
     return minD, maxD, meanD
 
   def getWithinNodesNoInside(self, xyzRadiusList):
-    '''for each ball, finds all nodes not inside the MS that are within the ball
-    returns the union of all such nodes'''
+    '''
+    for each ball, finds all nodes not inside the MS that are within the ball
+    returns the union of all such nodes
+    '''
     returnSet = set()
     for aNodeKey in self.gridNodes + self.surfaceNodes:
       aNode = self.nodeXyz[aNodeKey]
-      if self.nodeClass[aNodeKey] != 1: #is not inside
+      if self.nodeClass[aNodeKey] != 1:  # is not inside
         for coordRad in xyzRadiusList:
           distanceTo = geometry.distL2(coordRad[:3], aNode)
           if distanceTo < coordRad[3]:
             returnSet.add(aNodeKey)
-            break #don't need to check any more vdw radii
+            break  # don't need to check any more vdw radii
     return returnSet
 
   def getTracebackSet(self, nodeSet, name):
@@ -1113,7 +1117,7 @@ class mesh(object):
         for nextNode in listBack:
           if nextNode not in listToProcess and nextNode not in returnSet:
             listToProcess.add(nextNode)
-      else: #has no ancestors, must be starting node
+      else:  # has no ancestors, must be starting node
         returnSet.add(currentNode)
     return returnSet
 
@@ -1121,7 +1125,7 @@ class mesh(object):
     '''returns a list of just the between nodes'''
     returnList = []
     for aNode in self.gridNodes:
-      if self.nodeClass[aNode] == 2: #somewhere in the between
+      if self.nodeClass[aNode] == 2:  # somewhere in the between
         returnList.append(aNode)
     return returnList
 
@@ -1132,8 +1136,8 @@ class mesh(object):
   def getSurfaceNodesSorted(self, name):
     '''returns list sorted on some distance (usually travel)'''
     surfNodes = self.getSurfaceNodes()
-    surfNodes.sort(self.__distCompare(name)) #sorts based on distance
-    surfNodes.reverse() #want high to low
+    surfNodes.sort(self.__distCompare(name))  # sorts based on distance
+    surfNodes.reverse()  # want high to low
     return surfNodes
 
   def countNodes(self):
@@ -1145,27 +1149,27 @@ class mesh(object):
       return 1
     elif x == y:
       return 0
-    else: #x < y
+    else:  # x < y
       return -1
 
   def __distCompare(self, name):
     '''helper comparison method based on the name distance of passed in nodes'''
-    returnFunct = lambda x, y: self.__numericCompare(self.nodeDist[x][name], \
-                                             self.nodeDist[y][name])
-    return returnFunct #yes returns a function since sort() only takes 2 args
+    returnFunct = lambda x, y: self.__numericCompare(
+        self.nodeDist[x][name], self.nodeDist[y][name])
+    return returnFunct  # yes returns a function since sort() only takes 2 args
 
   def __shortenPath(self, path):
     '''finds shortcuts in the path'''
     shortPath = []
-    partialPath = path[:] #beginning to end of path
+    partialPath = path[:]  # beginning to end of path
     while len(partialPath) > 0:
-      thisNode = partialPath.pop() #remove end
-      shortPath.insert(0, thisNode) #do this regardless
+      thisNode = partialPath.pop()  # remove end
+      shortPath.insert(0, thisNode)  # do this regardless
       if len(partialPath) > 0:
         bestShortcut, shortcutIndex = False, len(partialPath)
         for neighbor, neighDist in self.nodeNeighbors[thisNode]:
-          if neighbor != partialPath[-1]: #one must be, but we ignore it
-            if neighbor in partialPath: #found a shortcut
+          if neighbor != partialPath[-1]:  # one must be, but we ignore it
+            if neighbor in partialPath:  # found a shortcut
               lastIndex = partialPath.index(neighbor)
               if lastIndex < shortcutIndex:
                 shortcutIndex, bestShortcut = lastIndex, neighbor
@@ -1175,29 +1179,31 @@ class mesh(object):
 
   def __findPathOutBranchBound(self, startNode, centerName, excludePts):
     '''uses branch and bound to find a path from start to outside convexhull'''
-    visitedNodes = set(excludePts) #all the things seen or not allowed
-    tree = {} #empty tree, goes up
-    nodesLeft,valuesLeft = [startNode], [self.nodeDist[startNode][centerName]]
+    visitedNodes = set(excludePts)  # all the things seen or not allowed
+    tree = {}  # empty tree, goes up
+    nodesLeft, valuesLeft = [startNode], [self.nodeDist[startNode][centerName]]
     while len(nodesLeft) > 0:
-      thisIndex = valuesLeft.index(max(valuesLeft)) #expand higher first
+      thisIndex = valuesLeft.index(max(valuesLeft))  # expand higher first
       thisNode = nodesLeft.pop(thisIndex)
       thisValue = valuesLeft.pop(thisIndex)
       visitedNodes.add(thisNode)
       for neighbor, neighDist in self.nodeNeighbors[thisNode]:
-        if neighbor not in visitedNodes: #don't want loops
-          if neighbor not in nodesLeft: #already on the stack
-            if self.nodeClass[neighbor] != 1: #don't care, don't go through inside
-              if self.nodeClass[neighbor] == 0:  #then we're done, outside
+        if neighbor not in visitedNodes:  # don't want loops
+          if neighbor not in nodesLeft:  # already on the stack
+            if self.nodeClass[neighbor] != 1:
+              #don't care, don't go through inside
+              if self.nodeClass[neighbor] == 0:  # then we're done, outside
                 path = [thisNode, neighbor]
-                value = min(self.nodeDist[thisNode][centerName], \
-                            self.nodeDist[neighbor][centerName])
+                value = min(
+                    self.nodeDist[thisNode][centerName],
+                    self.nodeDist[neighbor][centerName])
                 while path[0] != startNode:
                   path.insert(0, tree[path[0]])
                   value = min(value, self.nodeDist[path[0]][centerName])
-                shortPath = self.__shortenPath(path)  #shorten path if possible
+                shortPath = self.__shortenPath(path)  # shorten path if possible
                 #print len(path), len(shortPath)
                 return shortPath, value
-              else: #add to the list of things to check
+              else:  # add to the list of things to check
                 nodesLeft.append(neighbor)
                 valuesLeft.append(self.nodeDist[neighbor][centerName])
                 tree[neighbor] = thisNode
@@ -1210,9 +1216,9 @@ class mesh(object):
     neighborNodes = set()
     for node in iter(iterableNodes):
       for neighborNode, neighDist in self.nodeNeighbors[node]:
-        if neighborNode not in iterableNodes and \
-                  ((not excludeSet) or neighborNode not in excludeSet):
-          if self.nodeClass[neighborNode] != 1: #.isInside():
+        if neighborNode not in iterableNodes and (
+            (not excludeSet) or neighborNode not in excludeSet):
+          if self.nodeClass[neighborNode] != 1:  # .isInside():
             neighborNodes.add(neighborNode)
     return neighborNodes
 
@@ -1222,10 +1228,10 @@ class mesh(object):
     neighborNodes = set()
     for node in iter(iterableNodes):
       for neighborNode, neighDist in self.nodeNeighbors[node]:
-        if neighborNode not in iterableNodes and \
-                  ((not excludeSet) or neighborNode not in excludeSet):
+        if neighborNode not in iterableNodes and (
+            (not excludeSet) or neighborNode not in excludeSet):
           if 0 == self.nodeClass[neighborNode] or \
-                    2 == self.nodeClass[neighborNode]: #outside or between
+              2 == self.nodeClass[neighborNode]:  # outside or between
             neighborNodes.add(neighborNode)
     return neighborNodes
 
@@ -1235,8 +1241,8 @@ class mesh(object):
     neighborNodes = set()
     for node in iter(iterableNodes):
       for neighborNode, neighDist in self.nodeNeighbors[node]:
-        if neighborNode not in iterableNodes and \
-                  ((not excludeSet) or neighborNode not in excludeSet):
+        if neighborNode not in iterableNodes and (
+            (not excludeSet) or neighborNode not in excludeSet):
           if self.nodeClass[neighborNode] in [3, 5]:
             neighborNodes.add(neighborNode)
     return neighborNodes
@@ -1247,8 +1253,8 @@ class mesh(object):
     neighborNodes = set()
     for node in iter(iterableNodes):
       for neighborNode, neighDist in self.nodeNeighbors[node]:
-        if neighborNode not in iterableNodes and \
-                  ((not excludeSet) or neighborNode not in excludeSet):
+        if neighborNode not in iterableNodes and (
+            (not excludeSet) or neighborNode not in excludeSet):
           if self.nodeClass[neighborNode] in [0, 2]:
             neighborNodes.add(neighborNode)
     return neighborNodes
@@ -1273,29 +1279,29 @@ class mesh(object):
     neighbors and returns a list of these sets'''
     discs = unionfind2.unionFind()
     for node in iter(iterableNodes):
-      discs.find(node) #make sure it is added even if no neighbors
+      discs.find(node)  # make sure it is added even if no neighbors
       for neighborNode, neighDist in self.nodeNeighbors[node]:
-        if neighborNode in iterableNodes: #otherwise don't care
+        if neighborNode in iterableNodes:  # otherwise don't care
           discs.union(node, neighborNode)
     return discs.toLists()
 
   def __addPointNeighbors(self, pointNeighbors, pointOne, pointTwo):
     '''adds to the tree, which is a two-way connected dictionary'''
-    if pointOne not in pointNeighbors:           #initialize list
+    if pointOne not in pointNeighbors:            # initialize list
       pointNeighbors[pointOne] = []
-    if pointTwo not in pointNeighbors[pointOne]: #no duplicates
+    if pointTwo not in pointNeighbors[pointOne]:  # no duplicates
       pointNeighbors[pointOne].append(pointTwo)
-    if pointTwo not in pointNeighbors:           #initialize list
+    if pointTwo not in pointNeighbors:            # initialize list
       pointNeighbors[pointTwo] = []
-    if pointOne not in pointNeighbors[pointTwo]: #no duplicates
+    if pointOne not in pointNeighbors[pointTwo]:  # no duplicates
       pointNeighbors[pointTwo].append(pointOne)
 
   def __calculateMinPointToDist(self, point, iterableSet):
     '''iterates over whole set, comparing to point, returns smallest'''
     minDist = 10000000000.
     for otherPt in iter(iterableSet):
-      minDist = min(minDist, geometry.distL2Squared(self.nodeXyz[point], \
-                                             self.nodeXyz[otherPt]))
+      minDist = min(minDist, geometry.distL2Squared(
+          self.nodeXyz[point], self.nodeXyz[otherPt]))
     return math.sqrt(minDist)
 
   def __decideWhichCloser(self, thisPt, loopPts):
@@ -1305,7 +1311,7 @@ class mesh(object):
       minDists[index] = self.__calculateMinPointToDist(thisPt, loopPts[index])
     if minDists[0] < minDists[1]:
       lower = 0
-    return lower, minDists[lower] #in case you want dist too
+    return lower, minDists[lower]  # in case you want dist too
 
   def __divideTwoCloseGroups(self, loopPtsOne, loopPtsTwo):
     '''this is where the plugs are made. algorithm splits all points into 2
@@ -1320,9 +1326,10 @@ class mesh(object):
       allPts.difference_update(pointGroup)
     removePts = set()
     for point in allPts:
-      if self.nodeClass[point] not in [0, 2]: #not out or between
+      if self.nodeClass[point] not in [0, 2]:  # not out or between
         removePts.add(point)
-    allPts.difference_update(removePts) #don't want neighboring points on the surface
+    allPts.difference_update(removePts)
+    #don't want neighboring points on the surface
     #only points within maxDist of any loop point are considered, this ensures
     # a complete plug across the whole opening
     while len(allPts) > 0:
@@ -1336,114 +1343,130 @@ class mesh(object):
         if neighborPt in pointGroups[other]:
           neighborOpposite = True
           break
-      if not neighborOpposite: #yet
+      if not neighborOpposite:  # yet
         for neighborPt in neighborsNotInside:
-          if neighborPt in allPts or neighborPt in triedPts: #otherwise we don't know if it is a neighbor of a neighbor yet
+          if neighborPt in allPts or neighborPt in triedPts:
+            #otherwise we don't know if it is a neighbor of a neighbor yet
             if neighborPt not in pointGroups[lower]:
-              neighborLower, neighborDist = self.__decideWhichCloser( \
-                                                          neighborPt, loopPts)
+              neighborLower, neighborDist = self.__decideWhichCloser(
+                  neighborPt, loopPts)
               if neighborLower == other:
-                #have to check and make sure this neighbor is adjacent to other plug
+                #have to check and make sure this neighbor is adjacent to
+                # other plug
                 neighborNeighbors = self.getNeighborsNotInside([neighborPt])
                 for neighborNeighborCheck in neighborNeighbors:
-                  if neighborNeighborCheck in pointGroups[other]: #has to be adjacent to the correct plug
+                  if neighborNeighborCheck in pointGroups[other]:
+                    #has to be adjacent to the correct plug
                     neighborOpposite = True
-                    break #out of 4 loop 3 lines previous
+                    break  # out of 4 loop 3 lines previous
                 if neighborOpposite:
-                  break #out of 4 loop 12 lines previous
-      if neighborOpposite: #now take action
+                  break  # out of 4 loop 12 lines previous
+      if neighborOpposite:  # now take action
         pointGroups[lower].add(thisPt)
         for neighborPt in neighborsNotInside:
           if neighborPt not in pointGroups[0] and \
-                                neighborPt not in pointGroups[1]:
-            if self.nodeClass[neighborPt] in [0, 2]: #out or betw
+              neighborPt not in pointGroups[1]:
+            if self.nodeClass[neighborPt] in [0, 2]:  # out or betw
               allPts.add(neighborPt)
     #print len(pointGroups[0]), len(pointGroups[1])
     return pointGroups
 
-  def findOnePlug(self, indexLoop, regLoopPtList, debugOut, outFileName, \
-                  centerName):
+  def findOnePlug(
+      self, indexLoop, regLoopPtList, debugOut, outFileName, centerName):
     '''finds a plug for one regular loop'''
-    ringNeighbors = {} #dictionary keyed on disc to lists of discs
-    ringToDisc = {} #mapping from rings to discs
+    ringNeighbors = {}  # dictionary keyed on disc to lists of discs
+    ringToDisc = {}  # mapping from rings to discs
     ringToExclude = {}
     ringToCenterName = {}
     possibleHoleStarts = []
-    rings = [False, False] #two lists of sets
-    discs = [False, False] #two lists of sets
+    rings = [False, False]  # two lists of sets
+    discs = [False, False]  # two lists of sets
     for indexSide, regLoopPtListSide in enumerate(regLoopPtList):
       ringThisSide = set(regLoopPtListSide)
       rings[indexSide] = frozenset(ringThisSide)
     for side in xrange(len(discs)):
       other = (side + 1) % 2
-      if 1 == other: #only these some things once
+      if 1 == other:  # only these some things once
         groups = self.__divideTwoCloseGroups(rings[side], rings[other])
-        wholeDiscSet = set() #cumulative over matching pairs of discs
+        wholeDiscSet = set()  # cumulative over matching pairs of discs
         for indexGroup, group in enumerate(groups):
           wholeDiscSet.update(group)
           discThisGroup = frozenset(group)
           ringToDisc[rings[indexGroup]] = discThisGroup
           discs[indexGroup] = discThisGroup
           if debugOut:
-            pts = [] #here to end of loop is debugging
+            pts = []  # here to end of loop is debugging
             for node in iter(group):
               pts.append(self.nodeXyz[node])
-            if indexGroup == 0: #debugging
-              tstdebug.pointDebug(pts, filename=outFileName + ".plug." + str(indexLoop) + "." + str(indexGroup) + ".py", mainColor=(.1,.9,.1))
+            if indexGroup == 0:  # debugging
+              tstdebug.pointDebug(
+                  pts, filename=outFileName + ".plug." + str(indexLoop) +
+                  "." + str(indexGroup) + ".py", mainColor=(.1, .9, .1))
             else:
-              tstdebug.pointDebug(pts, filename=outFileName + ".plug." + str(indexLoop) + "." + str(indexGroup) + ".py", mainColor=(.9,.1,.1))
-        possibleHoleStarts.append(self.findMaxima(centerName, wholeDiscSet)[0][0])
-        ringToExclude[rings[side]] = ringToDisc[rings[other]] #don't go through other side
-        ringToExclude[rings[other]] = ringToDisc[rings[side]] #don't go through other side
-      ringNeighbors[rings[side]] = [rings[other]] #list of sets
+              tstdebug.pointDebug(
+                  pts, filename=outFileName + ".plug." + str(indexLoop) +
+                  "." + str(indexGroup) + ".py", mainColor=(.9, .1, .1))
+        possibleHoleStarts.append(
+            self.findMaxima(centerName, wholeDiscSet)[0][0])
+        ringToExclude[rings[side]] = ringToDisc[rings[other]]
+        #don't go through other side
+        ringToExclude[rings[other]] = ringToDisc[rings[side]]
+        #don't go through other side
+      ringNeighbors[rings[side]] = [rings[other]]  # list of sets
     return ringNeighbors, ringToDisc, ringToExclude, ringToCenterName, \
-                   possibleHoleStarts
+        possibleHoleStarts
 
-  def findOnePlugMaxima(self, ringCount, ring, ringToDiscAll, ringToExcludeAll,\
-                        debugOut, outFileName, centerName):
+  def findOnePlugMaxima(
+      self, ringCount, ring, ringToDiscAll, ringToExcludeAll,
+      debugOut, outFileName, centerName):
     '''finds and returns the maxima'''
     disc = ringToDiscAll[ring]
     excludeSet = ringToExcludeAll[ring]
     #print len(ring), len(disc),
     maximaDisc, maximaDist = self.findMaxima(centerName, disc)
     if debugOut:
-      pts = [] #here to end of loop is debugging
+      pts = []  # here to end of loop is debugging
       for node in iter(maximaDisc):
         pts.append(self.nodeXyz[node])
         #print node.classification
-      tstdebug.pointDebug(pts, filename=outFileName + ".plug.localmaxima." + str(ringCount) + ".py", mainColor=(.1,.3,.9))
+      tstdebug.pointDebug(
+          pts, filename=outFileName + ".plug.localmaxima." + str(ringCount) +
+          ".py", mainColor=(.1, .3, .9))
     return maximaDisc, maximaDist
 
-  def growOneMaxima(self, ringToMaximaAll, ring, maximaDisc, centerName, \
-                    ringToExcludeAll, pointNeighbors, outsidePoints, \
-                    ringNeighborsAll, ringToDiscAll):
+  def growOneMaxima(
+      self, ringToMaximaAll, ring, maximaDisc, centerName,
+      ringToExcludeAll, pointNeighbors, outsidePoints,
+      ringNeighborsAll, ringToDiscAll):
     '''grows out from one maxima, adds best path, doesn't return since stuff
     modified in place (pointNeighbors, ringToMaximaAll, outsidePoints'''
     excludeSet = ringToExcludeAll[ring]
     ringToMaximaAll[ring], paths, bestPath = [], [], 0
     for index, maximaDiscTry in enumerate(maximaDisc):
-      path,value = self.__findPathOutBranchBound(maximaDiscTry, centerName, \
-                                                 excludeSet)
+      path, value = self.__findPathOutBranchBound(
+          maximaDiscTry, centerName, excludeSet)
       #print len(path)
       if path and len(path) > 1:
         paths.append(path)
         if len(path) < len(paths[bestPath]):
           bestPath = len(paths) - 1
     if len(paths) > 0:
-      ringToMaximaAll[ring].append(paths[bestPath][0])  #the maxima used
-      for pathIndex in xrange(len(paths[bestPath])-1): #does pairs, don't do last one
+      ringToMaximaAll[ring].append(paths[bestPath][0])   # the maxima used
+      for pathIndex in xrange(len(paths[bestPath])-1):
+        #does pairs, don't do last one
         otherIndex = pathIndex + 1
-        self.__addPointNeighbors(pointNeighbors, \
-                      paths[bestPath][pathIndex], paths[bestPath][otherIndex])
-      if paths[bestPath][-1] not in outsidePoints: #want unique points
+        self.__addPointNeighbors(
+            pointNeighbors,
+            paths[bestPath][pathIndex], paths[bestPath][otherIndex])
+      if paths[bestPath][-1] not in outsidePoints:  # want unique points
         outsidePoints.append(paths[bestPath][-1])
-    else: # len(paths) == 0: #no paths found!!!!
-      ringToMaximaAll[ring] = [maximaDisc[0]] #arbitrary but necessary
+    else:  # len(paths) == 0:  # no paths found!!!!
+      ringToMaximaAll[ring] = [maximaDisc[0]]  # arbitrary but necessary
       #print indexMin, maximaDisc, ring, paths
-    #print outsidePoints[-1].isOutside() #checks... shouldn't be necessary
+    #print outsidePoints[-1].isOutside()  # checks... shouldn't be necessary
     #connect maxima (starting points)
     biggestMaxima = False
-    if ring in ringNeighborsAll: #do after only both have maxima
+    if ring in ringNeighborsAll:  # do after only both have maxima
       otherRing = ringNeighborsAll[ring][0]
       if otherRing in ringToMaximaAll:
         discs = [ringToDiscAll[ring], ringToDiscAll[ring]]
@@ -1452,18 +1475,19 @@ class mesh(object):
           for maximaOtherSide in ringToMaximaAll[otherRing]:
             maximas = [maximaOneSide, maximaOtherSide]
             if self.nodeDist[maximas[0]][centerName] > \
-                                 self.nodeDist[maximas[1]][centerName]:
+                self.nodeDist[maximas[1]][centerName]:
               biggestMaxima = maximas[0]
             else:
               biggestMaxima = maximas[1]
             #print maximas,
-            connPath,value = self.__connectTwoMaxima(centerName, \
-                                                     discs, maximas)
+            connPath, value = self.__connectTwoMaxima(
+                centerName, discs, maximas)
             #print value
-            for pathIndex in xrange(len(connPath)-1): #does pairs, don't do last one
+            for pathIndex in xrange(len(connPath) - 1):
+              #does pairs, don't do last one
               otherIndex = pathIndex + 1
-              self.__addPointNeighbors(pointNeighbors, \
-                               connPath[pathIndex], connPath[otherIndex])
+              self.__addPointNeighbors(
+                  pointNeighbors, connPath[pathIndex], connPath[otherIndex])
     #return almost nothing, modified in place
     return biggestMaxima
 
@@ -1474,7 +1498,7 @@ class mesh(object):
       if self.nodeDist[node][name] == maxVal:
         maxSet.add(node)
       elif self.nodeDist[node][name] > maxVal:
-        maxSet = set([node]) #start over
+        maxSet = set([node])  # start over
         maxVal = self.nodeDist[node][name]
     #change set to list here...
     returnMaxList = []
@@ -1488,50 +1512,53 @@ class mesh(object):
     doesn't allow path to wander very far from straightline path, nodes should
     be close and is better than restricting to discs which are sometimes
     not completely connected with each other.'''
-    visitedNodes = set() #all the things seen
-    tree = {} #empty tree, goes up
-    maxDistToCheck = geometry.distL2(self.nodeXyz[maximas[0]], \
-              self.nodeXyz[maximas[1]]) * 1.5 #could be lower but be safe
+    visitedNodes = set()  # all the things seen
+    tree = {}  # empty tree, goes up
+    maxDistToCheck = geometry.distL2(
+        self.nodeXyz[maximas[0]], self.nodeXyz[maximas[1]]) * 1.5
+    #could be lower but be safe
     #print maxDistToCheck
-    nodesLeft,valuesLeft = [maximas[0]], [self.nodeDist[maximas[0]][centerName]]
+    nodesLeft, valuesLeft = [
+        maximas[0]], [self.nodeDist[maximas[0]][centerName]]
     while len(nodesLeft) > 0:
-      thisIndex = valuesLeft.index(max(valuesLeft)) #expand higher first
+      thisIndex = valuesLeft.index(max(valuesLeft))  # expand higher first
       thisNode = nodesLeft.pop(thisIndex)
       thisValue = valuesLeft.pop(thisIndex)
       visitedNodes.add(thisNode)
       for neighbor, neighborDist in self.nodeNeighbors[thisNode]:
         if not discs or neighbor in discs[0] or neighbor in discs[1]:
-          if neighbor not in visitedNodes: #don't want loops
-            if neighbor not in nodesLeft: #already on the stack
-              if neighbor == maximas[1]:  #then we're done
+          if neighbor not in visitedNodes:  # don't want loops
+            if neighbor not in nodesLeft:  # already on the stack
+              if neighbor == maximas[1]:  # then we're done
                 path = [thisNode, neighbor]
-                value = min(self.nodeDist[thisNode][centerName], \
-                            self.nodeDist[neighbor][centerName])
+                value = min(
+                    self.nodeDist[thisNode][centerName],
+                    self.nodeDist[neighbor][centerName])
                 while path[0] != maximas[0]:
                   path.insert(0, tree[path[0]])
                   value = min(value, self.nodeDist[path[0]][centerName])
                 return path, value
-              elif 1 != self.nodeClass[neighbor]:  #not inside
+              elif 1 != self.nodeClass[neighbor]:  # not inside
                 #add to the list of things to check...if dist okay
-                thisDist=geometry.distL2(self.nodeXyz[maximas[1]], \
-                                         self.nodeXyz[neighbor])
+                thisDist = geometry.distL2(
+                    self.nodeXyz[maximas[1]], self.nodeXyz[neighbor])
                 if thisDist < maxDistToCheck:
                   nodesLeft.append(neighbor)
                   valuesLeft.append(self.nodeDist[neighbor][centerName])
                   tree[neighbor] = thisNode
-                else: #so we don't keep trying this one
+                else:  # so we don't keep trying this one
                   visitedNodes.add(neighbor)
     #if we get here it means we've tried and tried but can't get there from here
     #possibly retry without restricting to discs
     if discs:
       #print "trying again"
       return self.__connectTwoMaxima(centerName, False, maximas)
-    else: #really give up
+    else:  # really give up
       #print "giving up, giving in"
       return False, False
 
-  def __findPathPointToPoint(self, pointStart, pointEnd, pointNeighbors, \
-                             centerName):
+  def __findPathPointToPoint(
+      self, pointStart, pointEnd, pointNeighbors, centerName):
     '''uses depth first search to find all non-loop paths from start to end'''
     paths = [[pointStart]]
     completePaths = []
@@ -1540,22 +1567,22 @@ class mesh(object):
       curPath = paths.pop()
       curEnd = curPath[-1]
       neighbors = pointNeighbors[curEnd]
-      neighbors.sort(self.__distCompare(centerName)) #sorts based on distance
+      neighbors.sort(self.__distCompare(centerName))  # sorts based on distance
       #neighbors is sorted low to high now
       for neighbor in neighbors:
-        if neighbor == pointEnd: #found one path
+        if neighbor == pointEnd:  # found one path
           completePath = curPath[:]
           completePath.append(neighbor)
-          completePaths.append(completePath) #and continue
-        elif neighbor not in curPath: #no loops
+          completePaths.append(completePath)  # and continue
+        elif neighbor not in curPath:  # no loops
           newPath = curPath[:]
           #seenPts.add(neighbor)
           newPath.append(neighbor)
-          paths.append(newPath)    #highs put on last... so depth first
-    return completePaths #return the list of paths found
+          paths.append(newPath)    # highs put on last... so depth first
+    return completePaths  # return the list of paths found
 
-  def __findPathPointToMultiple(self, pointStart, pointsEnd, pointNeighbors, \
-                             centerName, plugPoints):
+  def __findPathPointToMultiple(
+      self, pointStart, pointsEnd, pointNeighbors, centerName, plugPoints):
     '''uses depth first search to find all non-loop paths from start to ends'''
     paths = [[pointStart]]
     completePaths = []
@@ -1564,19 +1591,19 @@ class mesh(object):
       curPath = paths.pop()
       curEnd = curPath[-1]
       neighbors = pointNeighbors[curEnd]
-      neighbors.sort(self.__distCompare(centerName)) #sorts based on distance
+      neighbors.sort(self.__distCompare(centerName))  # sorts based on distance
       #neighbors is sorted low to high now
       for neighbor in neighbors:
-        if neighbor in pointsEnd: #found one path
+        if neighbor in pointsEnd:  # found one path
           if neighbor != pointStart or len(curPath) > 2:
             completePath = curPath[:]
             completePath.append(neighbor)
-            completePaths.append(completePath) #and continue
-        elif neighbor not in curPath: #no cycles
+            completePaths.append(completePath)  # and continue
+        elif neighbor not in curPath:  # no cycles
           newPath = curPath[:]
           newPath.append(neighbor)
-          paths.append(newPath)    #highs put on last... so depth first
-    return completePaths #return the list of paths found
+          paths.append(newPath)     # highs put on last... so depth first
+    return completePaths  # return the list of paths found
 
   def __getPathPlugs(self, plugPoints, pathPoints):
     '''helper to find the plugs each path passes through'''
@@ -1595,14 +1622,14 @@ class mesh(object):
     paths = []
     #force paths to be unique wrt start, end, and plugPoints passed through
     for indexOne, pointOne in enumerate(outsidePoints):
-      otherPoints = outsidePoints[indexOne:] #include starting point
+      otherPoints = outsidePoints[indexOne:]  # include starting point
       if len(otherPoints) > 0:
         pathEndDict = {}
-        allPaths = self.__findPathPointToMultiple(pointOne, otherPoints, \
-                                         pointNeighbors, centerName, plugPoints)
-        if allPaths and len(allPaths) > 0: #otherwise no paths found
+        allPaths = self.__findPathPointToMultiple(
+            pointOne, otherPoints, pointNeighbors, centerName, plugPoints)
+        if allPaths and len(allPaths) > 0:  # otherwise no paths found
           for path in allPaths:
-            if path and len(path) > 0: #paranoia
+            if path and len(path) > 0:  # paranoia
               #print path
               indexTwo = outsidePoints.index(path[-1])
               if indexTwo not in pathEndDict:
@@ -1643,17 +1670,18 @@ class mesh(object):
     nodeDict = {}
     for refKey, refValueList in nodeRefDict.iteritems():
       if refKey not in self.nodeNode:
-        nodeTemp = node(refKey, self.nodeXyz[refKey], \
-                        self.nodeOffGridXyz[refKey], self.nodeDist[refKey])
+        nodeTemp = node(
+            refKey, self.nodeXyz[refKey],
+            self.nodeOffGridXyz[refKey], self.nodeDist[refKey])
         self.nodeNode[refKey] = nodeTemp
       nodeKey = self.nodeNode[refKey]
       nodeList = []
       for nodeRef in refValueList:
         if nodeRef not in self.nodeNode:
-          self.nodeNode[nodeRef] = node(nodeRef, self.nodeXyz[nodeRef], \
-                        self.nodeOffGridXyz[nodeRef], self.nodeDist[nodeRef])
+          self.nodeNode[nodeRef] = node(
+              nodeRef, self.nodeXyz[nodeRef],
+              self.nodeOffGridXyz[nodeRef], self.nodeDist[nodeRef])
         nodeList.append(self.nodeNode[nodeRef])
-
       nodeDict[nodeKey] = nodeList
     return nodeDict
 
@@ -1662,15 +1690,17 @@ class mesh(object):
     nodeList = []
     for nodeRef in nodeRefList:
       if nodeRef not in self.nodeNode:
-        self.nodeNode[nodeRef] = node(nodeRef, self.nodeXyz[nodeRef], \
-                        self.nodeOffGridXyz[nodeRef], self.nodeDist[nodeRef])
+        self.nodeNode[nodeRef] = node(
+            nodeRef, self.nodeXyz[nodeRef],
+            self.nodeOffGridXyz[nodeRef], self.nodeDist[nodeRef])
       nodeList.append(self.nodeNode[nodeRef])
     return nodeList
 
   def debugMesh(self, filename):
-    for code in range(4): #all 4 codes
+    for code in range(4):  # all 4 codes
       fileTemp = open(filename + "." + str(code) + ".py", 'w')
-      fileTemp.write("from pymol.cgo import * \nfrom pymol import cmd\nsurfObj = [ ")
+      fileTemp.write(
+          "from pymol.cgo import * \nfrom pymol import cmd\nsurfObj = [ ")
       for aNode in self.gridNodes.values() + self.surfaceNodes.values():
         if code == self.nodeClass[aNode]:
           fileTemp.write("COLOR, ")
@@ -1682,7 +1712,8 @@ class mesh(object):
             fileTemp.write(str(coord) + ", ")
           fileTemp.write("0.2, ")
       fileTemp.write(" ]\n")
-      fileTemp.write("cmd.load_cgo(surfObj,'grid" +str(code) +filename + "')\n")
+      fileTemp.write(
+          "cmd.load_cgo(surfObj,'grid" + str(code) + filename + "')\n")
       fileTemp.close()
 
 class meshFromSpheres(mesh):
@@ -1691,24 +1722,24 @@ class meshFromSpheres(mesh):
 
   def __init__(self, grid, mins, maxs, gridSize, spheres):
     '''creates a mesh that lies on a previously specified grid'''
-    self.gridNodes = []     #dictionaries of nodes, keyed on gridIndex or ptIndex
+    self.gridNodes = []   # dictionaries of nodes, keyed on gridIndex or ptIndex
     self.surfaceNodes = []
 
   def __init__(self, spheres, gridSpacing=1.0, outputName="debug.spheres.py"):
     '''creates a mesh that lies on a new grid with given spacing'''
     self.surfaceNodes = []
     self.surfacePoints = []
-    self.nodeDist = {} #moving data storage out of node class into dicts
+    self.nodeDist = {}  # moving data storage out of node class into dicts
     self.nodeNeighbors = {}
     self.nodeClass = {}
     self.nodeXyz = {}
     self.nodeOffGridXyz = {}
     self.nodeNode = {}
-    mins, maxs =  geometry.findMinsMaxsSpheres(spheres) #call geometry method
+    mins, maxs = geometry.findMinsMaxsSpheres(spheres)  # call geometry method
     #add 1.5*gridSpacing to min and max, ensure gridpoints outside surface
     for coord in range(3):
-      mins[coord] = mins[coord] - gridSpacing*1.5
-      maxs[coord] = maxs[coord] + gridSpacing*1.5
+      mins[coord] = mins[coord] - gridSpacing * 1.5
+      maxs[coord] = maxs[coord] + gridSpacing * 1.5
     #add to maxs to bring all dimension differences to a multiple of spacing
     for coord in range(3):
       difference = maxs[coord] - mins[coord]
@@ -1719,13 +1750,15 @@ class meshFromSpheres(mesh):
     tempPts = []
     for node in self.surfaceNodes:
       tempPts.append(self.nodeXyz[node])
-    tstdebug.pointDebug(tempPts, filename=outputName, mainColor=(.9,.4,.1), radius=gridSpacing/10.)
+    tstdebug.pointDebug(
+        tempPts, filename=outputName, mainColor=(.9, .4, .1),
+        radius=gridSpacing/10.)
 
   def __createEmptyGridNodes(self, mins, maxs, spacing, classification=0):
     '''makes a grid full of nodes, set to default outside'''
-    self.gridNodes = []     #dictionaries of nodes, keyed on gridIndex or ptIndex
+    self.gridNodes = []   # dictionaries of nodes, keyed on gridIndex or ptIndex
     lengths = []
-    for coord in range(3): #get the length in each dimension
+    for coord in range(3):  # get the length in each dimension
       lengths.append(1+int((maxs[coord]-mins[coord])/spacing))
     for xIndex in xrange(lengths[0]):
       for yIndex in xrange(lengths[1]):
@@ -1733,15 +1766,15 @@ class meshFromSpheres(mesh):
           indices = (xIndex, yIndex, zIndex)
           point = []
           for coord in xrange(3):
-            point.append(indices[coord]*spacing+mins[coord])
+            point.append(indices[coord] * spacing + mins[coord])
           self.gridNodes.append(indices)
           self.nodeXyz[indices] = point
           self.nodeOffGridXyz[indices] = point
           self.nodeDist[indices] = {}
           self.nodeNeighbors[indices] = []
           self.nodeClass[indices] = 0
-    self.lengths = lengths #save this too
-    self.mins = mins #save these three things, they will no longer change
+    self.lengths = lengths  # save this too
+    self.mins = mins  # save these three things, they will no longer change
     self.maxs = maxs
     self.spacing = spacing
     #no need to return, as gridNodes have been modified
@@ -1750,46 +1783,48 @@ class meshFromSpheres(mesh):
     '''linebreaks is a list of in/out vertices, coords is a single pair,
     update and return new linebreaks'''
     if 0 == len(linebreaks):
-      return coords #easy case
-    else: #now harder case, find place to put
+      return coords  # easy case
+    else:  # now harder case, find place to put
       newLB = []
       lineBreakIndex = 0
       while lineBreakIndex < len(linebreaks) and \
-                 linebreaks[lineBreakIndex] < coords[0]: #find first first
+          linebreaks[lineBreakIndex] < coords[0]:  # find first first
         newLB.append(linebreaks[lineBreakIndex])
-        lineBreakIndex += 1 #increment
-      if lineBreakIndex == len(linebreaks): #exhausted original list, tag to end
+        lineBreakIndex += 1
+      if lineBreakIndex == len(linebreaks):
+        #exhausted original list, tag to end
         newLB.extend(coords)
         return newLB
       #otherwise keep going,
-      if 1 == lineBreakIndex % 2: #means we ignore the first, superseded
+      if 1 == lineBreakIndex % 2:  # means we ignore the first, superseded
         pass
-      else: #new, so insert
+      else:  # new, so insert
         newLB.append(coords[0])
       while lineBreakIndex < len(linebreaks) and \
-                 linebreaks[lineBreakIndex] < coords[1]: #find second now
-        lineBreakIndex += 1 #not adding to lb
-      if lineBreakIndex == len(linebreaks): #exhausted original list, tag to end
+          linebreaks[lineBreakIndex] < coords[1]:  # find second now
+        lineBreakIndex += 1  # not adding to lb
+      if lineBreakIndex == len(linebreaks):
+        #exhausted original list, tag to end
         newLB.append(coords[1])
         return newLB
       if 1 == len(newLB) % 2 and 0 == lineBreakIndex % 2:
         newLB.append(coords[1])
       while lineBreakIndex < len(linebreaks):
         newLB.append(linebreaks[lineBreakIndex])
-        lineBreakIndex += 1 #increment
-      return newLB #either way return the new one
+        lineBreakIndex += 1
+      return newLB  # either way return the new one
 
   def __createSurfNodesOneDir(self, indexOne, indexTwo, spheres, axis):
     '''creates surface nodes along one line in the axis direction'''
-    if 2==axis:
+    if 2 == axis:
       minIndices = (indexOne, indexTwo, 0)
-      maxIndices = (indexOne, indexTwo, self.lengths[axis]-1)
-    elif 1==axis:
+      maxIndices = (indexOne, indexTwo, self.lengths[axis] - 1)
+    elif 1 == axis:
       minIndices = (indexOne, 0, indexTwo)
-      maxIndices = (indexOne, self.lengths[axis]-1, indexTwo)
-    elif 0==axis:
+      maxIndices = (indexOne, self.lengths[axis] - 1, indexTwo)
+    elif 0 == axis:
       minIndices = (0, indexOne, indexTwo)
-      maxIndices = (self.lengths[axis]-1, indexOne, indexTwo)
+      maxIndices = (self.lengths[axis] - 1, indexOne, indexTwo)
     extremeNodes = (minIndices, maxIndices)
     extrema = []
     for node in extremeNodes:
@@ -1799,7 +1834,7 @@ class meshFromSpheres(mesh):
     lineBreaks = []
     for sphere in spheres:
       points = geometry.lineSphereIntersection(extrema[0], extrema[1], sphere)
-      if points: #failure is indicated by False
+      if points:  # failure is indicated by False
         axisCoords = []
         for point in points:
           axisCoords.append(point[axis])
@@ -1810,29 +1845,29 @@ class meshFromSpheres(mesh):
     #linebreaks containts axis coords for surface nodes
     lineBreakIndex, lastGridNode = 0, False
     for axisIndex in xrange(self.lengths[axis]-1):
-      if 2==axis:
+      if 2 == axis:
         curIndices = (indexOne, indexTwo, axisIndex)
-      elif 1==axis:
+      elif 1 == axis:
         curIndices = (indexOne, axisIndex, indexTwo)
-      elif 0==axis:
+      elif 0 == axis:
         curIndices = (axisIndex, indexOne, indexTwo)
       curGridNode = curIndices
       if lineBreakIndex < len(lineBreaks) and \
-                   self.nodeXyz[curGridNode][axis] > lineBreaks[lineBreakIndex]:
+          self.nodeXyz[curGridNode][axis] > lineBreaks[lineBreakIndex]:
         #here we make a surface node and connect it to the gridnodes
         pointIndex = len(self.surfacePoints) + 1
-        if 2==axis:
-          surfacePoint = [self.nodeXyz[curGridNode][0], \
-                           self.nodeXyz[curGridNode][1], \
-                            lineBreaks[lineBreakIndex]]
-        elif 1==axis:
-          surfacePoint = [self.nodeXyz[curGridNode][0],
-                           lineBreaks[lineBreakIndex], \
-                            self.nodeXyz[curGridNode][2]]
-        elif 0==axis:
-          surfacePoint = [lineBreaks[lineBreakIndex], \
-                           self.nodeXyz[curGridNode][1],
-                            self.nodeXyz[curGridNode][2]]
+        if 2 == axis:
+          surfacePoint = [
+              self.nodeXyz[curGridNode][0], self.nodeXyz[curGridNode][1],
+              lineBreaks[lineBreakIndex]]
+        elif 1 == axis:
+          surfacePoint = [
+              self.nodeXyz[curGridNode][0], lineBreaks[lineBreakIndex],
+              self.nodeXyz[curGridNode][2]]
+        elif 0 == axis:
+          surfacePoint = [
+              lineBreaks[lineBreakIndex], self.nodeXyz[curGridNode][1],
+              self.nodeXyz[curGridNode][2]]
         pointListRef = [pointIndex]
         pointListRef.extend(surfacePoint)
         self.surfacePoints.append(pointListRef)
@@ -1842,12 +1877,12 @@ class meshFromSpheres(mesh):
         curDist = geometry.distL2(self.nodeXyz[curGridNode], surfacePoint)
         self.connectNeighbors(curGridNode, newSurfNode, curDist)
         self.connectNeighbors(lastGridNode, newSurfNode, lastDist)
-        if 0 == lineBreakIndex % 2: #odd
+        if 0 == lineBreakIndex % 2:  # odd
           self.nodeClass[curGridNode] = 1
         lineBreakIndex += 1
       elif lastGridNode:
-        thisDist = geometry.distL2(self.nodeXyz[lastGridNode], \
-                                   self.nodeXyz[curGridNode])
+        thisDist = geometry.distL2(
+            self.nodeXyz[lastGridNode], self.nodeXyz[curGridNode])
         self.connectNeighbors(curGridNode, lastGridNode, thisDist)
         self.nodeClass[curGridNode] = self.nodeClass[lastGridNode]
       lastGridNode = curGridNode
@@ -1870,16 +1905,16 @@ class meshJustSurface(mesh):
 
   def __init__(self, pointXYZ, pointNeighbor):
     '''creates a mesh from just the surface'''
-    self.gridNodes = []    #this will be empty
+    self.gridNodes = []    # this will be empty
     self.surfaceNodes = []
-    self.nodeDist = {} #moving data storage out of node class into dicts
+    self.nodeDist = {}  # moving data storage out of node class into dicts
     self.nodeNeighbors = {}
     self.nodeClass = {}
     self.nodeXyz = {}
     self.nodeOffGridXyz = {}
     self.nodeNode = {}
     #want somewhere to store tracebacks information
-    self.tracebacks = {} #dictionary keyed on the name just like distances
+    self.tracebacks = {}  # dictionary keyed on the name just like distances
     self.surfNodeInitialize(pointXYZ)
     self.surfNodeConnect(pointXYZ, pointNeighbor)
     #now all nodes have been added and neighbors calculated
@@ -1897,10 +1932,10 @@ class meshJustSurface(mesh):
 
   def surfNodeConnect(self, pointXYZ, pointNeighbor):
     '''now connect up all the surface nodes'''
-    for point in pointXYZ: #assuming no cavities
+    for point in pointXYZ:  # assuming no cavities
       ptIndex, ptXYZ = int(point[0]), tuple(point[1:4])
       #now connect surface nodes to each other
       for otherPoint in pointNeighbor[ptIndex-1][2:]:
         otherXYZ = pointXYZ[otherPoint-1][1:4]
-        self.connectNeighbor(ptIndex, otherPoint, \
-                             geometry.distL2(ptXYZ, otherXYZ))
+        self.connectNeighbor(
+            ptIndex, otherPoint, geometry.distL2(ptXYZ, otherXYZ))
