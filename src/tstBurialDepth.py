@@ -12,7 +12,8 @@
 #structure. Proteins: Structure, Function, and Bioinformatics. 2009.
 #http://dx.doi.org/10.1002/prot.22558
 
-import sys,string
+import sys
+import string
 import tstTravelDist
 
 if -1 != string.find(sys.argv[0], "tstBurialDepth.py"):

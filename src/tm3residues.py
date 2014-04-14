@@ -2,7 +2,10 @@
 
 #reports pockets with highest overlap with the set of residues
 
-import tm3, string, sys, statistics
+import tm3
+import string
+import sys
+import statistics
 import dot
 
 if -1 != string.find(sys.argv[0], "tm3residues.py"):
@@ -15,8 +18,8 @@ if -1 != string.find(sys.argv[0], "tm3residues.py"):
   colName = "Residue Number List"
   if nameOrNum == "name":
     colName = "Residue Name List"
-  dotData = dot.dotResidues(tmDataList, resList, colNameIn=colName, \
-                            printHelpful=False)
+  dotData = dot.dotResidues(
+      tmDataList, resList, colNameIn=colName, printHelpful=False)
   dotData.printHelpful(prefix)
   dotData.write(prefix + ".dot")
   dotData.writeGdl(prefix + ".gdl", force=False)
