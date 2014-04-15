@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
-import tm3, string, sys
+import tm3
+import string
+import sys
 
 def deleteLeaves(tmData, attributeName, threshold):
   column = tmData.attributeTitles.index(attributeName)
   for node in tmData.bottomUpTraversal():
-    if node in tmData.tree: #may have already been merged
+    if node in tmData.tree:  # may have already been merged
       if tmData.isLeaf(node.getId()):
         if node.attributes[column] < threshold:
           tmData.deleteLeaf(node.getId())
