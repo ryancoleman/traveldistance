@@ -8,10 +8,12 @@
 #that writes/reads from a tab-delimited format
 #also includes lots of methods to search and compare these structures
 
-import string, sys, operator #python libraries
-import statistics  #averages and such
-import dot         #dot files for reading/writing to graphviz or aisee
-import munkreskuhn #algorithm to find optimal matching between bipartite graphs
+import string
+import sys
+import operator
+import statistics   # averages and such
+import dot          # dot files for reading/writing to graphviz or aisee
+import munkreskuhn  # find optimal matching between bipartite graphs
 
 #these types are defined here for later
 floatType = type(1.)
@@ -32,16 +34,16 @@ def getLineMst(connections):
   '''takes a set of connections that form a line, puts them in order, returns'''
   connsLimit2 = {}
   for connection in connections:
-    node1fu,node2fu,score,extra1,extra2 = connection #unpack
+    node1fu, node2fu, score, extra1, extra2 = connection  # unpack
     node1 = int(string.split(node1fu, "f")[0][1:])
     node2 = int(string.split(node2fu, "f")[0][1:])
-    for node, otherNode in ((node1,node2),(node2,node1)):
+    for node, otherNode in ((node1, node2), (node2, node1)):
       if node not in connsLimit2:
         connsLimit2[node] = []
       connsLimit2[node].append(otherNode)
   #find start
   lowestSingle = None
-  for head,tails in connsLimit2.iteritems():
+  for head, tails in connsLimit2.iteritems():
     if len(tails) == 1:
       if lowestSingle is None:
         lowestSingle = head
@@ -55,33 +57,35 @@ def getLineMst(connections):
   while not done:
     tails = connsLimit2[lastSeen]
     if len(tails) == 1:
-      done = True #end of list so can quit
-    else: #determine which of theses is the one you haven't already seen
+      done = True  # end of list so can quit
+    else:  # determine which of theses is the one you haven't already seen
       if tails[0] == secondLast:
         newSeen = tails[1]
       else:
         newSeen = tails[0]
     if not done:
       outList.append(lastSeen)
-      secondLast = lastSeen #updates for next round
+      secondLast = lastSeen  # updates for next round
       lastSeen = newSeen
   return outList
 
 def getStandardColumnsMeanStddev():
   '''returns a dict that has been pre-calculated based on the cast/surfnet
   data set, which seem to be pretty reasonable values for the mean and stddev'''
-  columnToMean = {1: 2021.5149160870699, 2: 4611.729596728087,
-                  6: 5.1688493192518639, 7: 1.0553398650040864,
-                  8: 1.397754830189109, 9: 1787.604724497015,
-                  10: 18.882273257259961, 17: -7.1678825213817818,
-                  19: 18.9604617953798, 20: 15.147237413589277,
-                  21: 12.084412899466979}
-  colToStddev = {1: 3893.0666553174933, 2: 10372.377624807914,
-                 6: 8.1288279132363161, 7: 1.5324445735835186,
-                 8: 2.8725940273764614, 9: 3608.5463294631663,
-                 10: 26.678589504726215, 17: 8.5735418064033091,
-                 19: 26.833793052868906, 20: 22.42064979940854,
-                 21: 19.025192702415332}
+  columnToMean = {
+      1: 2021.5149160870699, 2: 4611.729596728087,
+      6: 5.1688493192518639, 7: 1.0553398650040864,
+      8: 1.397754830189109, 9: 1787.604724497015,
+      10: 18.882273257259961, 17: -7.1678825213817818,
+      19: 18.9604617953798, 20: 15.147237413589277,
+      21: 12.084412899466979}
+  colToStddev = {
+      1: 3893.0666553174933, 2: 10372.377624807914,
+      6: 8.1288279132363161, 7: 1.5324445735835186,
+      8: 2.8725940273764614, 9: 3608.5463294631663,
+      10: 26.678589504726215, 17: 8.5735418064033091,
+      19: 26.833793052868906, 20: 22.42064979940854,
+      21: 19.025192702415332}
   return columnToMean, colToStddev
 
 def calcColumnsMeanStddev(columnList, tmDataList):
@@ -102,17 +106,17 @@ def findSelfScore(tmData, columnList, resColNums, colToMean, colToStddev):
   '''does all against all comparison of nodes looking for similar ones
   looks only within 1 structure. returns  mean of 1/distance
   only consider non-overlapping other pockets '''
-  matchMatrix = {} #dict of dicts of scores, keyed on nodes
-  nodeList  = tmData.tree.keys()
+  matchMatrix = {}  # dict of dicts of scores, keyed on nodes
+  nodeList = tmData.tree.keys()
   scores = []
   for tmNodeCount, node1 in enumerate(nodeList):
-    matchMatrix[node1] = {} #init sub-dict
+    matchMatrix[node1] = {}  # init sub-dict
     for tmNode2Count, node2 in enumerate(nodeList):
       if tmNodeCount < tmNode2Count:
         resOverlap = dot.compareColumnsResidues(node1, node2, resColNums)
-        if resOverlap == 100.: #if there is NO overlap within same protein
-          score = dot.compareColumns(node1, node2, columnList, \
-                                     colToMean, colToStddev)
+        if resOverlap == 100.:  # if there is NO overlap within same protein
+          score = dot.compareColumns(
+              node1, node2, columnList, colToMean, colToStddev)
           matchMatrix[node1][node2] = score
           scores.append(score)
   selfScore = {}
@@ -137,10 +141,9 @@ def findSelfScore(tmData, columnList, resColNums, colToMean, colToStddev):
       selfScore[node] = 0.
   return selfScore
 
-def findSimilarTrees(tmDataList, columnListNames,  \
-                     sizeColName,  sizeMin=-1., \
-                     sizeMax=10000000000, outputEachPair=False,
-                     justKeepBest=False):
+def findSimilarTrees(
+    tmDataList, columnListNames, sizeColName, sizeMin=-1.,
+    sizeMax=10000000000, outputEachPair=False, justKeepBest=False):
   '''does munkreskuhn matching over pocket-pocket shapes to get a score
   per tree, returns table of these'''
   columnList = tmDataList[0].titlesToColumns(columnListNames)
@@ -152,18 +155,18 @@ def findSimilarTrees(tmDataList, columnListNames,  \
     for tmDataCount2, tmData2 in enumerate(tmDataList):
       if tmDataCount2 > tmDataCount1:
         dotData = dot.dot([tmData1, tmData2])
-        rowNames,colNames,matchMatrix,tooBig= dotData.computeSearchConnections(\
-                              1e10000000, columnList, colToMean, colToStddev, \
-                              False, sizeCol, False, False, \
-                              sizeMin=sizeMin, sizeMax=sizeMax, \
-                              doSelfScore=False, returnMatrix=True)
+        rowNames, colNames, matchMatrix, tooBig = \
+            dotData.computeSearchConnections(
+                1e10000000, columnList, colToMean, colToStddev, False, sizeCol,
+                False, False, sizeMin=sizeMin, sizeMax=sizeMax,
+                doSelfScore=False, returnMatrix=True)
         if not justKeepBest:
           matches = munkreskuhn.assignAndReturnMatches(matchMatrix)
           sumScore = 0
           for match in matches:
             sumScore += match[2]
           totalMatrix[tmData1][tmData2] = sumScore/float(len(matches))
-          if outputEachPair: #output a gdl for each pair of the munkres match
+          if outputEachPair:  # output a gdl for each pair of the munkres match
             newMatches = []
             justNodes = tooBig
             for match in matches:
@@ -174,10 +177,10 @@ def findSimilarTrees(tmDataList, columnListNames,  \
               newMatches.append([tmData1, tmData2, node1, node2, match[2]])
             dotData.matchList = newMatches
             dotData.addSearchConnections(1e1000000, remove=True)
-            dotData.writeGdl( \
-                tmData1.inputFileName+"_"+tmData2.inputFileName+".gdl", \
+            dotData.writeGdl(
+                tmData1.inputFileName + "_" + tmData2.inputFileName + ".gdl",
                 justNodes=justNodes, edges=True, force=True)
-        else: #just find the best match
+        else:  # just find the best match
           minMatchMatrix = 1e10000000
           for row in matchMatrix:
             for entry in row:
@@ -186,14 +189,13 @@ def findSimilarTrees(tmDataList, columnListNames,  \
           totalMatrix[tmData1][tmData2] = minMatchMatrix
   return totalMatrix
 
-def findSimilarNodes(tmDataList, columnListNames,  \
-                     maxThr, maxConnectionCount, skipConnCount, \
-                     resCols, sizeColName, sameStruct=False, sizeMin=-1., \
-                     sizeMax=10000000000, mst=False, selfColListNames=None, \
-                     doSelfScore=True, justNodes=None, lineMst=False, \
-                     lineMstEnds=False, refinePockets=False, possNodes=None, \
-                     dotResidues=None, printThings=True, calcColMeansStd=True, \
-                     alpha=1.,clusterOutput=False):
+def findSimilarNodes(
+    tmDataList, columnListNames, maxThr, maxConnectionCount, skipConnCount,
+    resCols, sizeColName, sameStruct=False, sizeMin=-1., sizeMax=10000000000,
+    mst=False, selfColListNames=None, doSelfScore=True, justNodes=None,
+    lineMst=False, lineMstEnds=False, refinePockets=False, possNodes=None,
+    dotResidues=None, printThings=True, calcColMeansStd=True, alpha=1.,
+    clusterOutput=False):
   '''does all against all comparison of nodes looking for similar ones
   does lots of other stuff (need to update this documentation)'''
   justNodesValues = None
@@ -209,55 +211,50 @@ def findSimilarNodes(tmDataList, columnListNames,  \
     colToMean, colToStddev = calcColumnsMeanStddev(columnList, tmDataList)
   else:
     colToMean, colToStddev = getStandardColumnsMeanStddev()
-  selfScores = {} #make combined list
+  selfScores = {}  # make combined list
   if doSelfScore:
     for tmData in tmDataList:
-      selfSc = findSelfScore(tmData, selfColList, resColNums, colToMean, \
-             colToStddev)
+      selfSc = findSelfScore(
+          tmData, selfColList, resColNums, colToMean, colToStddev)
       selfScores.update(selfSc)
   #print selfScores.values()
-  if len(tmDataList) == 1: #can't compare if only 1 struct
+  if len(tmDataList) == 1:  # can't compare if only 1 struct
     #want to output nodes + self scores in sorted order for debugging of
     #self scoring system
-    treeName = tmDataList[0].inputFileName #only one
+    treeName = tmDataList[0].inputFileName  # only one
     selfScoreList = list(selfScores.iteritems())
-    selfScoreList.sort(key=operator.itemgetter(1)) #sort by score
+    selfScoreList.sort(key=operator.itemgetter(1))  # sort by score
     if printThings:
       for node, selfScore in selfScoreList:
         if node.attributes[sizeCol] > sizeMin and \
-                          node.attributes[sizeCol] < sizeMax:
+            node.attributes[sizeCol] < sizeMax:
           print dot.outputDrawStr(treeName, node) + "; " + str(selfScore)
-    return None,None,None #no matches to return
-  else: #more than 1 tree, do comparisons
+    return None, none, none  # no matches to return
+  else:  # more than 1 tree, do comparisons
     dotData = dot.dot(tmDataList)
-    matchList = dotData.computeSearchConnections( \
-                               maxThr, columnList, colToMean, colToStddev, \
-                               resColNums, sizeCol, selfScores, sameStruct, \
-                               sizeMin=sizeMin, sizeMax=sizeMax, \
-                               doSelfScore=doSelfScore, \
-                               justNodes=justNodesValues, alpha=alpha)
+    matchList = dotData.computeSearchConnections(
+        maxThr, columnList, colToMean, colToStddev, resColNums, sizeCol,
+        selfScores, sameStruct, sizeMin=sizeMin, sizeMax=sizeMax,
+        doSelfScore=doSelfScore, justNodes=justNodesValues, alpha=alpha)
     if refinePockets:
       #iteration done here
       notDone = True
       eliminatedNodes = []
       while notDone:
-        changeNode, examinedNode = dotData.refinePockets(columnList, colToMean,\
-                               colToStddev, resColNums, sizeCol, selfScores, \
-                               sizeMin=sizeMin, sizeMax=sizeMax, \
-                               doSelfScore=doSelfScore, justNodes=justNodes,
-                               matchList=matchList, possNodes=possNodes, \
-                               notTheseNodes=eliminatedNodes)
-        if changeNode: #only recompute if there was a change
+        changeNode, examinedNode = dotData.refinePockets(
+            columnList, colToMean, colToStddev, resColNums, sizeCol,
+            selfScores, sizeMin=sizeMin, sizeMax=sizeMax,
+            doSelfScore=doSelfScore, justNodes=justNodes, matchList=matchList,
+            possNodes=possNodes, notTheseNodes=eliminatedNodes)
+        if changeNode:  # only recompute if there was a change
           if justNodes is not None:
             justNodesValues = justNodes.values()
-          matchList = dotData.computeSearchConnections( \
-                               maxThr, columnList, colToMean, colToStddev, \
-                               resColNums, sizeCol, selfScores, sameStruct, \
-                               sizeMin=sizeMin, sizeMax=sizeMax, \
-                               doSelfScore=doSelfScore, \
-                               justNodes=justNodesValues, alpha=alpha)
-          eliminatedNodes = [] #reset since there was a change
-        else: #worst wasn't changed this round
+          matchList = dotData.computeSearchConnections(
+              maxThr, columnList, colToMean, colToStddev, resColNums, sizeCol,
+              selfScores, sameStruct, sizeMin=sizeMin, sizeMax=sizeMax,
+              doSelfScore=doSelfScore, justNodes=justNodesValues, alpha=alpha)
+          eliminatedNodes = []  # reset since there was a change
+        else:  # worst wasn't changed this round
           eliminatedNodes.append(examinedNode)
           if examinedNode is None:
             notDone = False
@@ -270,25 +267,26 @@ def findSimilarNodes(tmDataList, columnListNames,  \
       #print len(clusters)
       if not mst:
         if printThings:
-          dotData.tempRemoveKeepersWriteGdl("search."+ \
-                     string.zfill(connections,6) + ".gdl", \
-                     justNodes=justNodesValues)
-      elif mst: #change filenames, don't write edges
+          dotData.tempRemoveKeepersWriteGdl(
+              "search." + string.zfill(connections, 6) + ".gdl",
+              justNodes=justNodesValues)
+      elif mst:   # change filenames, don't write edges
         if printThings:
-          dotData.tempRemoveKeepersWriteGdl("mst."+ \
-                   string.zfill(connections,4) + ".gdl", edges=False, \
-                   justNodes=justNodesValues)
-      if connections + skipConnCount > maxConnectionCount: #last time only
-        if clusterOutput: #do but record the num of clusters as they are added
-          dotData.addSearchConnections(maxThr, maxConnCount=connections*25, \
-                 mst=mst, clusterOutput=clusterOutput)
-        if lineMst: #do all again
-          dotData.addSearchConnections(maxThr, maxConnCount=connections, \
-                                     lineMst=True)
+          dotData.tempRemoveKeepersWriteGdl(
+              "mst." + string.zfill(connections, 4) + ".gdl",
+              edges=False, justNodes=justNodesValues)
+      if connections + skipConnCount > maxConnectionCount:  # last time only
+        if clusterOutput:  # do but record the num of clusters as they are added
+          dotData.addSearchConnections(
+              maxThr, maxConnCount=connections*25,
+              mst=mst, clusterOutput=clusterOutput)
+        if lineMst:  # do all again
+          dotData.addSearchConnections(
+              maxThr, maxConnCount=connections, lineMst=True)
           if printThings:
-            dotData.tempRemoveKeepersWriteGdl("linemst."+ \
-                   string.zfill(connections,4) + ".gdl", edges=False, \
-                   justNodes=justNodesValues)
+            dotData.tempRemoveKeepersWriteGdl(
+                "linemst." + string.zfill(connections, 4) + ".gdl",
+                edges=False, justNodes=justNodesValues)
           mslList = getLineMst(dotData.connections)
           mslScore = statistics.listOrderCorrectness(mslList)
           if dotResidues is not None:
@@ -299,16 +297,17 @@ def findSimilarNodes(tmDataList, columnListNames,  \
               print item,
             print " "
             print "linemstscore, ", mslScore
-        if lineMstEnds: #do one more time
+        if lineMstEnds:  # do one more time
           #want to do same as linemst but give hints as to the endpoints
           startNode = justNodes[tmDataList[0]]
           endNode = justNodes[tmDataList[-1]]
-          dotData.addSearchConnections(maxThr, maxConnCount=connections, \
-                            lineMst=True, startNode=startNode, endNode=endNode)
+          dotData.addSearchConnections(
+              maxThr, maxConnCount=connections, lineMst=True,
+              startNode=startNode, endNode=endNode)
           if printThings:
-            dotData.tempRemoveKeepersWriteGdl("linemstends."+ \
-                   string.zfill(connections,4) + ".gdl", edges=False, \
-                   justNodes=justNodesValues)
+            dotData.tempRemoveKeepersWriteGdl(
+                "linemstends." + string.zfill(connections, 4) + ".gdl",
+                edges=False, justNodes=justNodesValues)
           mslList = getLineMst(dotData.connections)
           if printThings:
             print "linemstends",
@@ -316,7 +315,8 @@ def findSimilarNodes(tmDataList, columnListNames,  \
               print item,
             print " "
       connections += skipConnCount
-    matchList.sort(lambda x,y: cmp(x[4],y[4])) #sort by score. best first
+    matchList.sort(lambda xVal, yVal: cmp(xVal[4], yVal[4]))
+    # sort by score. best first
     if printThings:
       for match in matchList:
         print "%5.2f ;" % match[4],
@@ -328,10 +328,13 @@ def findSimilarNodes(tmDataList, columnListNames,  \
 class tmNode(object):
   '''holds information about each node'''
 
-  def __init__(self, attributes, tree=None): #assume user passes matching lists of att's
-    '''puts the list of attributes in the new node'''
+  def __init__(self, attributes, tree=None):
+    '''
+    puts the list of attributes in the new node
+    assume user passes matching lists of att's
+    '''
     self.attributes = attributes
-    self.tree = tree #None otherwise a pointer to the tree this node is in
+    self.tree = tree  # None otherwise a pointer to the tree this node is in
 
   def __repr__(self):
     '''prints out tab delimited with extra tab at end'''
@@ -366,10 +369,10 @@ class tmTree(object):
   def __init__(self, attributeTitles):
     '''just store the titles'''
     self.attributeTitles = attributeTitles
-    self.tree = {} #dict stores children information for nodes
-    self.idNode = {} #stores id->node map
-    self.neighbors = {} #stores leaf neighbor info for tnv file
-    self.parent = {} #built from tree when necessary
+    self.tree = {}       # dict stores children information for nodes
+    self.idNode = {}     # stores id->node map
+    self.neighbors = {}  # stores leaf neighbor info for tnv file
+    self.parent = {}     # built from tree when necessary
 
   def titleRow(self):
     '''export titles'''
@@ -394,7 +397,7 @@ class tmTree(object):
     '''using parent, adds the child to its tree. creates tree if necessary'''
     if parentNode not in self.tree:
       self.tree[parentNode] = []
-    self.tree[parentNode].append(childNode) #no return necessary
+    self.tree[parentNode].append(childNode)  # no return necessary
 
   def setRoot(self, theNode):
     '''sets the root, important for output'''
@@ -417,7 +420,7 @@ class tmTree(object):
   def isSingleChild(self, aNodeId):
     '''true if this has exactly 1 child'''
     if self.root == self.idNode[aNodeId]:
-      return False #special case
+      return False  # special case
     children = self.tree[self.idNode[aNodeId]]
     if 1 == len(children):
       return True
@@ -427,7 +430,7 @@ class tmTree(object):
   def mergeSingleChild(self, aNodeId):
     '''checks to make sure node has a single child. deletes this node, making
     the child and parent attach to each other'''
-    if self.isSingleChild(aNodeId): #check otherwise don't do it
+    if self.isSingleChild(aNodeId):  # check otherwise don't do it
       children = self.tree[self.idNode[aNodeId]]
       del self.tree[self.idNode[aNodeId]]
       parent = self.parent[self.idNode[aNodeId]]
@@ -435,18 +438,18 @@ class tmTree(object):
       self.tree[parent].remove(self.idNode[aNodeId])
       self.tree[parent].extend(children)
       self.parent[children[0]] = parent
-      del self.idNode[aNodeId] #delete it from this as well
+      del self.idNode[aNodeId]  # delete it from this as well
 
   def deleteLeaf(self, aNodeId):
     '''removes the leaf with that id from the tree and the idnode dict'''
     children = self.tree[self.idNode[aNodeId]]
     if len(children) == 0:
       thisParent = self.parent[self.idNode[aNodeId]]
-      del self.parent[self.idNode[aNodeId]] #now delete entry in parent
-      oldChildren = self.tree[thisParent][:] #copy this
-      oldChildren.remove(self.idNode[aNodeId]) #should always work
+      del self.parent[self.idNode[aNodeId]]  # now delete entry in parent
+      oldChildren = self.tree[thisParent][:]  # copy this
+      oldChildren.remove(self.idNode[aNodeId])  # should always work
       self.tree[thisParent] = oldChildren
-      del self.idNode[aNodeId] #delete it from this as well
+      del self.idNode[aNodeId]  # delete it from this as well
 
   def bottomUpTraversal(self):
     '''returns a list of the nodes in bottom up order'''
@@ -498,12 +501,12 @@ class tmTree(object):
     stackList = [[self.root]]
     while len(stackList) > 0:
       current = stackList.pop()
-      children = self.tree[current[-1]]  #first find the children
-      for child in children:             #build the stack up
-        newList = current[:] #copy
+      children = self.tree[current[-1]]  # first find the children
+      for child in children:             # build the stack up
+        newList = current[:]  # copy
         newList.append(child)
         stackList.append(newList)
-      leafToGroup[int(current[-1].getId())] = []      #dict constructed here
+      leafToGroup[int(current[-1].getId())] = []      # dict constructed here
       for group in current:
         leafToGroup[int(current[-1].getId())].append(int(group.getId()))
     return leafToGroup
@@ -512,7 +515,7 @@ class tmTree(object):
     '''exports the tm3 nodes and tree as a tm3 file'''
     outFile = open(fileName, 'w')
     outFile.write(self.titleRow() + "\n")
-    outFile.write(self.root.typeRow() + "\n") #header done
+    outFile.write(self.root.typeRow() + "\n")  # header done
     stackList = [[self.root]]
     while len(stackList) > 0:
       current = stackList.pop()
@@ -521,7 +524,7 @@ class tmTree(object):
         hierarchy += node.getId() + "\t"
       children = self.tree[current[-1]]
       for child in children:
-        newList = current[:] #copy
+        newList = current[:]  # copy
         newList.append(child)
         stackList.append(newList)
       outFile.write(str(current[-1]) + hierarchy + "\n")
@@ -553,24 +556,24 @@ class tmTree(object):
     '''returns a list of all the nodes in no order whatsoever'''
     return self.idNode.values()
 
-  def compareResidueNodes(self, tmNode1, tmNode2, \
-                          columnName="Residue Name List"):
+  def compareResidueNodes(
+      self, tmNode1, tmNode2, columnName="Residue Name List"):
     '''takes two nodes, finds the overlap between their lining residues'''
     resColumn = self.titleToColumn(columnName)
-    resIds1 = set(string.split(tmNode1.attributes[resColumn],"+"))
-    resIds2 = set(string.split(tmNode2.attributes[resColumn],"+"))
+    resIds1 = set(string.split(tmNode1.attributes[resColumn], "+"))
+    resIds2 = set(string.split(tmNode2.attributes[resColumn], "+"))
     try:
-      resIds1.remove('') #how did these get here? stupid string methods
+      resIds1.remove('')  # how did these get here? stupid string methods
       resIds2.remove('')
     except KeyError:
-      pass #ignore if not there
+      pass  # ignore if not there
     union = float(len(resIds1.union(resIds2)))
-    if union > 0.: #otherwise automatically no match
-      #print resIds1, resIds2, union , len(resIds1.intersection(resIds2))
+    if union > 0.:  # otherwise automatically no match
+      #print resIds1, resIds2, union, len(resIds1.intersection(resIds2))
       thisScore = (float(len(resIds1.intersection(resIds2)))/union)
       return thisScore
     else:
-      return 0. #no overlap (union), so score is automatically 0
+      return 0.  # no overlap (union), so score is automatically 0
 
   def convertResSetToIdentities(self, oldSet):
     '''turns a set of residues with numbers to a set with counts. e.g.
@@ -580,106 +583,107 @@ class tmTree(object):
       newItemPrefix = item[:3]
       count = 0
       while newItemPrefix + str(count) in newSet:
-        count += 1 #increment until we're adding the unique residue number
-      newSet.add(newItemPrefix + str(count)) #new unique one
-    #print oldSet, newSet #debug the input/output
+        count += 1  # increment until we're adding the unique residue number
+      newSet.add(newItemPrefix + str(count))  # new unique one
+    #print oldSet, newSet  # debug the input/output
     return newSet
 
-  def compareResidueIdentityMultipleNodes(self, tmNodeList, \
-                          columnName="Residue Name List"):
+  def compareResidueIdentityMultipleNodes(
+      self, tmNodeList, columnName="Residue Name List"):
     '''computes the overlap/tanimoto score over an entire list of nodes'''
     if 1 == len(tmNodeList):
-      return 1. #max score since only 1 node
+      return 1.  # max score since only 1 node
     resColumn = self.titleToColumn(columnName)
     resIds = []
     for tmNode in tmNodeList:
-      resIds1 = set(string.split(tmNode.attributes[resColumn],"+"))
+      resIds1 = set(string.split(tmNode.attributes[resColumn], "+"))
       try:
-        resIds1.remove('') #how did these get here? stupid string methods
+        resIds1.remove('')  # how did these get here? stupid string methods
       except KeyError:
-        pass #ignore if not there
+        pass  # ignore if not there
       #now convert to ALA1, ALA2, etc
       newResIds1 = self.convertResSetToIdentities(resIds1)
       resIds.append(newResIds1)
     unionSet = resIds[0].copy()
     for otherSet in resIds[1:]:
-      unionSet.update(otherSet) #update is union_update renamed
+      unionSet.update(otherSet)  # update is union_update renamed
     union = float(len(unionSet))
-    if union > 0.: #otherwise automatically no match
+    if union > 0.:  # otherwise automatically no match
       intersectSet = resIds[0].copy()
       for otherSet in resIds[1:]:
         intersectSet.intersection_update(otherSet)
       thisScore = (float(len(intersectSet))/union)
       return thisScore
     else:
-      return 0. #no overlap (union), so score is automatically 0
+      return 0.  # no overlap (union), so score is automatically 0
 
-  def compareResidueIdentityNodes(self, tmNode1, tmNode2, \
-                          columnName="Residue Name List"):
+  def compareResidueIdentityNodes(
+      self, tmNode1, tmNode2, columnName="Residue Name List"):
     '''takes two nodes, finds the overlap between their lining residues.
     only care about residue type not number'''
     resColumn = self.titleToColumn(columnName)
-    resIds1 = set(string.split(tmNode1.attributes[resColumn],"+"))
-    resIds2 = set(string.split(tmNode2.attributes[resColumn],"+"))
+    resIds1 = set(string.split(tmNode1.attributes[resColumn], "+"))
+    resIds2 = set(string.split(tmNode2.attributes[resColumn], "+"))
     try:
-      resIds1.remove('') #how did these get here? stupid string methods
+      resIds1.remove('')  # how did these get here? stupid string methods
       resIds2.remove('')
     except KeyError:
-      pass #ignore if not there
+      pass  # ignore if not there
     #now convert to ALA1, ALA2, etc
     newResIds1 = self.convertResSetToIdentities(resIds1)
     newResIds2 = self.convertResSetToIdentities(resIds2)
     union = float(len(newResIds1.union(newResIds2)))
-    if union > 0.: #otherwise automatically no match
+    if union > 0.:  # otherwise automatically no match
       thisScore = (float(len(newResIds1.intersection(newResIds2)))/union)
       return thisScore
     else:
-      return 0. #no overlap (union), so score is automatically 0
+      return 0.  # no overlap (union), so score is automatically 0
 
-  def compareResidueList(self, residueList, tmNode, \
-                         columnName="Residue Name List", \
-                         lessThanRes=True, penalty=2):
+  def compareResidueList(
+      self, residueList, tmNode, columnName="Residue Name List",
+      lessThanRes=True, penalty=2):
     '''compares the column named to the residue list in +RES1+RES2 format'''
     resColumn = self.titleToColumn(columnName)
     resIds1 = set(string.split(residueList, "+"))
-    resIds2 = set(string.split(tmNode.attributes[resColumn],"+"))
+    resIds2 = set(string.split(tmNode.attributes[resColumn], "+"))
     resPocketCount = len(resIds2)
     try:
-      resIds1.remove('') #how did these get here? stupid string methods
+      resIds1.remove('')  # how did these get here? stupid string methods
       resIds2.remove('')
     except KeyError:
-      pass #maybe not there after all
+      pass  # maybe not there after all
     union = float(len(resIds1.union(resIds2)))
-    if union > 0.: #otherwise automatically no match
-      #print resIds1, resIds2, union , len(resIds1.intersection(resIds2))
+    if union > 0.:  # otherwise automatically no match
+      #print resIds1, resIds2, union, len(resIds1.intersection(resIds2))
       if not lessThanRes:
         thisScore = 100-(float(len(resIds1.intersection(resIds2)))/union) * 100.
         return thisScore, resPocketCount
-      else: #means want to return a score based on having just list, not more
+      else:  # means want to return a score based on having just list, not more
         lList = float(len(resIds1))
         pList = float(len(resIds2))
         intersect = float(len(resIds1.intersection(resIds2)))
         return 100 - ((intersect/lList) * 100.) + \
-                         (((pList-intersect)/pList)*100.*penalty), resPocketCount
+            (((pList-intersect)/pList)*100.*penalty), resPocketCount
     else:
-      return 100., resPocketCount #no intersection, worst score possible
+      return 100., resPocketCount  # no intersection, worst score possible
 
-  def findBestResidueListMatch(self, resList, colName="Residue Name List", \
-                               lessThanRes=False, penalty=1.):
+  def findBestResidueListMatch(
+      self, resList, colName="Residue Name List", lessThanRes=False,
+      penalty=1.):
     '''go through all the tmnodes in this tree, find the best match'''
-    bestMatch, bestScore, bestSize  = False, 100.*(penalty+10.), 100000.
+    bestMatch, bestScore, bestSize = False, 100.*(penalty+10.), 100000.
     someOverlapNodes = []
     for aNode in self.getAllNodes():
-      thisScore, thisSize = self.compareResidueList(resList, aNode, colName, \
-                                          lessThanRes, penalty)
+      thisScore, thisSize = self.compareResidueList(
+          resList, aNode, colName, lessThanRes, penalty)
       if thisScore < bestScore or \
-                (thisScore == bestScore and thisSize < bestSize):
+          (thisScore == bestScore and thisSize < bestSize):
         bestScore = thisScore
         bestMatch = aNode
         bestSize = thisSize
       if thisScore < 50. and thisSize > 0.:
         someOverlapNodes.append(aNode)
-    if 0 == len(someOverlapNodes): #should have at least 1
+    if 0 == len(someOverlapNodes):  # should have at least 1
       someOverlapNodes.append(bestMatch)
     return bestMatch, bestScore, someOverlapNodes
 
@@ -698,40 +702,41 @@ class tmTreeFromFile(tmTree):
     self.inputFileName = fileName
     treeFile = open(fileName, 'r')
     try:
-      idTree = {} #temporary tree, used to make self.tree later
+      idTree = {}  # temporary tree, used to make self.tree later
       attributeLine = treeFile.readline()
       attributeTitles = string.split(string.strip(attributeLine), '\t')
       tmTree.__init__(self, attributeTitles)
       types = string.split(treeFile.readline())
-      for line in treeFile: #the rest of the lines
-        tokens =  string.split(line)
+      for line in treeFile:  # the rest of the lines
+        tokens = string.split(line)
         attributes = []
-        for count,type in enumerate(types):
+        for count, type in enumerate(types):
           attributes.append(conversion(type, tokens[count]))
         newNode = tmNode(attributes, self)
         thisId = newNode.getId()
         if thisId not in idTree:
-          idTree[thisId] = [] #leaves have no children
+          idTree[thisId] = []  # leaves have no children
         self.idNode[thisId] = newNode
         rootId = tokens[len(types)]
         parentId = tokens[-2]
-        if rootId == thisId:  #this is the root
+        if rootId == thisId:  # this is the root
           self.root = newNode
         else:
           if parentId not in idTree:
             idTree[parentId] = []
-          idTree[parentId].insert(0, thisId) #this sorting keeps output the same
+          idTree[parentId].insert(0, thisId)
+          #this sorting keeps output the same
     except StopIteration:
-      pass #eof signal
+      pass  # eof signal
     finally:
-      treeFile.close() #close the file
+      treeFile.close()  # close the file
       #now make actual tree from idTree
       for parent, children in idTree.iteritems():
         childList = []
         for child in children:
           childList.append(self.idNode[child])
         self.tree[self.idNode[parent]] = childList
-      self.buildParent() #also build the parent list, necessary for node dels
+      self.buildParent()  # also build the parent list, necessary for node dels
 
 #main is only run for testing import of tm3 from commandline
 if -1 != string.find(sys.argv[0], "tm3.py"):
