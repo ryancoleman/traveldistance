@@ -24,4 +24,5 @@ if -1 != string.find(sys.argv[0], "tm3residues.py"):
   dotData.write(prefix + ".dot")
   dotData.writeGdl(prefix + ".gdl", force=False)
   print "dot -Tpng "+prefix+".dot > "+prefix+".png"
-  print "output files written to "+prefix+".tab.txt and "+prefix+".animation.py"
+  print "output files written to " + prefix + ".tab.txt and " + prefix + \
+      ".animation.py"
