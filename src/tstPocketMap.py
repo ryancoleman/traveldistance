@@ -9,9 +9,11 @@
 #http://dx.doi.org/10.1016/j.jmb.2006.07.022
 #
 #Coleman, RG, Sharp, KA. Protein Pockets; Inventory, Shape and Comparison
-#Journal of Molecular Biology, submitted.
+#Journal of Chemical Information and Modeling
+#  http://dx.doi.org/10.1021/ci900397t
 
-import sys,string
+import sys
+import string
 import tstTravelDist
 
 if -1 != string.find(sys.argv[0], "tstPocketMap.py"):
