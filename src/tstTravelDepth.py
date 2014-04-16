@@ -3,14 +3,15 @@
 #does everything to do travel depth, starting from a pdb file and optionally a
 #gridsize and optionally a path to the trisrf/trigen execs
 
-import sys,string,os
-
+import sys
+import string
+import os
 import tstCreate
 import tstConvexHull
 import oldTravelDist
 import tstdata
 import cavity
-import tstTravelDist #for repair of nearby point->pdb mapping
+import tstTravelDist  # for repair of nearby point->pdb mapping
 
 def checkLogTrimax(logFileName):
   '''checks log for trimax problems, returns true if that was the problem'''
@@ -27,33 +28,35 @@ def checkLogTrimax(logFileName):
     logFile.close()
   return problem
 
-def makeTstDoChecksIncrementGrid(pdbFileName, gridSize=1.0, pathToExecs=None, \
-     rootName=None, whichSrf="mesh", probeSize=False, radScaleIn=False, \
-     perturb=.0041, maxTries=20, check2trisPerEdge=True, \
-     gridSizeIncrement=0.2, maxIncrements=20):
+def makeTstDoChecksIncrementGrid(
+    pdbFileName, gridSize=1.0, pathToExecs=None,
+    rootName=None, whichSrf="mesh", probeSize=False, radScaleIn=False,
+    perturb=.0041, maxTries=20, check2trisPerEdge=True,
+    gridSizeIncrement=0.2, maxIncrements=20):
   attemptCount = 0
   gridSizeRun = gridSize
-  checkValue = makeTstDoChecks(pdbFileName, gridSizeRun, pathToExecs, rootName,\
+  checkValue = makeTstDoChecks(
+      pdbFileName, gridSizeRun, pathToExecs, rootName,
       whichSrf, probeSize, radScaleIn, perturb, maxTries, check2trisPerEdge)
   while not checkValue and attemptCount < maxIncrements:
     gridSizeRun  += gridSizeIncrement
     attemptCount += 1
-    checkValue = makeTstDoChecks(pdbFileName, gridSizeRun, pathToExecs, \
-        rootName, whichSrf, probeSize, radScaleIn, perturb, maxTries, \
-        check2trisPerEdge)
+    checkValue = makeTstDoChecks(
+        pdbFileName, gridSizeRun, pathToExecs, rootName, whichSrf, probeSize,
+        radScaleIn, perturb, maxTries, check2trisPerEdge)
   return checkValue
 
-
-def makeTstDoChecks(pdbFileName, gridSize=1.0, pathToExecs=None, rootName=None,\
-                    whichSrf="mesh", probeSize=False, radScaleIn=False, \
-                    perturb=.0041, maxTries=20, check2trisPerEdge=True):
+def makeTstDoChecks(
+    pdbFileName, gridSize=1.0, pathToExecs=None, rootName=None,
+    whichSrf="mesh", probeSize=False, radScaleIn=False,
+    perturb=.0041, maxTries=20, check2trisPerEdge=True):
   '''checks to make sure tst building goes okay... and then tris per point <=12
    modifies gridSize slightly if failure... usually enough'''
   if pathToExecs is None:
     pathToExecs = os.path.expandvars("$TDHOME/bin/")
   if rootName is None:
-    rootNameTemp = string.replace(pdbFileName,".pdb","")
-    rootName = string.replace(rootNameTemp,".PDB","")
+    rootNameTemp = string.replace(pdbFileName, ".pdb", "")
+    rootName = string.replace(rootNameTemp, ".PDB", "")
   tstFileName = rootName + ".tst"
   logFileName = tstFileName + ".log"
   everythingOkay = False
@@ -64,8 +67,8 @@ def makeTstDoChecks(pdbFileName, gridSize=1.0, pathToExecs=None, rootName=None,\
     if maxTry != -1:
       maxTry -= 1
     print "trying again", maxTry, pdbFileName,
-    attempt = tstCreate.makeTst(pdbFileName, gridSizeTry, pathToExecs, \
-                                whichSrf, probeSize, radScaleIn)
+    attempt = tstCreate.makeTst(
+        pdbFileName, gridSizeTry, pathToExecs, whichSrf, probeSize, radScaleIn)
     print "attempt", gridSizeTry
     if not attempt:
       gridSizeTry -= perturb
@@ -74,7 +77,8 @@ def makeTstDoChecks(pdbFileName, gridSize=1.0, pathToExecs=None, rootName=None,\
       try:
         tstD = tstdata.tstData(tstFileName)
         everythingOkay = True
-        #this checks for cases where 13 or more points are shared by a tri. tst code has problems outputting this
+        #this checks for cases where 13 or more points are shared by a tri.
+        # tst code has problems outputting this
         for pointTriRec in tstD.dict['POINT_TRIANGLE']:
           if everythingOkay and pointTriRec[1] >= 13:
             everythingOkay = False
@@ -86,7 +90,8 @@ def makeTstDoChecks(pdbFileName, gridSize=1.0, pathToExecs=None, rootName=None,\
             onePt = pointTriRec[0]
             theseTris = tstD.dict['POINT_TRIANGLE'][onePt-1][2:]
             for otherPt in pointTriRec[2:]:
-              if otherPt > onePt: #don't need to check each edge twice, just once
+              if otherPt > onePt:
+                #don't need to check each edge twice, just once
                 triCount = 0
                 for otherTri in tstD.dict['POINT_TRIANGLE'][otherPt-1][2:]:
                   try:
@@ -95,23 +100,23 @@ def makeTstDoChecks(pdbFileName, gridSize=1.0, pathToExecs=None, rootName=None,\
                   except ValueError:
                     pass
                 if check2trisPerEdge and triCount != 2:
-                  everythingOkay = False #this is bad...
+                  everythingOkay = False  # this is bad...
                   print "more than 2 triangles per edge...", triCount
                   problemList.append('2tri')
         if not everythingOkay:
           gridSizeTry -= perturb
           print "perturbing grid size..."
-      except IOError: #file doesn't exist, usually a problem with fortran, try again
+      except IOError: 
+        #file doesn't exist, usually a problem with fortran, try again
         everythingOkay = False
         print "ioerror, usually fortran problem, check", logFileName
         gridSizeTry -= perturb
         problemList.append('ioerror')
-        if checkLogTrimax(logFileName) or \
-             (len(problemList) > 2 and \
-             len(problemList) == problemList.count('ioerror')):
-             #more than 2 problems and all problems like this, or confirmed
-             #by checking log
-          maxTry = 0 #just give up
+        if checkLogTrimax(logFileName) or (len(problemList) > 2 and \
+            len(problemList) == problemList.count('ioerror')):
+          #more than 2 problems and all problems like this, or confirmed
+          #by checking log
+          maxTry = 0  # just give up
           print "all problems are ioerror type, giving up this run"
   if 0 == maxTry:
     print pdbFileName + " exceeded number of attempts"
@@ -122,31 +127,29 @@ def makeTstDoChecks(pdbFileName, gridSize=1.0, pathToExecs=None, rootName=None,\
 #default parameters, change for your system
 qhullExec = "qhull" #standard code
 khullExec = "khull" #kim's convex hull code
-def runTravelDepthCompletely(pdbFileName, gridSize=1.0, \
-                             whichSrf="mesh", probeSize=False, \
-                             radScaleIn=False, \
-                             pathToExecs="$TDHOME/bin/", \
-                             deleteFiles=True, check2trisPerEdge=True, \
-                             doTravelDepth=True, gridSizeIncrement=0.2, \
-                             doIncrement=True, incrementMax=20):
+def runTravelDepthCompletely(
+    pdbFileName, gridSize=1.0, whichSrf="mesh", probeSize=False,
+    radScaleIn=False, pathToExecs="$TDHOME/bin/", deleteFiles=True,
+    check2trisPerEdge=True, doTravelDepth=True, gridSizeIncrement=0.2,
+    doIncrement=True, incrementMax=20):
   pathToExecs = os.path.expandvars(pathToExecs)
-  rootNameTemp = string.replace(pdbFileName,".pdb","")
-  rootName = string.replace(rootNameTemp,".PDB","")
+  rootNameTemp = string.replace(pdbFileName, ".pdb", "")
+  rootName = string.replace(rootNameTemp, ".PDB", "")
   #now there are 4 more files
   print "running the tst creation code"
   gridSizeTry = float(gridSize)
   triesLeft = incrementMax
   if not doIncrement:
-    triesLeft = 1 #only do one try
+    triesLeft = 1  # only do one try
   while triesLeft >= 1:
-    okay = makeTstDoChecks(pdbFileName, gridSizeTry, pathToExecs, rootName, \
-                        whichSrf, probeSize, radScaleIn, \
-                        check2trisPerEdge=check2trisPerEdge)
+    okay = makeTstDoChecks(
+        pdbFileName, gridSizeTry, pathToExecs, rootName, whichSrf, probeSize,
+        radScaleIn, check2trisPerEdge=check2trisPerEdge)
     if not okay:
       triesLeft -= 1
       gridSizeTry += float(gridSizeIncrement)
       print "changing grid size to", gridSizeTry, "and trying again."
-    else: #everything was okay
+    else:  # everything was okay
       print "that run worked, proceeding"
       break
   if okay:
@@ -159,23 +162,23 @@ def runTravelDepthCompletely(pdbFileName, gridSize=1.0, \
     nocavTstFileName = rootName + ".nocav.tst"
     nocavPhiFileName = rootName + ".nocav.phi"
     print "removing cavities"
-    cavity.tstCavityRemoval(tstFileName, nocavTstFileName, \
-                                   phiFileName, nocavPhiFileName)
+    cavity.tstCavityRemoval(
+        tstFileName, nocavTstFileName, phiFileName, nocavPhiFileName)
     #now no more cavities
     print "running convex hull"
-    tstConvexHull.tstConvexHull(pathToExecs + khullExec, nocavTstFileName, \
-                                pathToExecs + qhullExec)
+    tstConvexHull.tstConvexHull(
+        pathToExecs + khullExec, nocavTstFileName, pathToExecs + qhullExec)
     convexTempFile1 = nocavTstFileName + ".tempQHullFile.output"
     convexTempFile2 = nocavTstFileName + ".tempQHullFile"
     #now has convex hull data,next step is travel depth
-    if doTravelDepth: #sometimes just skip for pockets, etc
+    if doTravelDepth:  # sometimes just skip for pockets, etc
       print "running travel depth"
       oldTravelDist.tstTravelDepth(nocavTstFileName, nocavPhiFileName)
     #now has travel depth data in it
     print "renaming files, deleting temporary files"
-    os.rename(tstFileName, tstCavFileName) #keep the cavities
+    os.rename(tstFileName, tstCavFileName)  # keep the cavities
     os.rename(phiFileName, phiCavFileName)
-    if deleteFiles: #delete unnecessary debugging files...
+    if deleteFiles:  # delete unnecessary debugging files...
       os.unlink(convexTempFile1)
       os.unlink(convexTempFile2)
       os.unlink(rootName + ".tri")
@@ -190,16 +193,16 @@ if -1 != string.find(sys.argv[0], "tstTravelDepth.py"):
     probe = float(sys.argv[4])
     radscale = sys.argv[5]
     path = sys.argv[6]
-    runTravelDepthCompletely(pdbFileName, gridSize, whichSurface, \
-                             probe, radscale, path)
+    runTravelDepthCompletely(
+        pdbFileName, gridSize, whichSurface, probe, radscale, path)
   elif 5 < len(sys.argv):
     pdbFileName = sys.argv[1]
     gridSize = float(sys.argv[2])
     whichSurface = sys.argv[3]
     probe = float(sys.argv[4])
     radscale = sys.argv[5]
-    runTravelDepthCompletely(pdbFileName, gridSize, whichSurface, \
-                             probe, radscale)
+    runTravelDepthCompletely(
+        pdbFileName, gridSize, whichSurface, probe, radscale)
   elif 4 < len(sys.argv):
     pdbFileName = sys.argv[1]
     gridSize = float(sys.argv[2])
@@ -219,4 +222,5 @@ if -1 != string.find(sys.argv[0], "tstTravelDepth.py"):
     pdbFileName = sys.argv[1]
     runTravelDepthCompletely(pdbFileName)
   else:
-    print "Usage: tstTravelDepth.py file.pdb [gridsize] [tri|mesh] [probe] [radius scale] [pathToExecs]"
+    print "Usage: tstTravelDepth.py file.pdb " + \
+        "[gridsize] [tri|mesh] [probe] [radius scale] [pathToExecs]"
