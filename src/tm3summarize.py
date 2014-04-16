@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
-import tm3, string, sys, statistics
+import tm3
+import string
+import sys
+import statistics
 
 def summarizeOneFeature(tmDataList, columnName, intervals=50, outName="a.txt"):
   '''takes that column, makes a histogram for each structure'''
@@ -13,8 +16,8 @@ def summarizeOneFeature(tmDataList, columnName, intervals=50, outName="a.txt"):
     overallMax = max(overallMax, max(data))
     treeData[tm3tree] = data
   if intervals == "max":
-    intervals = overallMax #1 per
-  interval = overallMax/intervals #number of intervals desired
+    intervals = overallMax  # 1 per
+  interval = overallMax/intervals  # number of intervals desired
   #print a header
   outFile.write("name\tcount\tmean\tstddev\t")
   currentOut = 0.
@@ -43,4 +46,5 @@ if -1 != string.find(sys.argv[0], "tm3summarize.py"):
     tmDataList.append(tmData)
   summarizeOneFeature(tmDataList, "Volume", outName="volume.txt")
   summarizeOneFeature(tmDataList, "Surface Area", outName="surfarea.txt")
-  summarizeOneFeature(tmDataList, "mouths", outName="mouths.txt", intervals="max")
+  summarizeOneFeature(
+      tmDataList, "mouths", outName="mouths.txt", intervals="max")
