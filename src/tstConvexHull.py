@@ -2,18 +2,17 @@
 #script to read .tst format and make surfaces in pymol
 #ryan coleman
 
-#from pymol.cgo import *
-#from pymol import cmd
-import math,  string
-#for running commandline instead of through pymol
-import sys, os
+import math
+import string
+import sys
+import os
 import tstdata
 
 def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
-  tstD = tstdata.tstData(tstFileName) #read the file into the data structure
+  tstD = tstdata.tstData(tstFileName)  # read the file into the data structure
   tempFile = open(tstFileName + ".tempQHullFile", 'w')
-  tempFile.write("3\n") #dimension
-  tempFile.write(str(len(tstD.dict['POINT_XYZ'])) + "\n") #number of points
+  tempFile.write("3\n")  # dimension
+  tempFile.write(str(len(tstD.dict['POINT_XYZ'])) + "\n")  # number of points
   for points in tstD.dict['POINT_XYZ']:
     tempFile.write(str(points[1]) + " ")
     tempFile.write(str(points[2]) + " ")
@@ -22,23 +21,26 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
   #call to qhull
   if runKHull:
     if os.path.exists(execKHull):
-      os.popen("cat " + tempFile.name+ " | " + execKHull + " TO " + \
-               tempFile.name+ ".output") #run khull
+      os.popen(
+          "cat " + tempFile.name + " | " + execKHull + " TO " +
+          tempFile.name + ".output")  # run khull
     else:
       print "khull does not exist or is not in the correct place:", execKHull
       exit(1)
   else:
     if os.path.exists(execQHull):
-      os.popen("cat " + tempFile.name+ " | " + execQHull + " i n TO " + \
-               tempFile.name+ ".output") #run qhull
+      os.popen(
+          "cat " + tempFile.name + " | " + execQHull + " i n TO " +
+          tempFile.name + ".output")  # run qhull
     else:
       print "qhull does not exist or is not in the correct place:", execQHull
       exit(1)
   tempOutputFile = open(tempFile.name + ".output", 'r')
-  totalFaces =tempOutputFile.readline() #first line contains number of faces
-  numberFaces = 0 #actually triangles now
-  convexHullFaces = [] #actually triangles now
-  triNumToFaceNum = {} #dict related triangle index (1-indexed) to face index (0-indexed)
+  totalFaces = tempOutputFile.readline()  # first line contains number of faces
+  numberFaces = 0  # actually triangles now
+  convexHullFaces = []  # actually triangles now
+  triNumToFaceNum = {}  # dict related triangle index (1-indexed) to
+  #face index (0-indexed)
   pointsInTriList = []
   for count in xrange(len(tstD.dict['POINT_XYZ'])):
     pointsInTriList.append([0])
@@ -47,25 +49,27 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
     #read in the faces, usually triangles but can be any polygon
     tokens = string.split(line)
     #i bet these are 0-indexed, so make them 1-indexed
-    faceIndices = [int(x) + 1 for x in tokens]
-    for numberTri in xrange(len(faceIndices) - 2): #turn polygons into tris
+    faceIndices = [int(index) + 1 for index in tokens]
+    for numberTri in xrange(len(faceIndices) - 2):  # turn polygons into tris
       triIndices = [faceIndices[0]]
-      for oneIndex in faceIndices[numberTri+1:numberTri+3]:
+      for oneIndex in faceIndices[numberTri + 1:numberTri + 3]:
         triIndices.append(oneIndex)
-      numberFaces += 1 #1-index the list
+      numberFaces += 1  # 1-index the list
       triNumToFaceNum[numberFaces] = count
       triIndices.insert(0, numberFaces)
       convexHullFaces.append(triIndices)
       for points in triIndices[1:]:
         pointsInTriList[points-1][0] += 1
         pointsInTriList[points-1].append(triIndices[0])
-  dimension = tempOutputFile.readline() #dimension+1  of the normals (x, y, z, offset)
-  totalFaces = tempOutputFile.readline() #repeat of # of faces
+  dimension = tempOutputFile.readline()
+  #dimension+1  of the normals (x, y, z, offset)
+  totalFaces = tempOutputFile.readline()  # repeat of # of faces
   outputLines = tempOutputFile.readlines()
   triangleNormals = []
   triangleNormalsCount = 0
   for triangle in convexHullFaces:
-    faceNormalTokens = string.split(outputLines[triNumToFaceNum[int(triangle[0])]])
+    faceNormalTokens = string.split(
+        outputLines[triNumToFaceNum[int(triangle[0])]])
     faceNormal = [float(x) for x in faceNormalTokens]
     triangleNormalsCount += 1
     faceNormal.insert(0, triangleNormalsCount)
@@ -73,9 +77,9 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
   tempOutputFile.close()
   chNormals = []
   for index, pointsAndFaces in enumerate(pointsInTriList):
-    normal = [0.0,0.0,0.0]
+    normal = [0.0, 0.0, 0.0]
     if pointsAndFaces[0] > 0:
-      normalTotal = [0.0,0.0,0.0]
+      normalTotal = [0.0, 0.0, 0.0]
       for faces in pointsAndFaces[1:]:
         for coord in range(3):
           normalTotal[coord] += triangleNormals[faces-1][coord+1]
@@ -83,8 +87,8 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
     normal.insert(0, index+1)
     chNormals.append(normal)
   #add index data to pointsInTriList
-  for index,pointInTri in enumerate(pointsInTriList):
-    pointInTri.insert(0,index+1)
+  for index, pointInTri in enumerate(pointsInTriList):
+    pointInTri.insert(0, index+1)
   #add to data
   tstD.dict['CONVEX_HULL_TRI_POINT_LIST'] = convexHullFaces
   tstD.dict['CONVEX_HULL_TRI_NORM_LIST'] = triangleNormals
@@ -103,7 +107,7 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
   tstFile.write("CONVEX_HULL_TRI_NORM_LIST\n")
   for line in triangleNormals:
     lineOut = "%8d" % line[0]
-    for count in xrange(1,len(line)):
+    for count in xrange(1, len(line)):
       lineOut += "%+15.8f " % line[count]
     noPlusLine = string.replace(lineOut, "+", " ")
     tstFile.write(noPlusLine)
@@ -112,7 +116,7 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
   tstFile.write("NORM_XYZ_CONVEX_HULL\n")
   for line in chNormals:
     lineOut = "%8d" % line[0]
-    for count in xrange(1,len(line)):
+    for count in xrange(1, len(line)):
       lineOut += "%+15.8f " % line[count]
     noPlusLine = string.replace(lineOut, "+", " ")
     tstFile.write(noPlusLine)
@@ -130,9 +134,10 @@ def tstConvexHull(execKHull, tstFileName, execQHull=False, runKHull=False):
 
 #this is where main will go
 if -1 != string.find(sys.argv[0], "tstConvexHull.py"):
-  if len(sys.argv) > 2: #else do nothing, read in as module
+  if len(sys.argv) > 2:  # else do nothing, read in as module
     for tstFile in sys.argv[2:]:
       print "running convex hull for", tstFile
       tstConvexHull(False, tstFile, sys.argv[1])
   else:
-    print "Usage: tstConvexHull qhull-executable tstFile [list of additional tst files]"
+    print "Usage: tstConvexHull qhull-executable tstFile " + \
+        "[list of additional tst files]"
