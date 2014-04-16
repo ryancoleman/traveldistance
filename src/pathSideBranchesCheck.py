@@ -5,8 +5,14 @@
 #this version only does the branch from a 'proper' path to the membrane interior
 #and removes other points along the path and other residues.
 
-import string, sys, comparePaths, os, pdb, geometry, tstdebug
-import paths as pathsModule
+import string
+import sys
+import comparePaths
+import os
+import pdb
+import geometry
+import tstdebug
+import paths as pathsModule  # avoid namespace collisions
 import addFoundHoleStats
 
 def countCrossingsZ(path, barrier):
@@ -18,7 +24,7 @@ def countCrossingsZ(path, barrier):
       crossings += 1
     elif thisPtZ >= barrier and barrier >= nextPtZ:
       crossings += 1
-    thisPtZ = nextPtZ #setup for next iteration
+    thisPtZ = nextPtZ  # setup for next iteration
   return crossings
 
 def checkPathBarriers(prefix):
@@ -27,14 +33,14 @@ def checkPathBarriers(prefix):
   findHolesFile = open(findHolesName, 'r')
   findHolesLines = findHolesFile.readlines()
   findHolesFile.close()
-  HolesName = tstName + ".sideshole.log" #holds all the output
-  goodHolesName = tstName + ".good.sideshole.log" #just the 1 1 0 1 1
-  sideHolesName = tstName + ".side.sideshole.log" #just the * * 1 * *
-  badHolesName = tstName + ".bad.sideshole.log" #all others
+  HolesName = tstName + ".sideshole.log"  # holds all the output
+  goodHolesName = tstName + ".good.sideshole.log"  # just the 1 1 0 1 1
+  sideHolesName = tstName + ".side.sideshole.log"  # just the * * 1 * *
+  badHolesName = tstName + ".bad.sideshole.log"  # all others
   pdbWithBarriersFileName = "planes_" + prefix + ".pdb"
   pdbBarriers = pdb.pdbData(pdbWithBarriersFileName)
   #get the barriers read in and defined
-  barrierAtomList = [[],[]]
+  barrierAtomList = [[], []]
   for index,resName in enumerate(pdbBarriers.resNames):
     if resName == "DUM":
       if pdbBarriers.atoms[index][0] == "O":
@@ -43,8 +49,7 @@ def checkPathBarriers(prefix):
         barrierAtomList[1].append(pdbBarriers.coords[index])
   barrierZ = [barrierAtomList[0][0][2], barrierAtomList[1][0][2]]
   barrierZ.sort()
-  barrierSep = geometry.distL2(barrierAtomList[0][0],  \
-                             barrierAtomList[1][0])
+  barrierSep = geometry.distL2(barrierAtomList[0][0], barrierAtomList[1][0])
   #barrier is just Z coordinate
   #setup for main loop over paths
   poreSuffix = ".pore.py"
@@ -72,7 +77,7 @@ def checkPathBarriers(prefix):
   poreFile =  tstName + "." + str(holeNumber) + poreSuffix
   print poreFile
   paths = []
-  sides,goods = [],[]
+  sides,goods = [], []
   endsToPaths = {}
   pathsToEnds = {}
   while os.path.exists(poreFile):
@@ -87,10 +92,10 @@ def checkPathBarriers(prefix):
       if end not in endsToPaths:
         endsToPaths[end] = []
       endsToPaths[end].append(pathNum)
-    intersections = [0,0]
+    intersections = [0, 0]
     for index, barrier in enumerate(barrierZ):
       intersections[index] = countCrossingsZ(path, barrier)
-    ends = [0,0,0]
+    ends = [0, 0, 0]
     for endPoint in [path[0],path[-1]]:
       endPointZ = endPoint[2]
       if endPointZ < barrierZ[0] and endPointZ < barrierZ[1]:
@@ -100,13 +105,13 @@ def checkPathBarriers(prefix):
       elif endPointZ > barrierZ[0] and endPointZ > barrierZ[1]:
         ends[2] += 1
     outputThisTime = str(ends[0]) + " " + str(intersections[0]) + " " + \
-                     str(ends[1]) + " " + str(intersections[1]) + " " + \
-                     str(ends[2]) + " " + str(barrierSep) + " "
+        str(ends[1]) + " " + str(intersections[1]) + " " + \
+        str(ends[2]) + " " + str(barrierSep) + " "
     logFile.write(outputThisTime)
     logFile.write("\n")
     if ends[0] + ends[1] + ends[2] != 2:
       print "problems sorting out the ends"
-    if ends[0] == 1 and ends[2] == 1 and intersections == [1,1]: #it is 'good'
+    if ends[0] == 1 and ends[2] == 1 and intersections == [1,1]:  # it is 'good'
       goods.append(pathNum)
       goodLogFile.write(prefix + " ")
       goodLogFile.write(string.strip(findHolesLines[holeNumber]) + " ")
@@ -148,28 +153,30 @@ def checkPathBarriers(prefix):
           if goodEnd == sideEnd:
             foundGoods.append(good)
     if len(foundGoods) > 0:
-      branchedPath = paths[side] #start with whole path
-      for good in foundGoods: #remove physiological intersecting paths
+      branchedPath = paths[side]  # start with whole path
+      for good in foundGoods:  # remove physiological intersecting paths
         branchedPath = pathsModule.subtractPaths(branchedPath, paths[good])
-      if len(branchedPath) > 0: #has to have some length remaining
+      if len(branchedPath) > 0:  # has to have some length remaining
         branches += 1
         branchFile = tstName + "." + str(branches) + branchSuffix
         print branches, side, foundGoods
-        tstdebug.debugSetGridSpheres(branchedPath,0.5,branchFile,radius=True,mainColor=(0.01,0.9,0.35))
+        tstdebug.debugSetGridSpheres(
+            branchedPath, 0.5, branchFile, radius=True,
+            mainColor=(0.01,0.9,0.35))
         branchLog.write(str(branches) + " ")
         branchLog.write(str(pathsToEnds[side][0]) + " ")
         branchLog.write(str(pathsToEnds[side][1]) + " ")
         branchLog.write("- ") #dummy, not real
         branchLog.write("0. 0. 0. 0. 0. 0. 0. 0. 0. 0. \n")
   branchLog.close()
-  addFoundHoleStats.redoFindholes(prefix, nearbyDistance=4., \
-          logExt=".branchholes.log", poreSuffix = ".branch.py", \
-          nearbyName=".branch")
+  addFoundHoleStats.redoFindholes(
+      prefix, nearbyDistance=4., logExt=".branchholes.log", 
+      poreSuffix=".branch.py", nearbyName=".branch")
 
 if -1 != string.find(sys.argv[0], "pathSideBranchesCheck"):
   if len(sys.argv) >= 2:
     prefix = sys.argv[1]
-    prefix = prefix.replace(".nocav.tst.findholes.log", "")#just in case
+    prefix = prefix.replace(".nocav.tst.findholes.log", "")  # just in case
     checkPathBarriers(prefix)
   else:
     print "pathSidesCheck.py prefix[.nocav.tst.findholes.log]"
