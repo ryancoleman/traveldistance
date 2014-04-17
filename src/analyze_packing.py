@@ -7,7 +7,8 @@
 #from a file with column data and 2 files for the 2 data sets to switch to
 #construct p-values.
 
-import string, sys
+import string
+import sys
 import statistics
 
 def readSummaryFile(inputFileName):
@@ -29,7 +30,7 @@ def readSummaryFile(inputFileName):
           for dataIndex, dataDict in enumerate(data):
             dataDict[name] = float(others[dataIndex])
     except StopIteration:
-      pass #EOF
+      pass  # EOF
     newData = {}
     for count in range(len(names)):
       newData[names[count]] = data[count]
@@ -44,9 +45,9 @@ def readList(inputFileName):
       for line in inputFile:
         tokens = string.split(line)
         if len(tokens) >= 1:
-          data.append(tokens[0]) #just add first... assume all there is
+          data.append(tokens[0])  # just add first... assume all there is
     except StopIteration:
-      pass #EOF
+      pass  # EOF
     return data
 
 def getMean(summaryDataColumn, listPdb):
@@ -59,13 +60,14 @@ def getMean(summaryDataColumn, listPdb):
 
 def getDiffMean(summaryDataColumn, listPdbs):
   '''get the diff of the first list - second by using the first argument'''
-  return getMean(summaryDataColumn, listPdbs[0]) - \
-                            getMean(summaryDataColumn, listPdbs[1])
+  return getMean(
+      summaryDataColumn, listPdbs[0]) - getMean(summaryDataColumn, listPdbs[1])
 
-def analyzeColumn(summaryDataColumn, listPdbs, outputFileName,numTests=1000000):
+def analyzeColumn(
+    summaryDataColumn, listPdbs, outputFileName, numTests=1000000):
   '''takes a column of summary data, computes average and permutes, outputs'''
   origDiffMean = getDiffMean(summaryDataColumn, listPdbs)
-  pValCounts =[0.,0.] #above, below
+  pValCounts = [0., 0.]  # above, below
   for test in range(numTests):
     newLists = statistics.permuteLists(listPdbs)
     testMean = getDiffMean(summaryDataColumn, newLists)
