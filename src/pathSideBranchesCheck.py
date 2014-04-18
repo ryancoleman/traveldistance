@@ -41,7 +41,7 @@ def checkPathBarriers(prefix):
   pdbBarriers = pdb.pdbData(pdbWithBarriersFileName)
   #get the barriers read in and defined
   barrierAtomList = [[], []]
-  for index,resName in enumerate(pdbBarriers.resNames):
+  for index, resName in enumerate(pdbBarriers.resNames):
     if resName == "DUM":
       if pdbBarriers.atoms[index][0] == "O":
         barrierAtomList[0].append(pdbBarriers.coords[index])
@@ -74,10 +74,10 @@ def checkPathBarriers(prefix):
   badLogFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   badLogFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   holeNumber = 1
-  poreFile =  tstName + "." + str(holeNumber) + poreSuffix
+  poreFile = tstName + "." + str(holeNumber) + poreSuffix
   print poreFile
   paths = []
-  sides,goods = [], []
+  sides, goods = [], []
   endsToPaths = {}
   pathsToEnds = {}
   while os.path.exists(poreFile):
@@ -96,7 +96,7 @@ def checkPathBarriers(prefix):
     for index, barrier in enumerate(barrierZ):
       intersections[index] = countCrossingsZ(path, barrier)
     ends = [0, 0, 0]
-    for endPoint in [path[0],path[-1]]:
+    for endPoint in [path[0], path[-1]]:
       endPointZ = endPoint[2]
       if endPointZ < barrierZ[0] and endPointZ < barrierZ[1]:
         ends[0] += 1
@@ -111,7 +111,8 @@ def checkPathBarriers(prefix):
     logFile.write("\n")
     if ends[0] + ends[1] + ends[2] != 2:
       print "problems sorting out the ends"
-    if ends[0] == 1 and ends[2] == 1 and intersections == [1,1]:  # it is 'good'
+    if ends[0] == 1 and ends[2] == 1 and intersections == [1, 1]:
+      #it is 'good'
       goods.append(pathNum)
       goodLogFile.write(prefix + " ")
       goodLogFile.write(string.strip(findHolesLines[holeNumber]) + " ")
@@ -126,8 +127,8 @@ def checkPathBarriers(prefix):
       badLogFile.write(string.strip(findHolesLines[holeNumber]) + " ")
       badLogFile.write(outputThisTime + "\n")
     #and that is it for this path
-    holeNumber += 1     #get set up for next pass
-    poreFile =  tstName + "." + str(holeNumber) + poreSuffix
+    holeNumber += 1     # get set up for next pass
+    poreFile = tstName + "." + str(holeNumber) + poreSuffix
   logFile.close()
   goodLogFile.close()
   sideLogFile.close()
@@ -142,7 +143,7 @@ def checkPathBarriers(prefix):
   #now want to find side branches of good paths
   branches = 0
   branchSuffix = ".branch.py"
-  branchFile =   tstName + "." + str(branches) + branchSuffix
+  branchFile = tstName + "." + str(branches) + branchSuffix
   branchLog = open(tstName + ".branchholes.log", 'w')
   branchLog.write(string.strip(findHolesLines[0]) + "\n")
   for side in sides:
@@ -162,15 +163,15 @@ def checkPathBarriers(prefix):
         print branches, side, foundGoods
         tstdebug.debugSetGridSpheres(
             branchedPath, 0.5, branchFile, radius=True,
-            mainColor=(0.01,0.9,0.35))
+            mainColor=(0.01, 0.9, 0.35))
         branchLog.write(str(branches) + " ")
         branchLog.write(str(pathsToEnds[side][0]) + " ")
         branchLog.write(str(pathsToEnds[side][1]) + " ")
-        branchLog.write("- ") #dummy, not real
+        branchLog.write("- ")  # dummy, not real
         branchLog.write("0. 0. 0. 0. 0. 0. 0. 0. 0. 0. \n")
   branchLog.close()
   addFoundHoleStats.redoFindholes(
-      prefix, nearbyDistance=4., logExt=".branchholes.log", 
+      prefix, nearbyDistance=4., logExt=".branchholes.log",
       poreSuffix=".branch.py", nearbyName=".branch")
 
 if -1 != string.find(sys.argv[0], "pathSideBranchesCheck"):

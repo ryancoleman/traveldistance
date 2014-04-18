@@ -36,7 +36,7 @@ def checkPathBarriers(prefix):
   pdbBarriers = pdb.pdbData(pdbWithBarriersFileName)
   #get the barriers read in and defined
   barrierAtomList = [[], []]
-  for index,resName in enumerate(pdbBarriers.resNames):
+  for index, resName in enumerate(pdbBarriers.resNames):
     if resName == "DUM":
       if pdbBarriers.atoms[index][0] == "O":
         barrierAtomList[0].append(pdbBarriers.coords[index])
@@ -69,7 +69,7 @@ def checkPathBarriers(prefix):
   badLogFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   badLogFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   holeNumber = 1
-  poreFile =  tstName + "." + str(holeNumber) + poreSuffix
+  poreFile = tstName + "." + str(holeNumber) + poreSuffix
   print poreFile
   paths = []
   sides = []
@@ -111,7 +111,7 @@ def checkPathBarriers(prefix):
       badLogFile.write(outputThisTime + "\n")
     #and that is it for this path
     holeNumber += 1     # get set up for next pass
-    poreFile =  tstName + "." + str(holeNumber) + poreSuffix
+    poreFile = tstName + "." + str(holeNumber) + poreSuffix
   print sides
   logFile.close()
   goodLogFile.close()

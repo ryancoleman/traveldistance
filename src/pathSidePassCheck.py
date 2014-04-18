@@ -35,7 +35,7 @@ def checkPathBarriers(prefix):
   pdbBarriers = pdb.pdbData(pdbWithBarriersFileName)
   #get the barriers read in and defined
   barrierAtomList = [[], []]
-  for index,resName in enumerate(pdbBarriers.resNames):
+  for index, resName in enumerate(pdbBarriers.resNames):
     if resName == "DUM":
       if pdbBarriers.atoms[index][0] == "O":
         barrierAtomList[0].append(pdbBarriers.coords[index])
@@ -68,7 +68,7 @@ def checkPathBarriers(prefix):
   badLogFile.write("endsBeyond1count barrier1count endsBetweenCount ")
   badLogFile.write("barrier2count endsBeyond2count barrierSeparation\n")
   holeNumber = 1
-  poreFile =  tstName + "." + str(holeNumber) + poreSuffix
+  poreFile = tstName + "." + str(holeNumber) + poreSuffix
   print poreFile
   paths = []
   sides = []
@@ -79,7 +79,7 @@ def checkPathBarriers(prefix):
     for index, barrier in enumerate(barrierZ):
       intersections[index] = countCrossingsZ(path, barrier)
     ends = [0, 0, 0]
-    for endPoint in [path[0],path[-1]]:
+    for endPoint in [path[0], path[-1]]:
       endPointZ = endPoint[2]
       if endPointZ < barrierZ[0] and endPointZ < barrierZ[1]:
         ends[0] += 1
@@ -88,13 +88,13 @@ def checkPathBarriers(prefix):
       elif endPointZ > barrierZ[0] and endPointZ > barrierZ[1]:
         ends[2] += 1
     outputThisTime = str(ends[0]) + " " + str(intersections[0]) + " " + \
-                     str(ends[1]) + " " + str(intersections[1]) + " " + \
-                     str(ends[2]) + " " + str(barrierSep) + " "
+        str(ends[1]) + " " + str(intersections[1]) + " " + \
+        str(ends[2]) + " " + str(barrierSep) + " "
     logFile.write(outputThisTime)
     logFile.write("\n")
     if ends[0] + ends[1] + ends[2] != 2:
       print "problems sorting out the ends"
-    if ends[0] == 1 and ends[2] == 1 and intersections == [1, 1]:  
+    if ends[0] == 1 and ends[2] == 1 and intersections == [1, 1]:
       # it is 'good'
       goodLogFile.write(prefix + " ")
       goodLogFile.write(string.strip(findHolesLines[holeNumber]) + " ")
@@ -110,7 +110,7 @@ def checkPathBarriers(prefix):
       badLogFile.write(outputThisTime + "\n")
     #and that is it for this path
     holeNumber += 1     # get set up for next pass
-    poreFile =  tstName + "." + str(holeNumber) + poreSuffix
+    poreFile = tstName + "." + str(holeNumber) + poreSuffix
   print sides
   logFile.close()
   goodLogFile.close()
