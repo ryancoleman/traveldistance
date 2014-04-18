@@ -3,27 +3,30 @@
 
 #finds nmr model closest to the average model, outputs it as best, doesn't clean
 
-
 #grab system, string,  regular expression, and operating system modules
-import sys, string, re, os, math
-import pdb #for chain sorting ease
+import sys
+import string
+import re
+import os
+import math
+import pdb  # for chain sorting ease
 
 def getClosestToAverage(fileName, skipAlign=True):
   '''takes a pdb file of an nmr structure, superposes all structures, finds
   euclidean average, then finds closest original model to the average, then
   picks it out as the one to use'''
   if not skipAlign:
-    import superimpose #superposition function, calls fortran code
+    import superimpose  # superposition function, calls fortran code
   pdbD = pdb.pdbData(fileName)
   modelNums = pdbD.getModelNumbers()
   firstModel = False
   alignedModels = []
   for modelNum in modelNums:
     newPdb = pdbD.getOneModel(modelNum)
-    outputFileName = fileName[:-4] +".model." + str(modelNum) + ".pdb"
+    outputFileName = fileName[:-4] + ".model." + str(modelNum) + ".pdb"
     newPdb.write(outputFileName)
-    if firstModel == False:
-      firstModel = outputFileName #don't align first
+    if not firstModel:
+      firstModel = outputFileName  # don't align first
     else:
       if not skipAlign:
         alignFileName = "align." + outputFileName
@@ -32,7 +35,7 @@ def getClosestToAverage(fileName, skipAlign=True):
       else:
         alignedModels.append(outputFileName)
   firstModelPdbD = pdb.pdbData(firstModel)
-  averageFileName = fileName[:-4] +".average.pdb"
+  averageFileName = fileName[:-4] + ".average.pdb"
   averagePdbD = firstModelPdbD.getAverageCoords(alignedModels)
   averagePdbD.write(averageFileName)
   bestModelName = firstModel
@@ -43,13 +46,12 @@ def getClosestToAverage(fileName, skipAlign=True):
       bestRMSD = otherRMSD
       bestModelName = alignModel
   #print bestRMSD, alignModel
-  bestFileName = fileName[:-4] +".best.pdb"
-  modelNumber = bestModelName.replace(".pdb","").replace( \
-                          "align."+fileName[:-4]+".model.","").replace( \
-                          fileName[:-4]+".model.","")
+  bestFileName = fileName[:-4] + ".best.pdb"
+  modelNumber = bestModelName.replace(".pdb", "").replace(
+      "align."+fileName[:-4]+".model.", "").replace(fileName[:-4]+".model.", "")
   pdbD = pdb.pdbData(fileName)
   newPdb = pdbD.getOneModel(int(modelNumber))
-  newPdb.write(bestFileName) #writes all other file info not just coords
+  newPdb.write(bestFileName)  # writes all other file info not just coords
 
 if -1 != string.find(sys.argv[0], "getClosestToAverageNMRpdb.py"):
   fileName = sys.argv[1]
