@@ -218,6 +218,7 @@ def trianglinizeLoop(loopPoints):
   return tris
 
 class tstDataWritable(tstData):
+
   def __init__(self, filename, necessaryKeys=False, drawCountTmp=0):
     '''necessaryKeys can be set to only read in certain records from tst'''
     self.dict = {}  # this dictionary will hold a key:value pair
