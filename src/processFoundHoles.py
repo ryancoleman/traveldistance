@@ -29,9 +29,9 @@ def getDataFromFile(fileName):
   try:
     for line in file:
       data = string.split(line)
-      if data[0] == 'number':  # opening line
-        pass #do nothing
-      else: #process it
+      if data[0] == 'number':   # opening line
+        pass  # do nothing
+      else:  # process it
         #convert to floats
         floatData = []
         for datum in data:
@@ -39,11 +39,11 @@ def getDataFromFile(fileName):
             floatData.append(float(datum))
           except ValueError:  # plugs column
             floatData.append(str(datum))
-        while len(floatData) < 15:  # pad
+        while len(floatData) < 15:   # pad
           floatData.append(0)
         returnData.append(floatData)
   except StopIteration:
-    pass #EOF
+    pass  # EOF
   file.close()
   return returnData
 
@@ -83,24 +83,24 @@ def getRankColumn(data, column, row):
     columnData.append(line[column])
   columnData.sort()
   piece = data[row][column]
-  for index,columnDatum in enumerate(columnData):
+  for index, columnDatum in enumerate(columnData):
     if piece <= columnDatum:
       return index + 1
 
 def getMinColumn(data, column):
   '''returns the row entry and index of the minimum'''
   bestIndex, bestValue = 0, data[0][column]
-  for rowIndex,line in enumerate(data):
+  for rowIndex, line in enumerate(data):
     if line[column] < bestValue:
-      bestIndex, bestValue = rowIndex,line[column]
+      bestIndex, bestValue = rowIndex, line[column]
   return bestValue, bestIndex
 
 def getMaxColumn(data, column):
   '''returns the row entry and index of the maximum'''
   bestIndex, bestValue = 0, data[0][column]
-  for rowIndex,line in enumerate(data):
+  for rowIndex, line in enumerate(data):
     if line[column] > bestValue:
-      bestIndex, bestValue = rowIndex,line[column]
+      bestIndex, bestValue = rowIndex, line[column]
   return bestValue, bestIndex
 
 def sortByColumnReturnOther(data, column, other):
@@ -124,10 +124,10 @@ def processDataOne(data, filename, sortStat, sortMethod):
   bestRankStr = filename + ", "
   sortedEvals = []
   backwardsEvals = []
-  for column in range(4,8):
+  for column in range(4, 8):
     rank = getRankColumn(data, column, bestIndex)
     revRank = len(data) - rank + 1
-    bestRankStr +=  str(rank) + ", " +  str(revRank) + ", "
+    bestRankStr += str(rank) + ", " + str(revRank) + ", "
     sorted = filename + ", "
     backwards = filename + ", "
     sortedOther = sortByColumnReturnOther(data, column, sortStat)
@@ -141,14 +141,14 @@ def processDataOne(data, filename, sortStat, sortMethod):
   bestRankStr += str(bestVal)
   return bestRankStr, sortedEvals, backwardsEvals
 
-def processData(dataList, nameList, listPaths, \
-                outputFileName="processed.foundholes."):
+def processData(
+    dataList, nameList, listPaths, outputFileName="processed.foundholes."):
   #first do the one big summary output file
   bestLists = []
-  compCols = [8,9,10,11,12,13,14]
+  compCols = [8, 9, 10, 11, 12, 13, 14]
   comps = ['min', 'max', 'max', 'min', 'max', 'max', 'min']
   compThreshs = [5., .4, .8, 2.5, .5, .8, 2.5]
-  for index,colIdx in enumerate(compCols):
+  for index, colIdx in enumerate(compCols):
     bestList = []
     for data in dataList:
       if comps[index] == 'min':
@@ -158,12 +158,12 @@ def processData(dataList, nameList, listPaths, \
       bestList.append(bestVal)
     bestLists.append(bestList)
     #fileOut = open(outputFileName + colNamesBonus[colIdx-4] + ".best.log", 'w')
-    #for index,name in enumerate(nameList):
+    #for index, name in enumerate(nameList):
     #  fileOut.write(name + " " + str(bestList[index]) + "\n")
     #fileOut.close()
   fileOut = open(outputFileName + "overall.best.log", 'w')
   fileOut.write("name pRMSD coverage span wRMSD less1 lessRad radiicomp\n")
-  for index,name in enumerate(nameList):
+  for index, name in enumerate(nameList):
     fileOut.write(name + " ")
     for index2 in range(len(compCols)):
       fileOut.write(str(bestLists[index2][index]) + " ")
@@ -183,7 +183,7 @@ def processData(dataList, nameList, listPaths, \
     for bestRankStr in bestRankStrings:
       fileOut.write(bestRankStr + "\n")
     fileOut.close()
-    for index,colName in enumerate(colNames):
+    for index, colName in enumerate(colNames):
       fileOut = open(
           outputFileName + "rankings." + colName + "." +
           colNamesBonus[sortColNumber-4] + ".log", 'w')
@@ -212,10 +212,10 @@ def processData(dataList, nameList, listPaths, \
       bestColumnData = []
       for data in dataList:
         if comps[colIdx] == 'min':
-          bestVal, bestIndex = getMinColumn(data, sortColNumber)  
+          bestVal, bestIndex = getMinColumn(data, sortColNumber)
           selectColumnData.extend(
-              getFromColumnIfMin(data, column, sortColNumber,
-              compThreshs[colIdx]))
+              getFromColumnIfMin(
+                  data, column, sortColNumber, compThreshs[colIdx]))
           bestColumnData.extend(
               getFromColumnIfMin(data, column, sortColNumber, bestVal))
         else:
@@ -226,15 +226,19 @@ def processData(dataList, nameList, listPaths, \
               getFromColumnIfMax(data, column, sortColNumber, bestVal))
         columnData.extend(getOneColumn(data, column))
       if len(drilledData[column]) > 0:
-        maxHere = (max(max(columnData),max(drilledData[column])) + 1.)
+        maxHere = (max(max(columnData), max(drilledData[column])) + 1.)
       else:
         maxHere = max(columnData) + 1.
       interval = maxHere/40.
-      histogram = statistics.computeHistogram(columnData,interval,maxData=maxHere)
-      #selectHistogram = statistics.computeHistogram(selectColumnData,interval,maxData=histogram[1])
-      bestHistogram = statistics.computeHistogram(bestColumnData,interval,maxData=histogram[1])
+      histogram = statistics.computeHistogram(
+          columnData, interval, maxData=maxHere)
+      #selectHistogram = statistics.computeHistogram(
+      #    selectColumnData, interval, maxData=histogram[1])
+      bestHistogram = statistics.computeHistogram(
+          bestColumnData, interval, maxData=histogram[1])
       if len(drilledData[column]) > 0:
-        realHistogram = statistics.computeHistogram(drilledData[column],interval,maxData=histogram[1])
+        realHistogram = statistics.computeHistogram(
+            drilledData[column], interval, maxData=histogram[1])
       else:
         realHistogram = False
       #need to scale select part of data to be same height as histogram
@@ -243,7 +247,7 @@ def processData(dataList, nameList, listPaths, \
       maxBestHeight = max(bestHistogram[0])
       if realHistogram:
         maxRealHeight = max(realHistogram[0])
-        realScaledHistogram = [[],realHistogram[1]]
+        realScaledHistogram = [[], realHistogram[1]]
         for histPoint in realHistogram[0]:
           realScaledHistogram[0].append(histPoint*maxHeight/maxRealHeight)
       #selectScaledHistogram = [[], selectHistogram[1]]
@@ -262,23 +266,42 @@ def processData(dataList, nameList, listPaths, \
           xVals.append(cutoff*interval)
         graphData = Gnuplot.Data(xVals, histogram[0], title="All")
         #if comps[colIdx] == 'min':
-          #graphSelectData = Gnuplot.Data(xVals, selectScaledHistogram[0], title="<" + str(compThreshs[colIdx]) + " " + str(colNamesBonus[sortColNumber-4]) + " Scaled by " + str(maxHeight/maxSelectHeight))
+        #  graphSelectData = Gnuplot.Data(
+        #     xVals, selectScaledHistogram[0],
+        #     title="<" + str(compThreshs[colIdx]) + " " +
+        #     str(colNamesBonus[sortColNumber-4]) + " Scaled by " +
+        #     str(maxHeight/maxSelectHeight))
         #else:
-          #graphSelectData = Gnuplot.Data(xVals, selectScaledHistogram[0], title=">" + str(compThreshs[colIdx]) + " " + str(colNamesBonus[sortColNumber-4]) + " Scaled by " + str(maxHeight/maxSelectHeight))
-        graphBestData = Gnuplot.Data(xVals, bestScaledHistogram[0], title="Best "+str(colNamesBonus[sortColNumber-4])+" Scaled by " + str(maxHeight/maxBestHeight))
+        #  graphSelectData = Gnuplot.Data(
+        #      xVals, selectScaledHistogram[0], title=">" +
+        #      str(compThreshs[colIdx]) + " " +
+        #      str(colNamesBonus[sortColNumber-4]) + " Scaled by " +
+        #      str(maxHeight/maxSelectHeight))
+        graphBestData = Gnuplot.Data(
+            xVals, bestScaledHistogram[0],
+            title="Best "+str(colNamesBonus[sortColNumber-4])+" Scaled by " +
+            str(maxHeight/maxBestHeight))
         if realHistogram:
-          graphRealData = Gnuplot.Data(xVals, realScaledHistogram[0], title="Drilled Holes Scaled by " + str(maxHeight/maxRealHeight))
-        graphDataCum = Gnuplot.Data(xVals, statistics.computeCumulativeHistogram(histogram[0]))
+          graphRealData = Gnuplot.Data(
+              xVals, realScaledHistogram[0],
+              title="Drilled Holes Scaled by " + str(maxHeight/maxRealHeight))
+        graphDataCum = Gnuplot.Data(
+            xVals, statistics.computeCumulativeHistogram(histogram[0]))
         plotter('set terminal png')
-        plotter('set output "' + outputFileName + columnName + '.' + colNamesBonus[sortColNumber-4] + '.png"')
+        plotter(
+            'set output "' + outputFileName + columnName + '.' +
+            colNamesBonus[sortColNumber-4] + '.png"')
         plotter('set data style linespoints')
-        plotter('set xrange [' + str(min(xVals)-.01) + ':' + str(max(xVals)+.01) + ']')
+        plotter(
+            'set xrange [' + str(min(xVals)-.01) + ':' +
+            str(max(xVals)+.01) + ']')
         plotter.xlabel(columnName)
         plotter.ylabel('Count')
         plotter('set multiplot')
         plotter('set key right top')
         if realHistogram:
-          #plotter.plot(graphData, graphSelectData, graphBestData, graphRealData)
+          #plotter.plot(
+          #    graphData, graphSelectData, graphBestData, graphRealData)
           plotter.plot(graphData, graphBestData, graphRealData)
         else:
           #plotter.plot(graphData, graphSelectData, graphBestData)
@@ -288,14 +311,14 @@ def processData(dataList, nameList, listPaths, \
 #this is main
 if len(sys.argv) > 1:
   listData = []
-  drilledFileNames,listPaths = [], []
+  drilledFileNames, listPaths = [], []
   for fileName in sys.argv[1:]:
     drilledName = string.replace(fileName, ".nocav.tst.findholes.log", ".py")
     drilledFileNames.append(drilledName)
     data = getDataFromFile(fileName)
     listData.append(data)
     drilledPath = comparePaths.readCGOPathWithRadius(drilledName)
-    listPaths.append(drilledPath) #radius, x, y, z
+    listPaths.append(drilledPath)  # radius, x, y, z
   processData(listData, sys.argv[1:], listPaths)
 else:
   print "call with list of findholes.log files"
