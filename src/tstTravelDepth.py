@@ -39,7 +39,7 @@ def makeTstDoChecksIncrementGrid(
       pdbFileName, gridSizeRun, pathToExecs, rootName,
       whichSrf, probeSize, radScaleIn, perturb, maxTries, check2trisPerEdge)
   while not checkValue and attemptCount < maxIncrements:
-    gridSizeRun  += gridSizeIncrement
+    gridSizeRun += gridSizeIncrement
     attemptCount += 1
     checkValue = makeTstDoChecks(
         pdbFileName, gridSizeRun, pathToExecs, rootName, whichSrf, probeSize,
@@ -86,7 +86,7 @@ def makeTstDoChecks(
             problemList.append('tri')
         #makes sure each edge is in only 2 triangles!
         for pointTriRec in tstD.dict['POINT_NEIGHBOR']:
-          if everythingOkay: #no need to keep checking otherwise
+          if everythingOkay:  # no need to keep checking otherwise
             onePt = pointTriRec[0]
             theseTris = tstD.dict['POINT_TRIANGLE'][onePt-1][2:]
             for otherPt in pointTriRec[2:]:
@@ -106,13 +106,14 @@ def makeTstDoChecks(
         if not everythingOkay:
           gridSizeTry -= perturb
           print "perturbing grid size..."
-      except IOError: 
+      except IOError:
         #file doesn't exist, usually a problem with fortran, try again
         everythingOkay = False
         print "ioerror, usually fortran problem, check", logFileName
         gridSizeTry -= perturb
         problemList.append('ioerror')
-        if checkLogTrimax(logFileName) or (len(problemList) > 2 and \
+        if checkLogTrimax(logFileName) or (
+            len(problemList) > 2 and
             len(problemList) == problemList.count('ioerror')):
           #more than 2 problems and all problems like this, or confirmed
           #by checking log
@@ -121,12 +122,13 @@ def makeTstDoChecks(
   if 0 == maxTry:
     print pdbFileName + " exceeded number of attempts"
     return False
-  return True #indicates success
+  return True  # indicates success
   #done, files created, all that needs to happen, maybe add max iteration count
 
 #default parameters, change for your system
-qhullExec = "qhull" #standard code
-khullExec = "khull" #kim's convex hull code
+qhullExec = "qhull"  # standard code
+khullExec = "khull"  # kim's convex hull code
+
 def runTravelDepthCompletely(
     pdbFileName, gridSize=1.0, whichSrf="mesh", probeSize=False,
     radScaleIn=False, pathToExecs="$TDHOME/bin/", deleteFiles=True,
