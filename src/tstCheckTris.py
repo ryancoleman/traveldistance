@@ -1,22 +1,14 @@
 #!/usr/bin/env python
-#script to read .tst format and make surfaces in pymol
 #ryan coleman
 
-#from pymol.cgo import *
-#from pymol import cmd
-import math,  string
-#for running commandline instead of through pymol
-import sys, os
-from tstdata import tstData
-
-
-
-#this function is the opening to pymol to open a tst file, read in the data
-def tstOpen(filename):
-  tstData(filename)
+import math
+import string
+import sys
+import os
+import tstdata
 
 def tstCheckTris(tstFileName):
-  tstD = tstData(tstFileName) #read the file into the data structure
+  tstD = tstdata.tstData(tstFileName)  # read the file into the data structure
   okay = True
   pointTris = tstD.dict['POINT_TRIANGLE']
   for pointTriRec in pointTris:
@@ -30,7 +22,7 @@ def tstCheckTris(tstFileName):
     return tstFileName
 
 #this is where main will go
-if len(sys.argv) > 1: #else do nothing, read in as module
+if len(sys.argv) > 1:  # else do nothing, read in as module
   badlist = []
   for tstFile in sys.argv[1:]:
     checked = tstCheckTris(tstFile)
