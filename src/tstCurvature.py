@@ -5,7 +5,7 @@ import string
 import tstdata
 import geometry
 import statistics
-import math #for pi
+import math  # for pi
 
 def tstEdgeCurvature(trianglePoint, pointXyz, pointTriangle, pointNeighbor):
   '''for each edge, calculate the angle between the triangles around it.
@@ -27,7 +27,7 @@ def tstEdgeCurvature(trianglePoint, pointXyz, pointTriangle, pointNeighbor):
     for otherPt in pointNeighborList[2:]:  # pN[1] is count
       ptList = [mainPt, otherPt]
       ptList.sort()
-      ptTuple = tuple(ptList) #canonicalized format
+      ptTuple = tuple(ptList)  # canonicalized format
       edgeLength = geometry.distL2(
           pointXyz[mainPt-1][1:], pointXyz[otherPt-1][1:])
       if ptTuple in edgeAngle:  # already done
