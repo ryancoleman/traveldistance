@@ -23,13 +23,14 @@ if -1 != string.find(sys.argv[0], "tm3resRefineComp.py"):
   #dotData.writeGdl("temp.gdl", force=False)
   #print "dot -Tpng temp.dot > temp.png"
   matchList = tm3.findSimilarNodes(
-      tmDataList, ["Surface Area", "Volume", "height",
-      #"mean absolute Curvature",
-      "mean Curvature", "mouths",
-      "longest dimension", "middle dimension", "short dimension",
-      "Area of Biggest Mouth", "Diameter of Biggest Mouth", "mean height"],
+      tmDataList, [
+          "Surface Area", "Volume", "height",
+          #"mean absolute Curvature",
+          "mean Curvature", "mouths",
+          "longest dimension", "middle dimension", "short dimension",
+          "Area of Biggest Mouth", "Diameter of Biggest Mouth", "mean height"],
       10000000, 1000, 50,
-      resCols=["Atom Name List"], sizeColName = "Volume",
+      resCols=["Atom Name List"], sizeColName="Volume",
       sizeMin=-1., sizeMax=10000000000,
       doSelfScore=False, justNodes=dotData.treeToBestNode,
       mst=True, lineMst=True, lineMstEnds=False,
@@ -39,9 +40,9 @@ if -1 != string.find(sys.argv[0], "tm3resRefineComp.py"):
   #linemstends doesn't work that well so disabled for now
   names, matrix = [], {}
   for match in matchList:
-    name1 =  match[0].inputFileName+ "-" + match[2].getId()
-    name2 =  match[1].inputFileName+ "-" +  match[3].getId()
-    for name,otherName in [(name1, name2), (name2, name1)]:
+    name1 = match[0].inputFileName + "-" + match[2].getId()
+    name2 = match[1].inputFileName + "-" + match[3].getId()
+    for name, otherName in [(name1, name2), (name2, name1)]:
       if name not in names:
         names.append(name)
       if name not in matrix:
@@ -56,5 +57,5 @@ if -1 != string.find(sys.argv[0], "tm3resRefineComp.py"):
   for name in names:
     print name,
     for otherName in names:
-      print round(matrix[name][otherName],3),
+      print round(matrix[name][otherName], 3),
     print " "
