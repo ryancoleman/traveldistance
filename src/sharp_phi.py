@@ -85,21 +85,21 @@ class phi(object):
     then call this to write to file
     the pad lines reproduce the binary padding of an original
     fortran formatted phi file'''
-    if phiFileName: #do nothing if no filename given
+    if phiFileName:  # do nothing if no filename given
       phiFile = open(phiFileName, 'wb')  # b may be unnecessary, have to check
       phiFile.write(struct.pack('4b', 20, 0, 0, 0))  # pad
-      phiFile.write(struct.pack('20s',self.toplabel))
+      phiFile.write(struct.pack('20s', self.toplabel))
       phiFile.write(struct.pack('8b', 20, 0, 0, 0, 70, 0, 0, 0))  # pad
-      phiFile.write(struct.pack('10s',self.head))
-      phiFile.write(struct.pack('60s',self.title))
-      phiFile.write(struct.pack('8b', 70, 0, 0, 0,4, -61, 16, 0))  # pad
-      self.phiArray.tofile(phiFile) #array
-      phiFile.write(struct.pack('8b',4, -61, 16, 0, 16, 0, 0, 0))  # pad
-      phiFile.write(struct.pack('16s',self.botlabel))
+      phiFile.write(struct.pack('10s', self.head))
+      phiFile.write(struct.pack('60s', self.title))
+      phiFile.write(struct.pack('8b', 70, 0, 0, 0, 4, -61, 16, 0))  # pad
+      self.phiArray.tofile(phiFile)  # array
+      phiFile.write(struct.pack('8b', 4, -61, 16, 0, 16, 0, 0, 0))  # pad
+      phiFile.write(struct.pack('16s', self.botlabel))
       phiFile.write(struct.pack('8b', 16, 0, 0, 0, 16, 0, 0, 0))  # pad
       phiFile.write(
           struct.pack(
-              'ffff', self.scale,self.oldmid[0], self.oldmid[1],
+              'ffff', self.scale, self.oldmid[0], self.oldmid[1],
               self.oldmid[2]))
       phiFile.write(struct.pack('4b', 16, 0, 0, 0))  # pad
       phiFile.close()
@@ -132,7 +132,7 @@ class phi(object):
         counts[value] = 1
     return counts
 
-  def histogramValues(self,width=1.):
+  def histogramValues(self, width=1.):
     '''makes a basic histogram'''
     ends = self.getMinMaxValues()
     bars = int(math.ceil((ends[1]-ends[0])/width)+1)
@@ -168,14 +168,15 @@ class phi(object):
         where = inside
       self.phiArray[index] = where
 
-  def findBoundaries(self, inside=-2.0, border=2, pointXYZ=None, pointList=None):
+  def findBoundaries(
+      self, inside=-2.0, border=2, pointXYZ=None, pointList=None):
     '''finds the extreme x, y, z positions that enclose all inside positions'''
     if self.__boundaries is None:  # need to calculate it
       if pointXYZ is not None:
         self.__boundaries = self.findPointMinsMaxs(pointXYZ, pointList)
       else:
         self.__boundaries = [
-            self.gridDimension, self.gridDimension, self.gridDimension] , [
+            self.gridDimension, self.gridDimension, self.gridDimension], [
             0, 0, 0]
       for x in xrange(self.gridDimension):
         for y in xrange(self.gridDimension):
@@ -188,9 +189,9 @@ class phi(object):
                 indices = (x, y, z)
                 for coord in range(3):
                   self.__boundaries[0][coord] = min(
-                        self.__boundaries[0][coord], indices[coord])
+                      self.__boundaries[0][coord], indices[coord])
                   self.__boundaries[1][coord] = max(
-                        self.__boundaries[1][coord], indices[coord])
+                      self.__boundaries[1][coord], indices[coord])
       for coord in range(3):
         self.__boundaries[0][coord] = max(0, self.__boundaries[0][coord]-border)
         self.__boundaries[1][coord] = min(
@@ -199,7 +200,7 @@ class phi(object):
 
   def getBoundaryLengths(self, inside=-2.0, border=2):
     '''calls findBoundaries if necessary, returns the lengths (max-min)'''
-    if self.__boundaries is None: #need to calculate it
+    if self.__boundaries is None:  # need to calculate it
       self.findBoundaries(inside, border)
     lengths = [
         self.__boundaries[1][0] - self.__boundaries[0][0],
@@ -211,7 +212,7 @@ class phi(object):
       self, grid, gridSize, defaultValue=0.0, toplabel="",
       head="", title="", botlabel="", lowestGridSize=65):
     '''does grid->phi data structure conversion'''
-    self.toplabel = toplabel[:20] #easy stuff first
+    self.toplabel = toplabel[:20]  # easy stuff first
     self.head = head[:10]
     self.title = title[:60]
     self.botlabel = botlabel[:16]
