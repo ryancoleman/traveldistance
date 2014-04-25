@@ -2,6 +2,7 @@
 
 #ryan g. coleman ryan.g.coleman@gmail.com ryangc@mail.med.upenn.edu
 #kim sharp lab http://crystal.med.upenn.edu
+#finds all inter-atom distances
 
 import string
 import sys

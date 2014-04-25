@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#adds curvature data to a tst file
+
 import sys
 import string
 import tstdata

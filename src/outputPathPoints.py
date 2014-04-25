@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #ryan g coleman ryangc@mail.med.upenn.edu
 
+#reads path files, writes out points
+
 import pdb
 import sys
 import string

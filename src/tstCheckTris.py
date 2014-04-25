@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #ryan coleman
 
+#checks that there are not 13 triangles sharing any one point
+
 import math
 import string
 import sys

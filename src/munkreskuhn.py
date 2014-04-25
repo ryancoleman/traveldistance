@@ -14,6 +14,7 @@
 
 import sys
 import string
+import unittest
 
 def assignAndReturnMatches(cost):
   '''calls assignment, finds the matches, returns a list of them and costs'''
@@ -285,8 +286,7 @@ def __useSmallestValue(cost, mask, rowCover, colCover):
         cost[row][col] -= minVal
   return 4  # go back to step 4
 
-#if called by itself, run tests
-if -1 != string.find(sys.argv[0], "munkreskuhn.py"):
+def runPrintTests():
   print "assignAndReturnMatches([[1, 2, 3], [4, 5, 1], [3, 1, 10])"
   print assignAndReturnMatches([[1, 2, 3], [4, 5, 1], [3, 1, 10]])
   print "  "
@@ -315,3 +315,37 @@ if -1 != string.find(sys.argv[0], "munkreskuhn.py"):
   print "  "
   print "assignAndReturnMatches([[1, 2, 3], [2, 4, 6], [3, 6, 9]])"
   print assignAndReturnMatches([[1, 2, 3], [2, 4, 6], [3, 6, 9]])
+
+class TestMunkresKuhn(unittest.TestCase):
+  '''unit tests of munkres kuhn hungarian algorithm best matching code'''
+
+  def testMunkresKuhn(self):
+    self.assertEqual(
+        assignAndReturnMatches([[1, 2, 3], [4, 5, 1], [3, 1, 10]]),
+        [(0, 0, 1), (1, 2, 1), (2, 1, 1)])
+    self.assertEqual(
+        assignAndReturnMatches(
+            [[1, 2, 3], [4, 5, 1], [3, 1, 10], [50, 20, 30]]),
+        [(0, 0, 1), (1, 2, 1), (2, 1, 1)])
+    self.assertEqual(
+        assignAndReturnMatches(
+            [[1, 2, 3], [4, 5, 8], [3, 1, 10], [50, 20, 30]]),
+        [(0, 2, 3), (1, 0, 4), (2, 1, 1)])
+    self.assertEqual(
+        assignAndReturnMatches([[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
+        [(0, 2, 3), (1, 1, 5), (2, 0, 7)])
+    self.assertEqual(
+        assignAndReturnMatches(
+            [[1, 2, 3, 4], [4, 5, 6, 7], [7, 8, 9, 10], [11, 12, 13, 15]]),
+        [(0, 3, 4), (1, 2, 6), (2, 1, 8), (3, 0, 11)])
+    self.assertEqual(
+        assignAndReturnMatches(
+            [[1, 2, 3, 4], [2, 4, 6, 8], [3, 6, 9, 12], [4, 8, 12, 16]]),
+        [(0, 3, 4), (1, 2, 6), (2, 1, 6), (3, 0, 4)])
+    self.assertEqual(
+        assignAndReturnMatches([[1, 2, 3], [2, 4, 6], [3, 6, 9]]),
+        [(0, 2, 3), (1, 1, 4), (2, 0, 3)])
+
+if __name__ == '__main__':  # if run, just do tests
+  suite = unittest.TestLoader().loadTestsFromTestCase(TestMunkresKuhn)
+  unittest.TextTestRunner(verbosity=9).run(suite)

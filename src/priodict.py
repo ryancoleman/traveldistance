@@ -2,15 +2,16 @@
 # David Eppstein, UC Irvine, 8 Mar 2002
 # under python license
 # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/117228
-
-#from __future__ import generators #disabled for 2.5
+# modified quite a bit by Ryan Coleman. modifications under same license.
 
 class priorityDictionary(dict):
   def __init__(self):
-    '''Initialize priorityDictionary by creating binary heap
-of pairs (value,key).  Note that changing or removing a dict entry will
-not remove the old pair from the heap until it is found by smallest() or
-until the heap is rebuilt.'''
+    '''
+    Initialize priorityDictionary by creating binary heap
+    of pairs (value,key).  Note that changing or removing a dict entry will
+    not remove the old pair from the heap until it is found by smallest() or
+    until the heap is rebuilt.
+    '''
     self.__heap = []
     dict.__init__(self)
 
@@ -44,9 +45,11 @@ until the heap is rebuilt.'''
     return iterfn()
 
   def __setitem__(self, key, val):
-    '''Change value stored in dictionary and add corresponding
-pair to heap.  Rebuilds the heap if the number of deleted items grows
-too large, to avoid memory leakage.'''
+    '''
+    Change value stored in dictionary and add corresponding
+    pair to heap.  Rebuilds the heap if the number of deleted items grows
+    too large, to avoid memory leakage.
+    '''
     dict.__setitem__(self, key, val)
     heap = self.__heap
     if len(heap) > 2 * len(self):
@@ -56,8 +59,7 @@ too large, to avoid memory leakage.'''
       newPair = (val, key)
       insertionPoint = len(heap)
       heap.append(None)
-      while insertionPoint > 0 and \
-              newPair < heap[(insertionPoint - 1)//2]:
+      while insertionPoint > 0 and newPair < heap[(insertionPoint - 1)//2]:
         heap[insertionPoint] = heap[(insertionPoint - 1)//2]
         insertionPoint = (insertionPoint - 1)//2
       heap[insertionPoint] = newPair

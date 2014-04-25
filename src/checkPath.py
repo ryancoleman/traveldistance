@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#checks paths through protein tunnels
+
 import string
 import sys
 import comparePaths

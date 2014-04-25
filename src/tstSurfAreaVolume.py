@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #ryan g. coleman ryangc@mail.med.upenn.edu
-#geometry is great
+#surface area and volume from tst file calculator
 
 import sys
 import string

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
+#output a pdb file of just the residues between the membrane barrier
+
 import string
 import sys
 import comparePaths
 import os
 import pdb
 import geometry
-
-#output a pdb file of just the residues between the membrane barrier
 
 def getJustMembranePdb(inputFileName, outputFileName):
   pdbBarriers = pdb.pdbData(inputFileName)

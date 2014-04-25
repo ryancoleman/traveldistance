@@ -1,4 +1,4 @@
-#script to read .pdb and make pdb-pymol objects
+#script to read .pdb and make pdb-pymol objects in pymol
 #ryan g. coleman ryangc@mail.med.upenn.edu
 
 from pymol.cgo import *

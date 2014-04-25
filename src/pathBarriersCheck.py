@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#checks path files to see what barriers they cross
+
 import string
 import sys
 import comparePaths

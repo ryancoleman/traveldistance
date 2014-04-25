@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#writes dot files for use with gnu dot graph drawing
+
 import tm3
 import string
 import sys

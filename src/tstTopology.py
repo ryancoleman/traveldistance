@@ -1,5 +1,6 @@
 #ryan g. coleman ryangc@mail.med.upenn.edu crystal.med.upenn.edu
 #Copyright 2006, Ryan G Coleman, Kim A Sharp
+#primitives for topology of tst files
 
 import tstdata   # data structure
 import sys  # for exiting

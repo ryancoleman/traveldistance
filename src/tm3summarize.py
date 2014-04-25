@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#summarize data in a tm3 file
+
 import tm3
 import string
 import sys
