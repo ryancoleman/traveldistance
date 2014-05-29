@@ -1,4 +1,6 @@
 ![Travel Depth](http://crystal.med.upenn.edu/tdimages/traveldepth.png)
+[![doi](https://zenodo.org/badge/3853/ryancoleman/traveldistance.png)](http://dx.doi.org/10.5281/zenodo.10213)
+
 
 traveldistance
 ==============
