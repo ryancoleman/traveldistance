@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # Ryan G. Coleman, Kim A. Sharp, http://crystal.med.upenn.edu,
-# ryan.g.coleman@gmail.com ryangc@mail.med.upenn.edu
+# ryan.g.coleman ATSYMBOL gmail.com ryangc ATSYMBOL mail.med.upenn.edu
 
 #file takes care of reading .crg files and putting them into dictionary struct
 #charge files are column based and look like this:

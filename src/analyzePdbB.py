@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#ryan g. coleman ryangc@mail.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu
 
 #analyzes the b-factor column of pdb file... for travel-in analysis
 #uses gnuplot for graphing... needs gnuplot 4 (apparently)

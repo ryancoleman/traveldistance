@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #module for importing/exporting pdb files
-#ryan g. coleman ryangc@mail.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu
 
 import string
 import math

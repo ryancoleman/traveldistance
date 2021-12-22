@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#ryan g. coleman ryangc@mail.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu
 
 #finds nmr model closest to the average model, outputs it as best, doesn't clean
 

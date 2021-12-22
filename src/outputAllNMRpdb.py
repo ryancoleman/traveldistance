@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#ryan g. coleman ryangc@mail.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu
 
 #outputs all NMR models as single pdb files
 

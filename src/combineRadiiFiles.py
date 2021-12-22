@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#ryan g coleman ryangc@mail.med.upenn.edu ryan.g.coleman@gmail.com
+#ryan g coleman ryangc ATSYMBOL mail.med.upenn.edu ryan.g.coleman ATSYMBOL gmail.com
 
 import string
 import sys

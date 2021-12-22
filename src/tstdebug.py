@@ -1,5 +1,5 @@
 
-#ryan.g.coleman@gmail.com ryangc@mail.med.upenn.edu
+#ryan.g.coleman ATSYMBOL gmail.com ryangc ATSYMBOL mail.med.upenn.edu
 #Ryan Coleman, Kim Sharp, univ. of penn., http://crystal.med.upenn.edu
 #contains various debugging functions, usually these write a pymol script
 

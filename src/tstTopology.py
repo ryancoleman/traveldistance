@@ -1,4 +1,4 @@
-#ryan g. coleman ryangc@mail.med.upenn.edu crystal.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu crystal.med.upenn.edu
 #Copyright 2006, Ryan G Coleman, Kim A Sharp
 #primitives for topology of tst files
 

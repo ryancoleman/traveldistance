@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#ryan g coleman ryangc@mail.med.upenn.edu
+#ryan g coleman ryangc ATSYMBOL mail.med.upenn.edu
 #takes a pdb file and makes a tst file, possibly add later improvements
 #to do common tasks automatically.
 

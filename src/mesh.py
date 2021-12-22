@@ -1,4 +1,4 @@
-#ryan g. coleman ryangc@mail.med.upenn.edu crystal.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu crystal.med.upenn.edu
 #copyright Ryan Coleman, Kim Sharp 2007
 #contains explicit mesh data structures and code
 

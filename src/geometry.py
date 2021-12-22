@@ -1,4 +1,4 @@
-#ryan g coleman, ryangc@mail.med.upenn.edu
+#ryan g coleman, ryangc ATSYMBOL mail.med.upenn.edu
 #copyright 2006-7 ryan g coleman, kim sharp crystal.med.upenn.edu
 #geometric primitives like distance functions and such
 

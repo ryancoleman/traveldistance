@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# ryan g. coleman, ryangc@mail.med.upenn.edu
+# ryan g. coleman, ryangc ATSYMBOL mail.med.upenn.edu
 # kim sharp lab
 # phi.py enables read/write of binary phi-maps from delphi
 # usage is import, then pass in filename to object creation

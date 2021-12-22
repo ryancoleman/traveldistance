@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#ryan g. coleman ryangc@mail.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu
 #does everything to do travel depth, starting from a pdb file and optionally a
 #gridsize and optionally a path to the trisrf/trigen execs
 

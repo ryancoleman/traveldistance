@@ -1,4 +1,4 @@
-#ryangc@mail.med.upenn.edu ryan.g.coleman@gmail.com
+#ryangc ATSYMBOL mail.med.upenn.edu ryan.g.coleman ATSYMBOL gmail.com
 #Ryan G Coleman, Kim Sharp http://crystal.med.upenn.edu
 
 #contains lots of grid primitives, there is not a grid class

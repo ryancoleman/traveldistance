@@ -1,4 +1,4 @@
-#Ryan G. Coleman, Kim A. Sharp crystal.med.upenn.edu, ryan.g.coleman@gmail.com
+#Ryan G. Coleman, Kim A. Sharp crystal.med.upenn.edu, ryan.g.coleman ATSYMBOL gmail.com
 #bunch of helper methods for orthogonal range searching in the context of depth
 
 import rangesearch

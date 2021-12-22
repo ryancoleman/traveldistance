@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#ryan g. coleman ryangc@mail.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu
 #usage: fixNMRpdb.py file
 
 #file.pdb is copied to file.one.pdb and all but first model are removed

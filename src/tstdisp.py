@@ -1,5 +1,5 @@
 #script to read .tst format and make surfaces in pymol
-#ryan g. coleman ryangc@mail.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu
 
 from pymol.cgo import *
 from pymol import cmd

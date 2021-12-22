@@ -40,10 +40,10 @@ References:
 Academic Press Inc. (1985)
 """
 
-__author__ = "Bill McNeill <billmcn@speakeasy.net>"
-__version__ = "1.0"
+__author__ = "Bill McNeill <billmcn@speakeasy.net>, mods ryan"
+__version__ = "1.0.1"
 
-#lots of edits, ryan coleman ryan.g.coleman@gmail.com
+#lots of edits, ryan coleman ryan.g.coleman ATSYMBOL gmail.com
 
 class pMatrix_Error(Exception):
     """Abstract parent for all matrix exceptions

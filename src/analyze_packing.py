@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#ryan g. coleman ryan.g.coleman@gmail.com ryangc@mail.med.upenn.edu
+#ryan g. coleman ryan.g.coleman ATSYMBOL gmail.com ryangc ATSYMBOL mail.med.upenn.edu
 #kim sharp lab http://crystal.med.upenn.edu
 
 #analyzes and computes p-values for difference of means test, reads data

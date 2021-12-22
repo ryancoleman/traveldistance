@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #a collection of functions for dealing with (mostly removing) cavities
-#Ryan G Coleman, Kim A Sharp, crystal.med.upennn.edu, ryan.g.coleman@gmail.com
+#Ryan G Coleman, Kim A Sharp, crystal.med.upennn.edu, ryan.g.coleman ATSYMBOL gmail.com
 
 import unionfind2
 import sharp_phi

@@ -1,4 +1,4 @@
-#ryan g. coleman ryangc@mail.med.upenn.edu
+#ryan g. coleman ryangc ATSYMBOL mail.med.upenn.edu
 #this file is a module to do 2D orthogonal range searching
 #by the simplest algorithm with the following properties:
 # space requirements for tree O(n log n)

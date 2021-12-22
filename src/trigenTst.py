@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 #Ryan G. Coleman, Kim A. Sharp
-#ryan.g.coleman@gmail.com http://crystal.med.upenn.edu
+#ryan.g.coleman ATSYMBOL gmail.com http://crystal.med.upenn.edu
 
 #this is a program to replace the excellent trigen (fortran) with python
 #reads in a .tri file, outputs a .tst file
